@@ -1,4 +1,4 @@
-namespace Core.Models.NotificationPayloads;
+namespace Core.Models.Notifications;
 
 public enum GameInvitationState
 {

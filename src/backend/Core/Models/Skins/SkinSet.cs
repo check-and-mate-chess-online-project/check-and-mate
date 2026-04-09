@@ -1,10 +1,10 @@
-namespace Core.Models;
+namespace Core.Models.Skins;
 
 public class SkinSet
 {
-    public int Id { get; private set; }
-    public string Name { get; private set; } = null!;
-    public string? Description { get; private set; }
+    public int Id { get; }
+    public string Name { get; } = null!;
+    public string? Description { get; }
 
     public SkinSet(string name, string? description)
     {
@@ -13,6 +13,4 @@ public class SkinSet
         Name = name;
         Description = !string.IsNullOrWhiteSpace(description) ? description : null;
     }
-
-    private SkinSet() {}
 }

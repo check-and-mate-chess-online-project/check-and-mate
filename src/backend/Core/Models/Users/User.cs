@@ -1,32 +1,25 @@
-namespace Core.Models;
+namespace Core.Models.Users;
 
 public class User
 {
     public int Id { get; private set; }
     public string Login { get; private set; } = null!;
     public string PasswordHash { get; private set; } = null!;
-    public int Rating { get; private set; }
-    public int Balance { get; private set; }
-    public int LootBoxCount { get; private set; }
+    public string Email { get; private set; } = null!;
+    public int Rating { get; private set; } = 500;
+    public int Balance { get; private set; } = 0;
+    public int LootBoxCount { get; private set; } = 0;
     public UserRole Role { get; private set; }
-    private readonly int _defaultRating = 500;
-    private readonly int _defaultBalance = 0;
-    private readonly int _defaultLootBoxCount = 0;
 
-    public User(string login, string passwordHash, UserRole role)
+    public User(string login, string passwordHash, string email, UserRole role)
     {
         if (string.IsNullOrWhiteSpace(login)) throw new ArgumentException("login cannot be empty");
         if (string.IsNullOrWhiteSpace(passwordHash)) throw new ArgumentException("password hash cannot be empty");
-
         Login = login;
         PasswordHash = passwordHash;
-        Rating = _defaultRating;
-        Balance = _defaultBalance;
-        LootBoxCount = _defaultLootBoxCount;
+        Email = email;
         Role = role;
     }
-
-    private User() {}
 
     public void ChangeLogin(string login)
     {
@@ -38,6 +31,12 @@ public class User
     {
         if (string.IsNullOrWhiteSpace(passwordHash)) throw new ArgumentException("password hash cannot be empty");
         PasswordHash = passwordHash;
+    }
+
+    public void ChangeEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("email cannot be empty");
+        Email = email;
     }
 
     public void ChangeRating(int diff)
