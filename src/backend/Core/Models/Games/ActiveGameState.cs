@@ -5,7 +5,7 @@ namespace Core.Models.Games;
 
 public class ActiveGameState : IGameState
 {
-    public MoveResult MakeMove(Game game, Move move, int playerId)
+    public MoveResult MakeMove(Game game, Move move, Guid playerId)
     {
         if (playerId != game.GetCurrentPlayerId()) throw new InvalidOperationException("invalid player");
         DateTime currentTime = DateTime.UtcNow;
@@ -31,7 +31,7 @@ public class ActiveGameState : IGameState
         return new MoveResult(result, terminationReason);
     }
 
-    public void HandleTimeout(Game game, int playerId)
+    public void HandleTimeout(Game game, Guid playerId)
     {
         if (playerId != game.GetCurrentPlayerId()) throw new InvalidOperationException("invalid player");
         if (game.CheckPlayerLeftTime(playerId, DateTime.UtcNow)) throw new InvalidOperationException("time is not yet up");
@@ -39,13 +39,13 @@ public class ActiveGameState : IGameState
         game.SetState(new FinishedGameState());
     }
 
-    public void HandleResign(Game game, int playerId) 
+    public void HandleResign(Game game, Guid playerId) 
     {
         game.FinishGame(GameTerminationReason.Resignation, playerId);
         game.SetState(new FinishedGameState());
     }
 
-    public void HandleDisconnect(Game game, int playerId)
+    public void HandleDisconnect(Game game, Guid playerId)
     {
         game.FinishGame(GameTerminationReason.Disconnect, playerId);
         game.SetState(new FinishedGameState());

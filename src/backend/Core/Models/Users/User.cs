@@ -1,23 +1,29 @@
+using Core.Models.Skins;
+
 namespace Core.Models.Users;
 
 public class User
 {
-    public int Id { get; private set; }
+    public Guid Id { get; private set; }
     public string Login { get; private set; } = null!;
     public string PasswordHash { get; private set; } = null!;
     public string Email { get; private set; } = null!;
     public int Rating { get; private set; } = 500;
     public int Balance { get; private set; } = 0;
     public int LootBoxCount { get; private set; } = 0;
+    public IReadOnlyCollection<Guid> Skins => _skinsId;
     public UserRole Role { get; private set; }
+    private readonly List<Guid> _skinsId;
 
     public User(string login, string passwordHash, string email, UserRole role)
     {
         if (string.IsNullOrWhiteSpace(login)) throw new ArgumentException("login cannot be empty");
         if (string.IsNullOrWhiteSpace(passwordHash)) throw new ArgumentException("password hash cannot be empty");
+        Id = Guid.NewGuid();
         Login = login;
         PasswordHash = passwordHash;
         Email = email;
+        _skinsId = [];
         Role = role;
     }
 
@@ -70,8 +76,7 @@ public class User
         LootBoxCount--;
     }
 
-    public void ChangeRole(UserRole role)
-    {
-        Role = role;
-    }
+    public void AddSkin(Guid skinId) => _skinsId.Add(skinId);
+
+    public void ChangeRole(UserRole role) => Role = role;
 }

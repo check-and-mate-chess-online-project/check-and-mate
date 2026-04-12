@@ -5,9 +5,9 @@ namespace Core.Models.Games;
 
 public class Game
 {
-    public int Id { get; private set; }
-    public int WhitePlayerId { get; private set; }
-    public int BlackPlayerId { get; private set; }
+    public Guid Id { get; private set; }
+    public Guid WhitePlayerId { get; private set; }
+    public Guid BlackPlayerId { get; private set; }
     public IGameState State { get; private set; } = null!;
     public GameResult? Result { get; private set; } = null;
     public GameTerminationReason? TerminationReason { get; private set; }
@@ -16,9 +16,10 @@ public class Game
     public ITimeControl TimeControl { get; private set; } = null!;
     private readonly IChessEngine _engine = null!;
 
-    public Game(int whitePlayerId, int blackPlayerId, IChessEngine engine, ITimeControl timeControl)
+    public Game(Guid whitePlayerId, Guid blackPlayerId, IChessEngine engine, ITimeControl timeControl)
     {
         if (whitePlayerId == blackPlayerId) throw new ArgumentException("players must be different");
+        Id = Guid.NewGuid();
         WhitePlayerId = whitePlayerId;
         BlackPlayerId = blackPlayerId;
         State = new PendingGameState();
@@ -26,13 +27,13 @@ public class Game
         _engine = engine;
     }
 
-    internal MoveResult MakeMove(Move move, int playerId) => State.MakeMove(this, move, playerId);
+    internal MoveResult MakeMove(Move move, Guid playerId) => State.MakeMove(this, move, playerId);
     
-    internal void EndByTimeout(int playerId) => State.HandleTimeout(this, playerId);
+    internal void EndByTimeout(Guid playerId) => State.HandleTimeout(this, playerId);
 
-    internal void EndByResignation(int playerId) => State.HandleResign(this, playerId);
+    internal void EndByResignation(Guid playerId) => State.HandleResign(this, playerId);
 
-    internal void EndByDisconnect(int playerId) => State.HandleDisconnect(this, playerId);
+    internal void EndByDisconnect(Guid playerId) => State.HandleDisconnect(this, playerId);
 
     internal void SetState(IGameState state) => State = state;
 
@@ -42,32 +43,32 @@ public class Game
 
     internal bool IsValidMove(Move move) => _engine.IsValidMove(move);
 
-    internal int GetCurrentPlayerId() => _engine.GetCurrentPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
+    internal Guid GetCurrentPlayerId() => _engine.GetCurrentPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
 
-    internal int GetDefendingPlayerId() => _engine.GetDefendingPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
+    internal Guid GetDefendingPlayerId() => _engine.GetDefendingPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
 
     internal void SetGameStartTime(DateTime currentTime) => StartTimeUtc = currentTime;
 
-    internal void SetMoveStartTime(int playerId, DateTime currentTime)
+    internal void SetMoveStartTime(Guid playerId, DateTime currentTime)
     {
         if (playerId == WhitePlayerId) TimeControl.SetMoveStartTime(PlayerColor.White, currentTime);
         else TimeControl.SetMoveStartTime(PlayerColor.Black, currentTime);
     }
 
-    internal void UpdatePlayerTime(int playerId, DateTime currentTime)
+    internal void UpdatePlayerTime(Guid playerId, DateTime currentTime)
     {
         if (playerId == WhitePlayerId) TimeControl.UpdateTime(PlayerColor.White, currentTime);
         else TimeControl.UpdateTime(PlayerColor.Black, currentTime);
     }
 
-    internal bool CheckPlayerLeftTime(int playerId, DateTime currentTime)
+    internal bool CheckPlayerLeftTime(Guid playerId, DateTime currentTime)
     {
         return playerId == WhitePlayerId
             ? TimeControl.CheckLeftTime(PlayerColor.White, currentTime)
             : TimeControl.CheckLeftTime(PlayerColor.Black, currentTime);
     }
 
-    internal void FinishGame(GameTerminationReason terminationReason, int? playerId = null)
+    internal void FinishGame(GameTerminationReason terminationReason, Guid? playerId = null)
     {
         TerminationReason = terminationReason;
         EndTimeUtc = DateTime.UtcNow;

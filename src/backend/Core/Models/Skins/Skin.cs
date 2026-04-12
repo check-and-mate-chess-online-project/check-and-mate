@@ -2,10 +2,18 @@ using Core.Models.Chess;
 
 namespace Core.Models.Skins;
 
-public class Skin(int setId, FigureType figure, SkinRarity rarity)
+public class Skin
 {
-    public int Id { get; }
-    public int SkinSetId { get; } = setId;
-    public FigureType Figure { get; } = figure;
-    public SkinRarity Rarity { get; } = rarity;
+    public Guid Id { get; }
+    public Guid SetId { get; }
+    public FigureType Figure { get; }
+    public SkinRarity Rarity { get; }
+
+    public Skin(Guid setId, FigureType figure, SkinRarity rarity)
+    {
+        Id = Guid.NewGuid();
+        SetId = setId;
+        Figure = figure;
+        Rarity = rarity;
+    }
 }

@@ -1,14 +1,10 @@
-using Core.Models.Interfaces;
-
 namespace Core.Models.Notifications;
 
-public class Notification(int userId, NotificationType type, INotificationPayload payload, bool isRead = false)
+public abstract class Notification
 {
-    public int Id { get; }
-    public int UserId { get; } = userId;
-    public NotificationType Type { get; } = type;
-    public INotificationPayload Payload { get; } = payload;
-    public bool IsRead { get; private set; } = isRead;
+    public Guid Id { get; protected set; }
+    public Guid UserId { get; protected set; }
+    public bool IsRead { get; protected set; }
 
     internal void Read() => IsRead = true;
 }
