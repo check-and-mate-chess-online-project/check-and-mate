@@ -9,7 +9,7 @@ public class Skin
     public FigureType Figure { get; }
     public SkinRarity Rarity { get; }
 
-    public Skin(Guid setId, FigureType figure, SkinRarity rarity)
+    internal Skin(Guid setId, FigureType figure, SkinRarity rarity)
     {
         Id = Guid.NewGuid();
         SetId = setId;
