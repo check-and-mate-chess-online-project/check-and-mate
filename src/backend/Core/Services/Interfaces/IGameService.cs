@@ -6,5 +6,6 @@ namespace Core.Services.Interfaces;
 public interface IGameService
 {
     Task<Game?> GetGameAsync(Guid gameId);
+    Task<List<Game>> GetByUserIdAsync(Guid gameId);
     void AddGame(Guid whitePlayerId, Guid blackPlayerId, IChessEngine engine, ITimeControl timeControl);
 }
