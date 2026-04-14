@@ -1,6 +1,6 @@
 using Core.Services.Interfaces;
-using Core.Models.Users;
 using Core.Repositories.Interfaces;
+using Core.Models.Users;
 
 namespace Core.Services;
 
@@ -12,8 +12,7 @@ public class FriendshipService(IFriendshipRepository friendshipRepos) : IFriends
 
     public async Task AddFriendshipAsync(Guid userId, Guid friendId)
     {
-        Friendship? existingFriendship = await _friendshipRepos.GetAsync(userId, friendId);
-        if (existingFriendship != null) throw new InvalidOperationException("friendship already exist");
+        if (await _friendshipRepos.GetAsync(userId, friendId) != null) throw new InvalidOperationException("friendship already exist");
         Friendship friendship = new(userId, friendId);
         _friendshipRepos.Add(friendship);
     }
