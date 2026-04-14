@@ -12,6 +12,7 @@ public class FriendshipService(IFriendshipRepository friendshipRepos) : IFriends
 
     public async Task AddFriendshipAsync(Guid userId, Guid friendId)
     {
+        if (userId == friendId) throw new InvalidOperationException("cannot be friends with yourself");
         if (await _friendshipRepos.GetAsync(userId, friendId) != null) throw new InvalidOperationException("friendship already exist");
         Friendship friendship = new(userId, friendId);
         _friendshipRepos.Add(friendship);
@@ -19,7 +20,7 @@ public class FriendshipService(IFriendshipRepository friendshipRepos) : IFriends
 
     public async Task RemoveFriendshipAsync(Guid userId, Guid friendId)
     {
-        if (await _friendshipRepos.GetAsync(userId, friendId) == null) throw new InvalidOperationException("friendship not exist");
-        await _friendshipRepos.RemoveAsync(userId, friendId);
+        Friendship friendship = await _friendshipRepos.GetAsync(userId, friendId) ?? throw new ArgumentException("friendship not exist");
+        _friendshipRepos.Remove(friendship);
     }
 }

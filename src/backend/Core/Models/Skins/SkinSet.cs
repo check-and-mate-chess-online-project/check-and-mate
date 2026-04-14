@@ -18,9 +18,9 @@ public class SkinSet
         Description = description;
     }
 
-    public void AddSkin(FigureType type, Guid skinId)
+    public void AddSkin(FigureType figure, Guid skinId)
     {
-        if (_skins.ContainsKey(type)) throw new InvalidOperationException("skin for this figure already exists");
-        _skins.Add(type, skinId);
+        if (_skins.ContainsKey(figure)) throw new InvalidOperationException("skin for this figure already exists");
+        _skins.Add(figure, skinId);
     }
 }

@@ -6,5 +6,5 @@ public interface IFriendshipRepository
 {
     Task<Friendship?> GetAsync(Guid userId, Guid friendId);
     void Add(Friendship friendship);
-    Task RemoveAsync(Guid userId, Guid friendId);
+    void Remove(Friendship friendship);
 }

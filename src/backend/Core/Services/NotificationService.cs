@@ -29,7 +29,7 @@ public class NotificationService(INotificationRepository notificationRepos) : IN
     public async Task UpdateNotificationAsync(Notification notification)
     {
         ArgumentNullException.ThrowIfNull(notification);
-        if (await _notificationRepos.GetAsync(notification.Id) == null) throw new InvalidOperationException("notification not exist");
-        await _notificationRepos.UpdateAsync(notification);
+        if (await _notificationRepos.GetAsync(notification.Id) == null) throw new ArgumentException("notification not exist");
+        _notificationRepos.Update(notification);
     }
 }

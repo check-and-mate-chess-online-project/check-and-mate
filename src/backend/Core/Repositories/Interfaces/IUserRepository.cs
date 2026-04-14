@@ -5,7 +5,8 @@ namespace Core.Repositories.Interfaces;
 public interface IUserRepository
 {
     Task<User?> GetAsync(Guid userd);
+    Task<User?> GetAsync(string login);
     void Add(User user);
-    Task UpdateAsync(User user);
-    Task RemoveAsync(Guid userId);
+    void Update(User user);
+    void Remove(User user);
 }

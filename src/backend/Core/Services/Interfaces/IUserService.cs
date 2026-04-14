@@ -4,7 +4,7 @@ namespace Core.Services.Interfaces;
 
 public interface IUserService
 {
-    Task<User?> GetUserAsync(Guid userd);
+    Task<User?> GetUserAsync(Guid userId);
     Task AddUserAsync(string login, string password, string email, UserRole role);
     Task ChangeUserLoginAsync(Guid userId, string login);
     Task ChangeUserPasswordAsync(Guid userId, string password);
