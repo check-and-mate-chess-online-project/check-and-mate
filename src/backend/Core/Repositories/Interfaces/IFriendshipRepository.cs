@@ -4,6 +4,7 @@ namespace Core.Repositories.Interfaces;
 
 public interface IFriendshipRepository
 {
-    Task AddAsync(Friendship friendship);
+    Task<Friendship?> GetFriendship(Guid userId, Guid friendId);
+    void Add(Friendship friendship);
     Task RemoveAsync(Guid userId, Guid friendId);
 }

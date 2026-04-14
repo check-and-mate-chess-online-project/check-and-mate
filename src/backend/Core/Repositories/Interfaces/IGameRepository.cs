@@ -4,6 +4,7 @@ namespace Core.Repositories.Interfaces;
 
 public interface IGameRepository
 {
-    Task<Game> GetAsync(Guid gameId);
-    Task AddAsync(Game game);
+    Task<Game?> GetAsync(Guid gameId);
+    Task<List<Game>> GetByUserIdAsync(Guid gameId);
+    void Add(Game game);
 }

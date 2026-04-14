@@ -41,12 +41,14 @@ public class ActiveGameState : IGameState
 
     public void HandleResign(Game game, Guid playerId) 
     {
+        if (playerId != game.WhitePlayerId && playerId != game.BlackPlayerId) throw new InvalidOperationException("invalid player");
         game.FinishGame(GameTerminationReason.Resignation, playerId);
         game.SetState(new FinishedGameState());
     }
 
     public void HandleDisconnect(Game game, Guid playerId)
     {
+        if (playerId != game.WhitePlayerId && playerId != game.BlackPlayerId) throw new InvalidOperationException("invalid player");
         game.FinishGame(GameTerminationReason.Disconnect, playerId);
         game.SetState(new FinishedGameState());
     }

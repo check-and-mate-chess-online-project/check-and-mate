@@ -22,5 +22,9 @@ public class PendingGameState : IGameState
 
     public void HandleTimeout(Game game, Guid playerId) => throw new InvalidOperationException("game has not started yet");
 
-    public void HandleDisconnect(Game game, Guid playerId) => game.SetState(new FinishedGameState());
+    public void HandleDisconnect(Game game, Guid playerId)
+    {
+        if (playerId != game.WhitePlayerId && playerId != game.BlackPlayerId) throw new InvalidOperationException("invalid player");
+        game.SetState(new FinishedGameState());
+    }
 }
