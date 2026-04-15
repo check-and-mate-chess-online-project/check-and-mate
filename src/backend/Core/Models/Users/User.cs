@@ -1,3 +1,5 @@
+using Core.Models.Chess;
+
 namespace Core.Models.Users;
 
 public class User
@@ -10,8 +12,10 @@ public class User
     public int Balance { get; private set; } = 0;
     public int LootBoxCount { get; private set; } = 0;
     public IReadOnlyCollection<Guid> Skins => _skinIds;
+    public IReadOnlyDictionary<FigureType, Guid> FigureSkinIds => _figureSkinIds;
     public UserRole Role { get; private set; }
     private readonly HashSet<Guid> _skinIds = [];
+    private readonly Dictionary<FigureType, Guid> _figureSkinIds = [];
 
     internal User(string login, string passwordHash, string email, UserRole role)
     {
@@ -71,5 +75,11 @@ public class User
     {
         if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("email cannot be empty");
         Email = email;
+    }
+
+    internal void ChangeFigureSkin(FigureType figure, Guid skinId)
+    {
+        if (!_skinIds.Contains(skinId)) throw new InvalidOperationException("user does not have this skin");
+        _figureSkinIds[figure] = skinId;
     }
 }

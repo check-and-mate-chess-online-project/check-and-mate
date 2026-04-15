@@ -11,7 +11,7 @@ public class GameService(IGameRepository gameRepository) : IGameService
 
     public async Task<Game?> GetGameAsync(Guid gameId) => await _gameRepos.GetAsync(gameId);
 
-    public async Task<List<Game>> GetUserGamesAsync(Guid gameId) => await _gameRepos.GetByUserIdAsync(gameId);
+    public async Task<List<Game>> GetUserGamesAsync(Guid userId) => await _gameRepos.GetByUserIdAsync(userId);
 
     public void AddGame(Guid whitePlayerId, Guid blackPlayerId, IChessEngine engine, ITimeControl timeControl)
     {
