@@ -11,11 +11,7 @@ public class User
     public int Rating { get; private set; } = 500;
     public int Balance { get; private set; } = 0;
     public int LootBoxCount { get; private set; } = 0;
-    public IReadOnlyCollection<Guid> Skins => _skinIds;
-    public IReadOnlyDictionary<FigureType, Guid> FigureSkinIds => _figureSkinIds;
     public UserRole Role { get; private set; }
-    private readonly HashSet<Guid> _skinIds = [];
-    private readonly Dictionary<FigureType, Guid> _figureSkinIds = [];
 
     internal User(string login, string passwordHash, string email, UserRole role)
     {
@@ -55,8 +51,6 @@ public class User
         LootBoxCount--;
     }
 
-    public void AddSkin(Guid skinId) => _skinIds.Add(skinId);
-
     public void ChangeRole(UserRole role) => Role = role;
 
     internal void ChangeLogin(string login)
@@ -75,11 +69,5 @@ public class User
     {
         if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("email cannot be empty");
         Email = email;
-    }
-
-    internal void ChangeFigureSkin(FigureType figure, Guid skinId)
-    {
-        if (!_skinIds.Contains(skinId)) throw new InvalidOperationException("user does not have this skin");
-        _figureSkinIds[figure] = skinId;
     }
 }

@@ -1,27 +1,27 @@
 using Core.Services.Interfaces;
 using Core.Repositories.Interfaces;
 using Core.Models.Chess;
-using Core.Models.Skins;
+using Core.Models.Users;
 
 namespace Core.Services;
 
-public class UserCustomizationService(IUserFigureSkinRepository userFigureSkinRepos) : IUserCustomizationService
+public class UserCustomizationService(IUserCustomizationRepository userCustomizationRepos) : IUserCustomizationService
 {
-    private readonly IUserFigureSkinRepository _userFigureSkinRepos = userFigureSkinRepos;
+    private readonly IUserCustomizationRepository _userCustomizationRepos = userCustomizationRepos;
 
-    public async Task<Skin?> GetUserFigureSkinAsync(Guid userId, FigureType figure) => await _userFigureSkinRepos.GetAsync(userId, figure);
+    public async Task<UserCustomization?> GetUserCustomizationAsync(Guid userId) => await _userCustomizationRepos.GetAsync(userId);
 
-    public async Task<List<Skin>> GetUserFigureSkinsAsync(Guid userId) => await _userFigureSkinRepos.GetByUserIdAsync(userId);
-
-    public async Task InitializeUserFigureSkinsAsync(Guid userId, Dictionary<FigureType, Guid> figureSkins)
+    public async Task AddUserCustomizationAsync(Guid userId, Dictionary<FigureType, Guid> figureSkinIds)
     {
-        if ((await _userFigureSkinRepos.GetByUserIdAsync(userId)).Any()) throw new InvalidOperationException("figure skins already exist");
-        _userFigureSkinRepos.Initialize(userId, figureSkins);
+        if (await _userCustomizationRepos.GetAsync(userId) != null) throw new InvalidOperationException("user customization already exist");
+        UserCustomization customization = new(userId, figureSkinIds);
+        _userCustomizationRepos.Add(customization);
     }
 
     public async Task UpdateUserFigureSkinAsync(Guid userId, FigureType figure, Guid skinId)
     {
-        if (await _userFigureSkinRepos.GetAsync(userId, figure) == null) throw new ArgumentException("figure skin not exist");
-        _userFigureSkinRepos.Update(userId, figure, skinId);
+        UserCustomization customization = await _userCustomizationRepos.GetAsync(userId) ?? throw new ArgumentException("user customization not exist");
+        customization.ChangeFigureSkin(figure, skinId);
+        _userCustomizationRepos.Update(customization);
     }
 }

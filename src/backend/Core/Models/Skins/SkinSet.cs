@@ -7,8 +7,8 @@ public class SkinSet
     public Guid Id { get; }
     public string Name { get; } = null!;
     public string? Description { get; }
-    public IReadOnlyCollection<Guid> Skins => _skins.Values;
-    private readonly Dictionary<FigureType, Guid> _skins = [];
+    public IReadOnlyCollection<Guid> SkinIds => _skinIds.Values;
+    private readonly Dictionary<FigureType, Guid> _skinIds = [];
 
     public SkinSet(string name, string? description = null)
     {
@@ -20,7 +20,7 @@ public class SkinSet
 
     public void AddSkin(FigureType figure, Guid skinId)
     {
-        if (_skins.ContainsKey(figure)) throw new InvalidOperationException("skin for this figure already exists");
-        _skins.Add(figure, skinId);
+        if (_skinIds.ContainsKey(figure)) throw new InvalidOperationException("skin for this figure already exists");
+        _skinIds.Add(figure, skinId);
     }
 }
