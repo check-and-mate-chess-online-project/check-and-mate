@@ -12,6 +12,8 @@ public class SkinService(ISkinRepository skinRepos, ISkinSetRepository skinSetRe
 
     public async Task<Skin?> GetSkinAsync(Guid skinId) => await _skinRepos.GetAsync(skinId);
 
+    public async Task<Dictionary<FigureType, Skin>> GetDefaultSkinsAsync() => await _skinRepos.GetDefaultsAsync();
+
     public async Task<List<Skin>> GetAllSkinsAsync() => await _skinRepos.GetAllAsync();
 
     public async Task AddSkinAsync(Guid setId, FigureType figure, SkinRarity rarity)

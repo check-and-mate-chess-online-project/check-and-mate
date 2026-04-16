@@ -9,7 +9,7 @@ public class UserSkinService(IUserSkinRepository userSkinRepos) : IUserSkinServi
 
     public async Task<List<Guid>> GetUserSkinIdsAsync(Guid userId) => await _userSkinRepos.GetUserSkinIdsAsync(userId);
 
-    public async Task AddAsync(Guid userId, Guid skinId)
+    public async Task AddUserSkinAsync(Guid userId, Guid skinId)
     {
         if (await _userSkinRepos.GetUserSkinIdsAsync(userId) != null) throw new InvalidOperationException("user already has the skin");
         _userSkinRepos.Add(userId, skinId);
