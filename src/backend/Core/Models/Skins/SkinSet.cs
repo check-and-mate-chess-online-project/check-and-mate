@@ -5,7 +5,7 @@ namespace Core.Models.Skins;
 public class SkinSet
 {
     public Guid Id { get; }
-    public string Name { get; } = null!;
+    public string Name { get; }
     public string? Description { get; }
     public IReadOnlyCollection<Guid> SkinIds => _skinIds.Values;
     private readonly Dictionary<FigureType, Guid> _skinIds = [];

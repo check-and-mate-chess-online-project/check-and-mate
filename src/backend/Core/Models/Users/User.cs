@@ -4,16 +4,16 @@ namespace Core.Models.Users;
 
 public class User
 {
-    public Guid Id { get; private set; }
-    public string Login { get; private set; } = null!;
-    public string PasswordHash { get; private set; } = null!;
-    public string Email { get; private set; } = null!;
+    public Guid Id { get; }
+    public string Login { get; private set; }
+    public string PasswordHash { get; private set; }
+    public string Email { get; private set; }
     public int Rating { get; private set; } = 500;
     public int Balance { get; private set; } = 0;
     public int LootBoxCount { get; private set; } = 0;
     public UserRole Role { get; private set; }
 
-    internal User(string login, string passwordHash, string email, UserRole role)
+    public User(string login, string passwordHash, string email, UserRole role)
     {
         if (string.IsNullOrWhiteSpace(login)) throw new ArgumentException("login cannot be empty");
         if (string.IsNullOrWhiteSpace(passwordHash)) throw new ArgumentException("password hash cannot be empty");
@@ -53,19 +53,19 @@ public class User
 
     public void ChangeRole(UserRole role) => Role = role;
 
-    internal void ChangeLogin(string login)
+    public void ChangeLogin(string login)
     {
         if (string.IsNullOrWhiteSpace(login)) throw new ArgumentException("login cannot be empty");
         Login = login;
     }
 
-    internal void ChangePasswordHash(string passwordHash)
+    public void ChangePasswordHash(string passwordHash)
     {
         if (string.IsNullOrWhiteSpace(passwordHash)) throw new ArgumentException("password hash cannot be empty");
         PasswordHash = passwordHash;
     }
 
-    internal void ChangeEmail(string email)
+    public void ChangeEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("email cannot be empty");
         Email = email;

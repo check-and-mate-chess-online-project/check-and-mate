@@ -5,18 +5,18 @@ namespace Core.Models.Games;
 
 public class Game
 {
-    public Guid Id { get; private set; }
-    public Guid WhitePlayerId { get; private set; }
-    public Guid BlackPlayerId { get; private set; }
-    public IGameState State { get; private set; } = null!;
-    public GameResult? Result { get; private set; } = null;
+    public Guid Id { get; }
+    public Guid WhitePlayerId { get; }
+    public Guid BlackPlayerId { get; }
+    public IGameState State { get; private set; }
+    public GameResult? Result { get; private set; }
     public GameTerminationReason? TerminationReason { get; private set; }
     public DateTime? StartTimeUtc { get; private set; }
     public DateTime? EndTimeUtc { get; private set; }
-    public ITimeControl TimeControl { get; private set; } = null!;
-    private readonly IChessEngine _engine = null!;
+    public ITimeControl TimeControl { get; }
+    private readonly IChessEngine _engine;
 
-    internal Game(Guid whitePlayerId, Guid blackPlayerId, IChessEngine engine, ITimeControl timeControl)
+    public Game(Guid whitePlayerId, Guid blackPlayerId, IChessEngine engine, ITimeControl timeControl)
     {
         if (whitePlayerId == blackPlayerId) throw new ArgumentException("players must be different");
         Id = Guid.NewGuid();
@@ -35,8 +35,6 @@ public class Game
 
     public void EndByDisconnect(Guid playerId) => State.HandleDisconnect(this, playerId);
 
-    public void SetState(IGameState state) => State = state;
-
     public int GetMoveCount() => _engine.MoveCount;
 
     public bool IsValidMove(Move move) => _engine.IsValidMove(move);
@@ -44,6 +42,8 @@ public class Game
     public Guid GetCurrentPlayerId() => _engine.GetCurrentPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
 
     public Guid GetDefendingPlayerId() => _engine.GetDefendingPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
+
+    internal void SetState(IGameState state) => State = state;
 
     internal void SetGameStartTime(DateTime currentTime) => StartTimeUtc = currentTime;
 

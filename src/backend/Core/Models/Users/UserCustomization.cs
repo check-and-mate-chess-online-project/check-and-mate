@@ -8,5 +8,5 @@ public class UserCustomization(Guid userId, Dictionary<FigureType, Guid> figureS
     public IReadOnlyDictionary<FigureType, Guid> UserFigureSkinIds => _figureSkinIds;
     private readonly Dictionary<FigureType, Guid> _figureSkinIds = figureSkinIds;
 
-    internal void ChangeFigureSkin(FigureType figure, Guid skinId) => _figureSkinIds[figure] = skinId;
+    public void ChangeFigureSkin(FigureType figure, Guid skinId) => _figureSkinIds[figure] = skinId;
 }

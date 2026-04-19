@@ -2,13 +2,13 @@ namespace Core.Models.Users;
 
 public class Friendship
 {
-    public Guid UserId { get; }
-    public Guid FriendId { get; }
+    public Guid FriendAId { get; }
+    public Guid FriendBId { get; }
 
-    public Friendship(Guid userId, Guid friendId)
+    public Friendship(Guid friendAId, Guid friendBId)
     {
-        if (userId == friendId) throw new ArgumentException("users must be different"); 
-        UserId = userId < friendId ? userId : friendId;
-        FriendId = userId < friendId ? friendId : userId;
+        if (friendAId == friendBId) throw new ArgumentException("users must be different"); 
+        FriendAId = friendAId < friendBId ? friendAId : friendBId;
+        FriendBId = friendAId < friendBId ? friendBId : friendAId;
     }
 }

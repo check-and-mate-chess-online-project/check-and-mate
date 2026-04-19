@@ -1,6 +1,8 @@
+using Core.Models.Skins;
+
 namespace Application.Services.Interfaces;
 
 public interface ILootBoxOpeningService
 {
-    Task OpenUserLootBoxAsync(Guid userId);
+    Task<Skin> OpenUserLootBoxAsync(Guid userId);
 }

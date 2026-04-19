@@ -22,6 +22,8 @@ public class TimeControl : ITimeControl
         _blackTimeLeftSec = initialTimeSec;
     }
 
+    public bool IsEnabled() => true;
+
     public void SetMoveStartTime(PlayerColor color, DateTime currentTime)
     {
         if (color == PlayerColor.White) _whiteLastMoveStartTimeUtc = currentTime;
