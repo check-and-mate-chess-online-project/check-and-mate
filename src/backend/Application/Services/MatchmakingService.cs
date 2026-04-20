@@ -1,11 +1,11 @@
 using Application.Services.Interfaces;
-using Application.Orchestration.Games;
+using Application.Orchestration.GameSessions;
 using Application.Abstractions.Matchmaking;
 using Application.Abstractions.UnitOfWork;
+using Core.Repositories;
 using Core.Models.Games;
 using Core.Models.Users;
 using Core.Models.Interfaces;
-using Core.Repositories;
 
 namespace Application.Services;
 
@@ -39,7 +39,7 @@ public class MatchmakingService(GameSessionService sessionService, IUserReposito
         bool userIsWhite = Random.Shared.Next(2) == 0;
         Guid whiteId = userIsWhite ? userId : opponent.Id;
         Guid blackId = userIsWhite ? opponent.Id : userId;
-        var game = _sessionService.Create(whiteId, blackId, timeControl);
+        Game game = _sessionService.Create(whiteId, blackId, timeControl);
         await _uow.CommitChangesAsync();
         return game;
     }

@@ -1,5 +1,5 @@
 using Application.Services.Interfaces;
-using Application.Orchestration.Games;
+using Application.Orchestration.GameSessions;
 using Application.Abstractions.UnitOfWork;
 using Core.Repositories;
 using Core.Models.Requests;

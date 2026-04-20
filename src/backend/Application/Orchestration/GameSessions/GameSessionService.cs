@@ -3,7 +3,7 @@ using Application.Abstractions.UnitOfWork;
 using Core.Models.Games;
 using Core.Models.Interfaces;
 
-namespace Application.Orchestration.Games;
+namespace Application.Orchestration.GameSessions;
 
 public class GameSessionService(IGameSessionStore sessionStore, IChessEngine engine, IUnitOfWork uow)
 {
@@ -19,5 +19,11 @@ public class GameSessionService(IGameSessionStore sessionStore, IChessEngine eng
         Game game = new(whitePlayerId, blackPlayerId, _engine, timeControl);
         _sessionStore.Add(game);
         return game;
+    }
+
+    public void Remove(Game game)
+    {
+        if (_sessionStore.Get(game.Id) == null) throw new ArgumentException($"game session {game.Id} not exist");
+        _sessionStore.Remove(game);
     }
 }
