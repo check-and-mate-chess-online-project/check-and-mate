@@ -10,6 +10,8 @@ public class GameSessionService(IGameSessionStore sessionStore, IChessEngine eng
     private readonly IGameSessionStore _sessionStore = sessionStore;
     private readonly IChessEngine _engine = engine;
     private readonly IUnitOfWork _uow = uow;
+
+    public Game? Get(Guid gameId) => _sessionStore.Get(gameId);
     
     public Game? GetByPlayers(Guid playerAId, Guid playerBId) => _sessionStore.GetByPlayers(playerAId, playerBId);
 

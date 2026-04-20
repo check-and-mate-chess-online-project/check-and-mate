@@ -5,17 +5,23 @@ using Core.Repositories;
 using Core.Models.Requests;
 using Core.Models.Games;
 using Core.Models.Interfaces;
+using Core.Models.Users;
 
 namespace Application.Services;
 
-public class GameInvitationService(GameSessionService sessionService, IGameInvitationRepository invitationRepos, IUnitOfWork uow) : IGameInvitationService
+public class GameInvitationService(GameSessionService sessionService, IGameInvitationRepository invitationRepos, IUserRepository userRepos, IUnitOfWork uow) : IGameInvitationService
 {
     private readonly GameSessionService _sessionService = sessionService;
     private readonly IGameInvitationRepository _invitationRepos = invitationRepos;
+    private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
 
     public async Task SendGameInvitationAsync(Guid senderId, Guid userId, int initialTimeSec, int incrementPerMoveSec)
     {
+        User sender = await _userRepos.GetAsync(senderId) ?? throw new ArgumentException($"user {senderId} not exist");
+        if (sender.IsDeleted) throw new InvalidOperationException($"user {senderId} is deleted");
+        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
+        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
         if (await _invitationRepos.GetPendingAsync(senderId, userId) != null) throw new InvalidOperationException($"game invitation from {senderId} to {userId} already exist");
         if (_sessionService.GetByPlayers(senderId, userId) != null) throw new InvalidOperationException($"game session beetwen {senderId} and {userId} already exist");
         ITimeControl timeControl = initialTimeSec != 0 ? new TimeControl(initialTimeSec, incrementPerMoveSec) : new DisabledTimeControl();

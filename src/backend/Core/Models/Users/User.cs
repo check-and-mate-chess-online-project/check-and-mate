@@ -12,6 +12,7 @@ public class User
     public int Balance { get; private set; } = 0;
     public int LootBoxCount { get; private set; } = 0;
     public UserRole Role { get; private set; }
+    public bool IsDeleted { get; private set; } = false;
 
     public User(string login, string passwordHash, string email, UserRole role)
     {
@@ -70,4 +71,6 @@ public class User
         if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("email cannot be empty");
         Email = email;
     }
+
+    public void Delete() => IsDeleted = true;
 }

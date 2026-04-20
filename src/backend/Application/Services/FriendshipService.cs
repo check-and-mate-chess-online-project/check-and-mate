@@ -7,14 +7,19 @@ using Core.Models.Users;
 
 namespace Application.Services;
 
-public class FriendshipService(IFriendshipRepository friendshipRepos, IFriendRequestRepository requestRepos, IUnitOfWork uow) : IFriendshipService
+public class FriendshipService(IFriendshipRepository friendshipRepos, IFriendRequestRepository requestRepos, IUserRepository userRepos, IUnitOfWork uow) : IFriendshipService
 {
     private readonly IFriendshipRepository _friendshipRepos = friendshipRepos;
     private readonly IFriendRequestRepository _requestRepos = requestRepos;
+    private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
 
     public async Task SendFriendRequestAsync(Guid senderId, Guid userId)
     {
+        User sender = await _userRepos.GetAsync(senderId) ?? throw new ArgumentException($"user {senderId} not exist");
+        if (sender.IsDeleted) throw new InvalidOperationException($"user {senderId} is deleted");
+        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
+        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
         if (await _requestRepos.GetPendingAsync(senderId, userId) != null) throw new InvalidOperationException($"friend request from {senderId} to {userId} already exist");
         (Guid senderId, Guid userId) key = FriendshipKey.Normalize(senderId, userId);
         if (await _friendshipRepos.GetAsync(key.senderId, key.userId) != null) throw new InvalidOperationException($"users {senderId} and {userId} already friends");

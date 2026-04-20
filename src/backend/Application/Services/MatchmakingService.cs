@@ -20,10 +20,12 @@ public class MatchmakingService(GameSessionService sessionService, IUserReposito
     public async Task<Game?> StartGameAsync(Guid userId, ITimeControl timeControl)
     {
         User player = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not found");
+        if (player.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
         Dictionary<User, ITimeControl> candidates = _pool.GetAll();
         User? opponent = candidates
             .Where(x =>
                 x.Key.Id != userId &&
+                !x.Key.IsDeleted &&
                 x.Value.IsEnabled() &&
                 x.Value.InitialTimeSec == timeControl.InitialTimeSec &&
                 x.Value.IncrementPerMoveSec == timeControl.IncrementPerMoveSec)

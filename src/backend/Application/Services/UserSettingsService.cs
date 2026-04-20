@@ -16,6 +16,7 @@ public class UserSettingsService(IUserRepository userRepos, IPasswordHasher hash
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(login);
         User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
+        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
         user.ChangeLogin(login);
         _userRepos.Update(user);
         await _uow.CommitChangesAsync();
@@ -25,6 +26,7 @@ public class UserSettingsService(IUserRepository userRepos, IPasswordHasher hash
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
         User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
+        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
         string passworHash = _hasher.GetHash(password);
         user.ChangePasswordHash(passworHash);
         _userRepos.Update(user);
@@ -35,6 +37,7 @@ public class UserSettingsService(IUserRepository userRepos, IPasswordHasher hash
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
         User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user not {userId} exist");
+        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
         user.ChangeEmail(email);
         _userRepos.Update(user);
         await _uow.CommitChangesAsync();
@@ -43,6 +46,7 @@ public class UserSettingsService(IUserRepository userRepos, IPasswordHasher hash
     public async Task RemoveUserAsync(Guid userId)
     {
         User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
+        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} already deleted");
         _userRepos.Remove(user);
         await _uow.CommitChangesAsync();
     }
