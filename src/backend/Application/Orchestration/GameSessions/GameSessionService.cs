@@ -5,7 +5,7 @@ using Core.Models.Interfaces;
 
 namespace Application.Orchestration.GameSessions;
 
-public class GameSessionService(IGameSessionStore sessionStore, IChessEngine engine, IUnitOfWork uow)
+public class GameSessionService(IGameSessionStore sessionStore, IChessEngine engine, IUnitOfWork uow) : IGameSessionService
 {
     private readonly IGameSessionStore _sessionStore = sessionStore;
     private readonly IChessEngine _engine = engine;

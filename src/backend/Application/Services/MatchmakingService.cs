@@ -9,10 +9,10 @@ using Core.Models.Interfaces;
 
 namespace Application.Services;
 
-public class MatchmakingService(GameSessionService sessionService, IUserRepository userRepos, IMatchmakingPool pool, IUnitOfWork uow) : IMatchmakingService
+public class MatchmakingService(IGameSessionService sessionService, IUserRepository userRepos, IMatchmakingPool pool, IUnitOfWork uow) : IMatchmakingService
 {
     public int Range { get; } = 1000;
-    private readonly GameSessionService _sessionService = sessionService;
+    private readonly IGameSessionService _sessionService = sessionService;
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IMatchmakingPool _pool = pool;
     private readonly IUnitOfWork _uow = uow;

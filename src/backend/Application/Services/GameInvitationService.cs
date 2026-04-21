@@ -9,9 +9,9 @@ using Core.Models.Users;
 
 namespace Application.Services;
 
-public class GameInvitationService(GameSessionService sessionService, IGameInvitationRepository invitationRepos, IUserRepository userRepos, IUnitOfWork uow) : IGameInvitationService
+public class GameInvitationService(IGameSessionService sessionService, IGameInvitationRepository invitationRepos, IUserRepository userRepos, IUnitOfWork uow) : IGameInvitationService
 {
-    private readonly GameSessionService _sessionService = sessionService;
+    private readonly IGameSessionService _sessionService = sessionService;
     private readonly IGameInvitationRepository _invitationRepos = invitationRepos;
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
