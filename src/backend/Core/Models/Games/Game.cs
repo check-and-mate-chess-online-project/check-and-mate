@@ -39,6 +39,8 @@ public class Game
 
     public bool IsValidMove(Move move) => _engine.IsValidMove(move);
 
+    public List<(int A, int B, FigureType Figure, PlayerColor Color)> GetFigures() => _engine.GetFigures();
+
     public Guid GetCurrentPlayerId() => _engine.GetCurrentPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
 
     public Guid GetDefendingPlayerId() => _engine.GetDefendingPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
