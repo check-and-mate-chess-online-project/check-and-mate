@@ -5,11 +5,13 @@ using Core.Repositories;
 using Core.Models.Chess;
 using Core.Models.Games;
 using Core.Models.Users;
+using Application.Orchestration.Settings;
 
 namespace Application.Services;
 
-public class GameplayService(IGameSessionService sessionService, IGameRepository gameRepos, IUserRepository userRepos, IUnitOfWork uow) : IGameplayService
+public class GameplayService(IGameSettingsProvider settings, IGameSessionService sessionService, IGameRepository gameRepos, IUserRepository userRepos, IUnitOfWork uow) : IGameplayService
 {
+    private readonly IGameSettingsProvider _settings = settings;
     private readonly IGameSessionService _sessionService = sessionService;
     private readonly IGameRepository _gameRepos = gameRepos;
     private readonly IUserRepository _userRepos = userRepos;
@@ -23,7 +25,7 @@ public class GameplayService(IGameSessionService sessionService, IGameRepository
         MoveResult moveResult = game.MakeMove(move, userId);
         if (moveResult.IsGameOver == true) 
         {
-            await ChangePlayerRatings(game, userId, (GameTerminationReason)moveResult.TerminationReason!);
+            await UpdatePlayerStats(game, userId, (GameTerminationReason)moveResult.TerminationReason!);
             _sessionService.Remove(game);
             _gameRepos.Add(game);
             await _uow.CommitChangesAsync();
@@ -35,7 +37,7 @@ public class GameplayService(IGameSessionService sessionService, IGameRepository
     {
         Game game = _sessionService.Get(gameId) ?? throw new ArgumentException($"game {gameId} not exist");
         game.EndByTimeout(userId);
-        await ChangePlayerRatings(game, userId, GameTerminationReason.Timeout);
+        await UpdatePlayerStats(game, userId, GameTerminationReason.Timeout);
         _sessionService.Remove(game);
         _gameRepos.Add(game);
         await _uow.CommitChangesAsync();
@@ -47,7 +49,7 @@ public class GameplayService(IGameSessionService sessionService, IGameRepository
         User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
         if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
         game.EndByResignation(userId);
-        await ChangePlayerRatings(game, userId, GameTerminationReason.Resignation);
+        await UpdatePlayerStats(game, userId, GameTerminationReason.Resignation);
         _sessionService.Remove(game);
         _gameRepos.Add(game);
         await _uow.CommitChangesAsync();
@@ -57,17 +59,33 @@ public class GameplayService(IGameSessionService sessionService, IGameRepository
     {
         Game game = _sessionService.Get(gameId) ?? throw new ArgumentException($"game {gameId} not exist");
         game.EndByDisconnect(userId);
-        await ChangePlayerRatings(game, userId, GameTerminationReason.Disconnect);
+        await UpdatePlayerStats(game, userId, GameTerminationReason.Disconnect);
         _sessionService.Remove(game);
         _gameRepos.Add(game);
         await _uow.CommitChangesAsync();
     }
 
-    private async Task ChangePlayerRatings(Game game, Guid userId, GameTerminationReason terminationReason)
+    private async Task UpdatePlayerStats(Game game, Guid userId, GameTerminationReason terminationReason)
     {
         User whitePlayer = await _userRepos.GetAsync(game.WhitePlayerId) ?? throw new ArgumentException($"white player not exist");
         User blackPlayer = await _userRepos.GetAsync(game.BlackPlayerId) ?? throw new ArgumentException($"black player not exist");
         GameResult gameResult = game.GetGameResultByTerminationReason(terminationReason, userId);
+        await ChangePlayerRatings(whitePlayer, blackPlayer, gameResult);
+        User winner = gameResult == GameResult.WhiteVictory ? whitePlayer : blackPlayer;
+        User loser = gameResult == GameResult.WhiteVictory ? blackPlayer : whitePlayer;
+        AddPlayerBalances(winner, loser);
+    }
+
+    private void AddPlayerBalances(User winner, User loser)
+    {
+        winner.AddBalance(_settings.GameWinReward);
+        winner.AddBalance(_settings.GameLoseReward);
+        _userRepos.Update(winner);
+        _userRepos.Update(loser);
+    }
+
+    private async Task ChangePlayerRatings(User whitePlayer, User blackPlayer, GameResult gameResult)
+    {
         (int whiteRatingDelta, int blackRatingDelta) = CalculateRating(gameResult);
         whitePlayer.ChangeRating(whiteRatingDelta);
         blackPlayer.ChangeRating(blackRatingDelta);
