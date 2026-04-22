@@ -43,6 +43,20 @@ public class Game
 
     public Guid GetDefendingPlayerId() => _engine.GetDefendingPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
 
+    public GameResult GetGameResultByTerminationReason(GameTerminationReason terminationReason, Guid? playerId = null)
+    {
+        return terminationReason switch
+        {
+            GameTerminationReason.CheckMate => playerId == WhitePlayerId ? GameResult.WhiteVictory : GameResult.BlackVictory,
+            GameTerminationReason.StaleMate => GameResult.Draw,
+            GameTerminationReason.Resignation => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
+            GameTerminationReason.Timeout => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
+            GameTerminationReason.DrawAgreement => GameResult.Draw,
+            GameTerminationReason.Disconnect => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
+            _ => throw new ArgumentException("invalid game termination reason")
+        };
+    }
+
     internal void SetState(IGameState state) => State = state;
 
     internal void SetGameStartTime(DateTime currentTime) => StartTimeUtc = currentTime;
@@ -72,15 +86,6 @@ public class Game
     {
         TerminationReason = terminationReason;
         EndTimeUtc = DateTime.UtcNow;
-        Result = terminationReason switch
-        {
-            GameTerminationReason.CheckMate => playerId == WhitePlayerId ? GameResult.WhiteVictory : GameResult.BlackVictory,
-            GameTerminationReason.StaleMate => GameResult.Draw,
-            GameTerminationReason.Resignation => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
-            GameTerminationReason.Timeout => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
-            GameTerminationReason.DrawAgreement => GameResult.Draw,
-            GameTerminationReason.Disconnect => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
-            _ => throw new ArgumentException("invalid game termination reason")
-        };
+        Result = GetGameResultByTerminationReason(terminationReason, playerId);
     }
 }
