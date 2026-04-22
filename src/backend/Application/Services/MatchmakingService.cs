@@ -6,12 +6,13 @@ using Core.Repositories;
 using Core.Models.Games;
 using Core.Models.Users;
 using Core.Models.Interfaces;
+using Application.Orchestration.Settings;
 
 namespace Application.Services;
 
-public class MatchmakingService(IGameSessionService sessionService, IUserRepository userRepos, IMatchmakingPool pool, IUnitOfWork uow) : IMatchmakingService
+public class MatchmakingService(IGameSettingsProvider settings, IGameSessionService sessionService, IUserRepository userRepos, IMatchmakingPool pool, IUnitOfWork uow) : IMatchmakingService
 {
-    public int Range { get; } = 1000;
+    private readonly IGameSettingsProvider _settings = settings;
     private readonly IGameSessionService _sessionService = sessionService;
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IMatchmakingPool _pool = pool;
@@ -26,9 +27,16 @@ public class MatchmakingService(IGameSessionService sessionService, IUserReposit
             .Where(x =>
                 x.Key.Id != userId &&
                 !x.Key.IsDeleted &&
-                x.Value.IsEnabled() &&
-                x.Value.InitialTimeSec == timeControl.InitialTimeSec &&
-                x.Value.IncrementPerMoveSec == timeControl.IncrementPerMoveSec)
+                (
+                    (!x.Value.IsEnabled() && !timeControl.IsEnabled()) ||
+                    (
+                        x.Value.IsEnabled() && 
+                        timeControl.IsEnabled() &&
+                        x.Value.InitialTimeSec == timeControl.InitialTimeSec &&
+                        x.Value.IncrementPerMoveSec == timeControl.IncrementPerMoveSec
+                    )
+                ) &&
+                Math.Abs(x.Key.Rating - player.Rating) <= _settings.RatingRange)
             .Select(x => x.Key)
             .FirstOrDefault();
         if (opponent == null)

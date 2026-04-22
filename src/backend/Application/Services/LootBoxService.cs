@@ -4,13 +4,13 @@ using Application.Abstractions.UnitOfWork;
 using Core.Repositories;
 using Core.Models.Skins;
 using Core.Models.Users;
+using Application.Orchestration.Settings;
 
 namespace Application.Services;
 
-public class LootBoxService(ISkinDropService skinSropService, IUserRepository userRepos, IUserSkinRepository userSkinRepos, IUnitOfWork uow) : ILootBoxService
+public class LootBoxService(IGameSettingsProvider settings, ISkinDropService skinSropService, IUserRepository userRepos, IUserSkinRepository userSkinRepos, IUnitOfWork uow) : ILootBoxService
 {
-    public int LootBoxPrice { get; } = 500;
-    public int DuplicateReward { get; } = 100;
+    private readonly IGameSettingsProvider _settings = settings;
     private readonly ISkinDropService _skinSropService = skinSropService;
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUserSkinRepository _userSkinRepos = userSkinRepos;
@@ -31,7 +31,7 @@ public class LootBoxService(ISkinDropService skinSropService, IUserRepository us
         else
         {
             isDuplicate = true;
-            user.AddBalance(DuplicateReward);
+            user.AddBalance(_settings.DuplicateSkinReward);
         }
         _userRepos.Update(user);
         await _uow.CommitChangesAsync();
@@ -42,7 +42,7 @@ public class LootBoxService(ISkinDropService skinSropService, IUserRepository us
     {
         User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
         if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
-        int totalPrice = LootBoxPrice * count;
+        int totalPrice = _settings.LootBoxPrice * count;
         user.SpendBalance(totalPrice);
         user.AddLootBoxes(count);
         _userRepos.Update(user);
