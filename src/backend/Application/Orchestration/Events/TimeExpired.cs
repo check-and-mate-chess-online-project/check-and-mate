@@ -2,4 +2,4 @@ using Core.Models.Games;
 
 namespace Application.Orchestration.Events;
 
-public record TimeExpired(Game Game, Guid UserId);
+public record TimeExpired(Guid GameId, Guid UserId);

@@ -47,7 +47,8 @@ public class UserSettingsService(IUserRepository userRepos, IPasswordHasher hash
     {
         User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
         if (user.IsDeleted) throw new InvalidOperationException($"user {userId} already deleted");
-        _userRepos.Remove(user);
+        user.Delete();
+        _userRepos.Update(user);
         await _uow.CommitChangesAsync();
     }
 }
