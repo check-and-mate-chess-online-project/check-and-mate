@@ -5,5 +5,5 @@ namespace Application.Services.Interfaces;
 
 public interface IMatchmakingService
 {
-    Task<Game?> StartGameAsync(Guid userId, ITimeControl timeControl);
+    Task<Game?> StartGameAsync(Guid userId, bool isEnabled, int initialTimeSec, int incrementPerMoveSec);
 }

@@ -5,6 +5,7 @@ namespace Core.Models.Games;
 
 public class TimeControl : ITimeControl
 {
+    public bool IsEnabled { get; } = true;
     public int InitialTimeSec { get; }
     public int IncrementPerMoveSec { get; }
     private double _whiteTimeLeftSec;
@@ -21,8 +22,6 @@ public class TimeControl : ITimeControl
         _whiteTimeLeftSec = initialTimeSec;
         _blackTimeLeftSec = initialTimeSec;
     }
-
-    public bool IsEnabled() => true;
 
     public void SetMoveStartTime(PlayerColor color, DateTime currentTime)
     {

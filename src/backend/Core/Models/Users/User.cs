@@ -1,5 +1,3 @@
-using Core.Models.Chess;
-
 namespace Core.Models.Users;
 
 public class User

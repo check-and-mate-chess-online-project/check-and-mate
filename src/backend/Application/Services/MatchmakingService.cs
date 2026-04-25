@@ -18,20 +18,21 @@ public class MatchmakingService(IGameSettingsProvider settings, IGameSessionServ
     private readonly IMatchmakingPool _pool = pool;
     private readonly IUnitOfWork _uow = uow;
 
-    public async Task<Game?> StartGameAsync(Guid userId, ITimeControl timeControl)
+    public async Task<Game?> StartGameAsync(Guid userId, bool isEnabled, int initialTimeSec, int incrementPerMoveSec)
     {
         User player = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not found");
         if (player.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
+        ITimeControl timeControl = isEnabled ? new TimeControl(initialTimeSec, incrementPerMoveSec) : new DisabledTimeControl();
         Dictionary<User, ITimeControl> candidates = _pool.GetAll();
         User? opponent = candidates
             .Where(x =>
                 x.Key.Id != userId &&
                 !x.Key.IsDeleted &&
                 (
-                    (!x.Value.IsEnabled() && !timeControl.IsEnabled()) ||
+                    (!x.Value.IsEnabled && !timeControl.IsEnabled) ||
                     (
-                        x.Value.IsEnabled() && 
-                        timeControl.IsEnabled() &&
+                        x.Value.IsEnabled && 
+                        timeControl.IsEnabled &&
                         x.Value.InitialTimeSec == timeControl.InitialTimeSec &&
                         x.Value.IncrementPerMoveSec == timeControl.IncrementPerMoveSec
                     )
