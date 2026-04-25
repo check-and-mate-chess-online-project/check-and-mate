@@ -1,9 +1,8 @@
-using Core.Models.Interfaces;
-using Core.Models.Games;
+using Application.Dtos;
 
 namespace Application.Services.Interfaces;
 
 public interface IMatchmakingService
 {
-    Task<Game?> StartGameAsync(Guid userId, bool isEnabled, int initialTimeSec, int incrementPerMoveSec);
+    Task<GameDto?> StartGameAsync(Guid userId, bool isEnabled, int initialTimeSec, int incrementPerMoveSec);
 }

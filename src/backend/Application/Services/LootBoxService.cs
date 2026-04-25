@@ -1,10 +1,11 @@
 using Application.Services.Interfaces;
 using Application.Orchestration.Skins;
 using Application.Abstractions.UnitOfWork;
+using Application.Orchestration.Settings;
+using Application.Dtos;
 using Core.Repositories;
 using Core.Models.Skins;
 using Core.Models.Users;
-using Application.Orchestration.Settings;
 
 namespace Application.Services;
 
@@ -16,7 +17,7 @@ public class LootBoxService(IGameSettingsProvider settings, ISkinDropService ski
     private readonly IUserSkinRepository _userSkinRepos = userSkinRepos;
     private readonly IUnitOfWork _uow = uow;
 
-    public async Task<(Skin, bool)> OpenUserLootBoxAsync(Guid userId)
+    public async Task<LootBoxDropResultDto> OpenUserLootBoxAsync(Guid userId)
     {
         User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
         if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
@@ -35,7 +36,8 @@ public class LootBoxService(IGameSettingsProvider settings, ISkinDropService ski
         }
         _userRepos.Update(user);
         await _uow.CommitChangesAsync();
-        return (skin, isDuplicate);
+        LootBoxDropResultDto dropResult = new() { SkinId = skin.Id, IsDuplicate = isDuplicate };
+        return dropResult;
     }
 
     public async Task BuyLootBoxesAsync(Guid userId, int count)

@@ -1,9 +1,9 @@
-using Core.Models.Skins;
+using Application.Dtos;
 
 namespace Application.Services.Interfaces;
 
 public interface ILootBoxService
 {
-    Task<(Skin, bool)> OpenUserLootBoxAsync(Guid userId);
+    Task<LootBoxDropResultDto> OpenUserLootBoxAsync(Guid userId);
     Task BuyLootBoxesAsync(Guid userId, int count);
 }

@@ -1,5 +1,7 @@
 using Application.Services.Interfaces;
 using Application.Abstractions.UnitOfWork;
+using Application.Dtos;
+using Application.Mappers;
 using Core.Repositories;
 using Core.Models.Users;
 
@@ -10,7 +12,7 @@ public class UserRegistrationService(IUserRepository userRepos, IUnitOfWork uow)
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
 
-    public async Task<User> RegisterAsync(string login, string password, string email, UserRole role)
+    public async Task<UserDto> RegisterAsync(string login, string password, string email, UserRole role)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(login);
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
@@ -19,6 +21,6 @@ public class UserRegistrationService(IUserRepository userRepos, IUnitOfWork uow)
         User user = new(login, password, email, role);
         _userRepos.Add(user);
         await _uow.CommitChangesAsync();
-        return user;
+        return UserMapper.GetDto(user);
     }
 }

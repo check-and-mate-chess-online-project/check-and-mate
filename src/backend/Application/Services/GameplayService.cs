@@ -1,11 +1,13 @@
 using Application.Services.Interfaces;
 using Application.Abstractions.UnitOfWork;
 using Application.Orchestration.GameSessions;
+using Application.Orchestration.Settings;
+using Application.Dtos;
+using Application.Mappers;
 using Core.Repositories;
 using Core.Models.Chess;
 using Core.Models.Games;
 using Core.Models.Users;
-using Application.Orchestration.Settings;
 
 namespace Application.Services;
 
@@ -17,7 +19,7 @@ public class GameplayService(IGameSettingsProvider settings, IGameSessionService
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
 
-    public async Task<MoveResult> MakeMoveAsync(Guid gameId, Guid userId, Move move)
+    public async Task<MoveResultDto> MakeMoveAsync(Guid gameId, Guid userId, Move move)
     {
         Game game = _sessionService.Get(gameId) ?? throw new ArgumentException($"game {gameId} not exist");
         User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
@@ -30,7 +32,7 @@ public class GameplayService(IGameSettingsProvider settings, IGameSessionService
             _gameRepos.Add(game);
             await _uow.CommitChangesAsync();
         }
-        return moveResult;
+        return MoveResultMapper.GetDto(moveResult);
     }
 
     public async Task HandleTimeoutAsync(Guid gameId, Guid userId)
