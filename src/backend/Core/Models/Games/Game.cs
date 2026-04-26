@@ -37,7 +37,7 @@ public class Game
 
     public int GetMoveCount() => _engine.MoveCount;
 
-    public bool IsValidMove(Move move) => _engine.IsValidMove(move);
+    public bool IsValidMove(Move move, PlayerColor color) => _engine.IsValidMove(move, color);
 
     public List<(int A, int B, FigureType Figure, PlayerColor Color)> GetFigures() => _engine.GetFigures();
 

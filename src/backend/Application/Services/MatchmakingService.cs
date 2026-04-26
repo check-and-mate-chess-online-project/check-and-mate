@@ -2,7 +2,7 @@ using Application.Services.Interfaces;
 using Application.Orchestration.GameSessions;
 using Application.Abstractions.Matchmaking;
 using Application.Abstractions.UnitOfWork;
-using Application.Orchestration.Settings;
+using Application.Abstractions.Settings;
 using Application.Dtos;
 using Application.Mappers;
 using Core.Repositories;

@@ -5,8 +5,9 @@ namespace Application.Services.Interfaces;
 
 public interface IGameplayService
 {
-    Task<MoveResultDto> MakeMoveAsync(Guid gameId, Guid userId, Move move);
-    Task HandleTimeoutAsync(Guid gameId, Guid userId);
-    Task HandleResignAsync(Guid gameId, Guid userId);
-    Task HandleDisconnectAsync(Guid gameId, Guid userId);
+    GameDto? GetActiveGameByUser(Guid userId);
+    Task<MoveResultDto> MakeMoveAsync(Guid userId, Move move);
+    Task HandleTimeoutAsync(Guid userId);
+    Task HandleResignAsync(Guid userId);
+    Task HandleDisconnectAsync(Guid userId);
 }

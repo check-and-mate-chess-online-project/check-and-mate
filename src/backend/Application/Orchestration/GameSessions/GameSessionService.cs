@@ -1,19 +1,19 @@
 using Application.Abstractions.GameSessions;
-using Application.Abstractions.UnitOfWork;
 using Core.Models.Games;
 using Core.Models.Interfaces;
 
 namespace Application.Orchestration.GameSessions;
 
-public class GameSessionService(IGameSessionStore sessionStore, IChessEngine engine, IUnitOfWork uow) : IGameSessionService
+public class GameSessionService(IGameSessionStore sessionStore, IChessEngine engine) : IGameSessionService
 {
     private readonly IGameSessionStore _sessionStore = sessionStore;
     private readonly IChessEngine _engine = engine;
-    private readonly IUnitOfWork _uow = uow;
 
     public Game? Get(Guid gameId) => _sessionStore.Get(gameId);
     
     public Game? GetByPlayers(Guid playerAId, Guid playerBId) => _sessionStore.GetByPlayers(playerAId, playerBId);
+
+    public Game? GetByUserId(Guid userId) => _sessionStore.GetByUserId(userId);
 
     public Game Create(Guid whitePlayerId, Guid blackPlayerId, ITimeControl timeControl)
     {

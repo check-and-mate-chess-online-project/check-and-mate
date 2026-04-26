@@ -1,7 +1,7 @@
 using Application.Services.Interfaces;
 using Application.Abstractions.UnitOfWork;
+using Application.Abstractions.Settings;
 using Application.Orchestration.GameSessions;
-using Application.Orchestration.Settings;
 using Application.Dtos;
 using Application.Mappers;
 using Core.Repositories;
@@ -11,7 +11,12 @@ using Core.Models.Users;
 
 namespace Application.Services;
 
-public class GameplayService(IGameSettingsProvider settings, IGameSessionService sessionService, IGameRepository gameRepos, IUserRepository userRepos, IUnitOfWork uow) : IGameplayService
+public class GameplayService(
+    IGameSettingsProvider settings, 
+    IGameSessionService sessionService, 
+    IGameRepository gameRepos, 
+    IUserRepository userRepos, 
+    IUnitOfWork uow) : IGameplayService
 {
     private readonly IGameSettingsProvider _settings = settings;
     private readonly IGameSessionService _sessionService = sessionService;
@@ -19,10 +24,16 @@ public class GameplayService(IGameSettingsProvider settings, IGameSessionService
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
 
-    public async Task<MoveResultDto> MakeMoveAsync(Guid gameId, Guid userId, Move move)
+    public GameDto? GetActiveGameByUser(Guid userId)
     {
-        Game game = _sessionService.Get(gameId) ?? throw new ArgumentException($"game {gameId} not exist");
+        Game? game = _sessionService.GetByUserId(userId);
+        return game != null ? GameMapper.GetDto(game) : null;
+    }
+
+    public async Task<MoveResultDto> MakeMoveAsync(Guid userId, Move move)
+    {
         User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
+        Game game = _sessionService.GetByUserId(userId) ?? throw new ArgumentException($"user {userId} not in game");
         if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
         MoveResult moveResult = game.MakeMove(move, userId);
         if (moveResult.IsGameOver == true) 
@@ -35,9 +46,9 @@ public class GameplayService(IGameSettingsProvider settings, IGameSessionService
         return MoveResultMapper.GetDto(moveResult);
     }
 
-    public async Task HandleTimeoutAsync(Guid gameId, Guid userId)
+    public async Task HandleTimeoutAsync(Guid userId)
     {
-        Game game = _sessionService.Get(gameId) ?? throw new ArgumentException($"game {gameId} not exist");
+        Game game = _sessionService.GetByUserId(userId) ?? throw new ArgumentException($"user {userId} not in game");
         game.EndByTimeout(userId);
         await UpdatePlayerStats(game, userId, GameTerminationReason.Timeout);
         _sessionService.Remove(game);
@@ -45,9 +56,9 @@ public class GameplayService(IGameSettingsProvider settings, IGameSessionService
         await _uow.CommitChangesAsync();
     }
 
-    public async Task HandleResignAsync(Guid gameId, Guid userId)
+    public async Task HandleResignAsync(Guid userId)
     {
-        Game game = _sessionService.Get(gameId) ?? throw new ArgumentException($"game {gameId} not exist");
+        Game game = _sessionService.GetByUserId(userId) ?? throw new ArgumentException($"user {userId} not in game");
         User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
         if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
         game.EndByResignation(userId);
@@ -57,9 +68,9 @@ public class GameplayService(IGameSettingsProvider settings, IGameSessionService
         await _uow.CommitChangesAsync();
     }
     
-    public async Task HandleDisconnectAsync(Guid gameId, Guid userId)
+    public async Task HandleDisconnectAsync(Guid userId)
     {
-        Game game = _sessionService.Get(gameId) ?? throw new ArgumentException($"game {gameId} not exist");
+        Game game = _sessionService.GetByUserId(userId) ?? throw new ArgumentException($"user {userId} not in game");
         game.EndByDisconnect(userId);
         await UpdatePlayerStats(game, userId, GameTerminationReason.Disconnect);
         _sessionService.Remove(game);

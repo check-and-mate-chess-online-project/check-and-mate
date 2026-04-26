@@ -11,7 +11,7 @@ public class GameTimeoutHandler(IGameplayService gameplayService, IUnitOfWork uo
 
     public async Task Handle(TimeExpired e)
     {
-        await _gameplayService.HandleTimeoutAsync(e.GameId, e.UserId);
+        await _gameplayService.HandleTimeoutAsync(e.UserId);
         await _uow.CommitChangesAsync();
     }
 }

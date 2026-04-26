@@ -1,7 +1,7 @@
 using Application.Services.Interfaces;
 using Application.Orchestration.Skins;
 using Application.Abstractions.UnitOfWork;
-using Application.Orchestration.Settings;
+using Application.Abstractions.Settings;
 using Application.Dtos;
 using Core.Repositories;
 using Core.Models.Skins;
