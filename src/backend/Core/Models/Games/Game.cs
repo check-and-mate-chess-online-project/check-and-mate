@@ -1,5 +1,6 @@
 using Core.Models.Interfaces;
 using Core.Models.Chess;
+using Core.Models.Users;
 
 namespace Core.Models.Games;
 
@@ -44,6 +45,22 @@ public class Game
     public Guid GetCurrentPlayerId() => _engine.GetCurrentPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
 
     public Guid GetDefendingPlayerId() => _engine.GetDefendingPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
+
+    public bool IsTimeExpired(out Guid userId)
+    {
+        PlayerColor color;
+        if (_engine.GetCurrentPlayer() == PlayerColor.White)
+        {
+            color = PlayerColor.White;
+            userId = WhitePlayerId;
+        }
+        else
+        {
+            color = PlayerColor.Black;
+            userId = BlackPlayerId;
+        }
+        return TimeControl.CheckLeftTime(color, DateTime.UtcNow);
+    }
 
     public GameResult GetGameResultByTerminationReason(GameTerminationReason terminationReason, Guid? playerId = null)
     {

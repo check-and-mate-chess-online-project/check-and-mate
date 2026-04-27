@@ -1,6 +1,6 @@
 using Core.Models.Skins;
 
-namespace Application.Orchestration.Skins;
+namespace Application.Orchestration.SkinDrops;
 
 public interface ISkinDropService
 {

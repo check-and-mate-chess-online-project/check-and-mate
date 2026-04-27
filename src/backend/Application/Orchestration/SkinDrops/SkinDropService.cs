@@ -1,7 +1,7 @@
 using Core.Repositories;
 using Core.Models.Skins;
 
-namespace Application.Orchestration.Skins;
+namespace Application.Orchestration.SkinDrops;
 
 public class SkinDropService(ISkinRepository skinRepos) : ISkinDropService
 {

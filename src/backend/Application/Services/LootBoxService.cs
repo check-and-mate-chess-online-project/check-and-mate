@@ -1,5 +1,5 @@
 using Application.Services.Interfaces;
-using Application.Orchestration.Skins;
+using Application.Orchestration.SkinDrops;
 using Application.Abstractions.UnitOfWork;
 using Application.Abstractions.Settings;
 using Application.Dtos;

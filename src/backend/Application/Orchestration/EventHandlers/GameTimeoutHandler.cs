@@ -1,10 +1,11 @@
 using Application.Services.Interfaces;
 using Application.Abstractions.UnitOfWork;
-using Application.Orchestration.Events;
+using Application.Abstractions.Events;
+using Application.Events;
 
 namespace Application.Orchestration.EventHandlers;
 
-public class GameTimeoutHandler(IGameplayService gameplayService, IUnitOfWork uow)
+public class GameTimeoutHandler(IGameplayService gameplayService, IUnitOfWork uow) : IEventHandler<TimeExpired>
 {
     private readonly IGameplayService _gameplayService = gameplayService;
     private readonly IUnitOfWork _uow = uow;

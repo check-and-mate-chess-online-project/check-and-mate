@@ -17,7 +17,11 @@ using Infrastructure.Persistence.InMemory;
 using Core.Repositories;
 using Core.Models.Interfaces;
 using Infrastructure.Chess;
-
+using Application.Abstractions.Events;
+using Infrastructure.Events;
+using Infrastructure.Background;
+using Application.Events;
+using Application.Orchestration.EventHandlers;
 
 namespace Presentation;
 
@@ -47,15 +51,10 @@ public class Program
                 {
                     OnMessageReceived = context =>
                     {
-                        var accessToken = context.Request.Query["access_token"];
-                        var path = context.HttpContext.Request.Path;
-
-                        if (!string.IsNullOrEmpty(accessToken) &&
-                            path.StartsWithSegments("/hub"))
-                        {
+                        string? accessToken = context.Request.Query["access_token"];
+                        PathString path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hub")) 
                             context.Token = accessToken;
-                        }
-
                         return Task.CompletedTask;
                     }
                 };
@@ -63,8 +62,7 @@ public class Program
 
         builder.Services.AddAuthorization();
 
-        builder.Services.Configure<GameSettings>(
-        builder.Configuration.GetSection("GameSettings"));
+        builder.Services.Configure<GameSettings>(builder.Configuration.GetSection("GameSettings"));
         builder.Services.AddScoped<IGameSettingsProvider, GameSettingsProvider>();
 
         builder.Services.AddSingleton<IGameRepository, GameRepository>();
@@ -74,9 +72,12 @@ public class Program
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
         builder.Services.AddSingleton<IMatchmakingPool, MatchmakingPool>();
         builder.Services.AddSingleton<IPasswordHasher, SimplePasswordHasher>();
-
         builder.Services.AddScoped<IGameSessionService, GameSessionService>();
 
+        builder.Services.AddSingleton<IEventDispatcher, EventDispatcher>();
+        builder.Services.AddScoped<IEventHandler<TimeExpired>, GameTimeoutHandler>();
+
+        builder.Services.AddHostedService<TimeService>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
         builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();

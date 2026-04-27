@@ -15,6 +15,8 @@ public class GameSessionStore : IGameSessionStore
 
     public Game? GetByUserId(Guid userId) => _games.FirstOrDefault(g => g.WhitePlayerId == userId || g.BlackPlayerId == userId);
 
+    public List<Game> GetAll() => _games;
+
     public void Add(Game game) => _games.Add(game);
 
     public void Update(Game game)

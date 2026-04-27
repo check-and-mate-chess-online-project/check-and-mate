@@ -57,6 +57,4 @@ public static class ChessMapper
             _ => throw new ArgumentException("invalid figure type")
         };
     }
-
-
 }
