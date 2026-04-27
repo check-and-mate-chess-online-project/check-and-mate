@@ -8,6 +8,6 @@ public interface IGameSessionStore
     Game? GetByPlayers(Guid playerAId, Guid playerBId);
     Game? GetByUserId(Guid userId);
     void Add(Game game);
-    void Update();
+    void Update(Game game);
     void Remove(Game game);
 }
