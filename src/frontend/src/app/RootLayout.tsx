@@ -16,7 +16,7 @@ export function RootLayout() {
         <nav className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/lobby" className="block">
-              <img src={logo} alt="Check &amp; Mate" className="h-10 w-auto" />
+              <img src={logo} alt="Check &amp; Mate" className="h-12 w-auto" />
             </Link>
             <div className="flex gap-4 items-center">
               <NavLink to="/lobby" className={navLinkClass}>
