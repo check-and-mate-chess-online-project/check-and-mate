@@ -1,0 +1,81 @@
+{
+  "nav": {
+    "lobby": "Lobby",
+    "skins": "Skins",
+    "skinsItems": {
+      "inventory": "Inventory",
+      "cases": "Cases",
+      "shop": "Shop"
+    },
+    "profile": "Profile",
+    "profileItems": {
+      "myProfile": "My profile",
+      "history": "History",
+      "friends": "Friends",
+      "logout": "Logout"
+    }
+  },
+  "auth": {
+    "logoutAlert": "Logout will be implemented together with auth"
+  },
+  "landing": {
+    "tagline": "Chess with skins from cases",
+    "signIn": "Sign in",
+    "signUp": "Sign up"
+  },
+  "pages": {
+    "lobby": {
+      "title": "Lobby",
+      "placeholder": "Matchmaking and game list will be here"
+    },
+    "login": {
+      "title": "Login",
+      "placeholder": "Login form will be here"
+    },
+    "register": {
+      "title": "Register",
+      "placeholder": "Registration form will be here"
+    },
+    "game": {
+      "title": "Game",
+      "idLabel": "id"
+    },
+    "history": {
+      "title": "History",
+      "placeholder": "List of played games will be here"
+    },
+    "replay": {
+      "title": "Replay",
+      "label": "Game replay"
+    },
+    "myProfile": {
+      "title": "My profile",
+      "placeholder": "Login, rating, balance, stats and active skins will be here"
+    },
+    "userProfile": {
+      "title": "User profile",
+      "label": "Player profile"
+    },
+    "inventory": {
+      "title": "Inventory",
+      "placeholder": "All skins and selection will be here"
+    },
+    "cases": {
+      "title": "Cases",
+      "placeholder": "Cases inventory and opening will be here"
+    },
+    "shop": {
+      "title": "Shop",
+      "placeholder": "Cases shop will be here"
+    },
+    "friends": {
+      "title": "Friends",
+      "placeholder": "Friends, requests and game invitations will be here"
+    },
+    "notFound": {
+      "title": "404",
+      "subtitle": "Page not found",
+      "goHome": "Go home"
+    }
+  }
+}

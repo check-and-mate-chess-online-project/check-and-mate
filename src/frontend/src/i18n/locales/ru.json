@@ -1,0 +1,81 @@
+{
+  "nav": {
+    "lobby": "Лобби",
+    "skins": "Скины",
+    "skinsItems": {
+      "inventory": "Инвентарь",
+      "cases": "Кейсы",
+      "shop": "Магазин"
+    },
+    "profile": "Профиль",
+    "profileItems": {
+      "myProfile": "Мой профиль",
+      "history": "История",
+      "friends": "Друзья",
+      "logout": "Выйти"
+    }
+  },
+  "auth": {
+    "logoutAlert": "Выход будет реализован вместе с auth"
+  },
+  "landing": {
+    "tagline": "Шахматы со скинами из кейсов",
+    "signIn": "Войти",
+    "signUp": "Регистрация"
+  },
+  "pages": {
+    "lobby": {
+      "title": "Лобби",
+      "placeholder": "Тут будет матчмейкинг и список игр"
+    },
+    "login": {
+      "title": "Вход",
+      "placeholder": "Тут будет форма входа"
+    },
+    "register": {
+      "title": "Регистрация",
+      "placeholder": "Тут будет форма регистрации"
+    },
+    "game": {
+      "title": "Игра",
+      "idLabel": "id"
+    },
+    "history": {
+      "title": "История",
+      "placeholder": "Тут будет список сыгранных партий"
+    },
+    "replay": {
+      "title": "Повтор",
+      "label": "Повтор партии"
+    },
+    "myProfile": {
+      "title": "Мой профиль",
+      "placeholder": "Тут будут логин, рейтинг, баланс, статистика и активные скины"
+    },
+    "userProfile": {
+      "title": "Профиль игрока",
+      "label": "Профиль игрока"
+    },
+    "inventory": {
+      "title": "Инвентарь",
+      "placeholder": "Тут будут все скины и выбор активных"
+    },
+    "cases": {
+      "title": "Кейсы",
+      "placeholder": "Тут будет инвентарь кейсов и открытие"
+    },
+    "shop": {
+      "title": "Магазин",
+      "placeholder": "Тут будет магазин кейсов"
+    },
+    "friends": {
+      "title": "Друзья",
+      "placeholder": "Тут будут друзья, заявки и приглашения в игру"
+    },
+    "notFound": {
+      "title": "404",
+      "subtitle": "Страница не найдена",
+      "goHome": "На главную"
+    }
+  }
+}
