@@ -1,13 +1,17 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import logo from '../assets/logo.svg'
 import { Dropdown } from '../shared/ui/Dropdown'
+import { LanguageToggle } from '../shared/ui/LanguageToggle'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'text-slate-100' : 'text-slate-400 hover:text-slate-100'
 
 export function RootLayout() {
+  const { t } = useTranslation()
+
   const handleLogout = () => {
-    alert('logout — будет реализован вместе с auth')
+    alert(t('auth.logoutAlert'))
   }
 
   return (
@@ -20,28 +24,31 @@ export function RootLayout() {
             </Link>
             <div className="flex gap-4 items-center">
               <NavLink to="/lobby" className={navLinkClass}>
-                Lobby
+                {t('nav.lobby')}
               </NavLink>
               <Dropdown
-                label="Skins"
+                label={t('nav.skins')}
                 items={[
-                  { label: 'Inventory', to: '/inventory' },
-                  { label: 'Cases', to: '/cases' },
-                  { label: 'Shop', to: '/shop' },
+                  { label: t('nav.skinsItems.inventory'), to: '/inventory' },
+                  { label: t('nav.skinsItems.cases'), to: '/cases' },
+                  { label: t('nav.skinsItems.shop'), to: '/shop' },
                 ]}
               />
             </div>
           </div>
-          <Dropdown
-            label="Profile"
-            align="right"
-            items={[
-              { label: 'My profile', to: '/profile' },
-              { label: 'History', to: '/history' },
-              { label: 'Friends', to: '/friends' },
-              { label: 'Logout', onClick: handleLogout },
-            ]}
-          />
+          <div className="flex items-center gap-4">
+            <LanguageToggle />
+            <Dropdown
+              label={t('nav.profile')}
+              align="right"
+              items={[
+                { label: t('nav.profileItems.myProfile'), to: '/profile' },
+                { label: t('nav.profileItems.history'), to: '/history' },
+                { label: t('nav.profileItems.friends'), to: '/friends' },
+                { label: t('nav.profileItems.logout'), onClick: handleLogout },
+              ]}
+            />
+          </div>
         </nav>
       </header>
       <main className="flex-1 p-6">
