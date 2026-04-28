@@ -15,7 +15,7 @@ i18n
     fallbackLng: 'en',
     supportedLngs: ['en', 'ru'],
     interpolation: {
-      escapeValue: false, // React уже экранирует, второй раз не нужно
+      escapeValue: false,
     },
   })
 
