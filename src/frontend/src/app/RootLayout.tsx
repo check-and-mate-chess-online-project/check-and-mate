@@ -23,7 +23,7 @@ export function RootLayout() {
                 Lobby
               </NavLink>
               <Dropdown
-                label="Скины"
+                label="Skins"
                 items={[
                   { label: 'Inventory', to: '/inventory' },
                   { label: 'Cases', to: '/cases' },
