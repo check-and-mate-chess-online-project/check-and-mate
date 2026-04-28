@@ -1,9 +1,16 @@
 import { Link } from 'react-router-dom'
+import logo from '../assets/logo.svg'
 
 export function LandingPage() {
   return (
     <div className="text-center max-w-2xl">
-      <h1 className="text-6xl font-bold mb-4">Check &amp; Mate</h1>
+      <h1 className="mb-6">
+        <img
+          src={logo}
+          alt="Check &amp; Mate"
+          className="w-full max-w-xl mx-auto"
+        />
+      </h1>
       <p className="text-xl text-slate-400 mb-8">
         шахматы со скинами из кейсов
       </p>
