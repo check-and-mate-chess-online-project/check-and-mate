@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import logo from '../assets/logo.svg'
+import { Dropdown } from '../shared/ui/Dropdown'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'text-slate-100' : 'text-slate-400 hover:text-slate-100'
@@ -17,36 +18,30 @@ export function RootLayout() {
             <Link to="/lobby" className="block">
               <img src={logo} alt="Check &amp; Mate" className="h-10 w-auto" />
             </Link>
-            <div className="flex gap-4">
+            <div className="flex gap-4 items-center">
               <NavLink to="/lobby" className={navLinkClass}>
                 Lobby
               </NavLink>
-              <NavLink to="/inventory" className={navLinkClass}>
-                Inventory
-              </NavLink>
-              <NavLink to="/cases" className={navLinkClass}>
-                Cases
-              </NavLink>
-              <NavLink to="/friends" className={navLinkClass}>
-                Friends
-              </NavLink>
-              <NavLink to="/history" className={navLinkClass}>
-                History
-              </NavLink>
+              <Dropdown
+                label="Скины"
+                items={[
+                  { label: 'Inventory', to: '/inventory' },
+                  { label: 'Cases', to: '/cases' },
+                  { label: 'Shop', to: '/shop' },
+                ]}
+              />
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <NavLink to="/profile" className={navLinkClass}>
-              Profile
-            </NavLink>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-slate-400 hover:text-slate-100"
-            >
-              Logout
-            </button>
-          </div>
+          <Dropdown
+            label="Profile"
+            align="right"
+            items={[
+              { label: 'My profile', to: '/profile' },
+              { label: 'History', to: '/history' },
+              { label: 'Friends', to: '/friends' },
+              { label: 'Logout', onClick: handleLogout },
+            ]}
+          />
         </nav>
       </header>
       <main className="flex-1 p-6">

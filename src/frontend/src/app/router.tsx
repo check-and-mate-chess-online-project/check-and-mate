@@ -14,6 +14,7 @@ import { MyProfilePage } from '../pages/MyProfilePage'
 import { UserProfilePage } from '../pages/UserProfilePage'
 import { InventoryPage } from '../pages/InventoryPage'
 import { CasesPage } from '../pages/CasesPage'
+import { ShopPage } from '../pages/ShopPage'
 import { FriendsPage } from '../pages/FriendsPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
           { path: '/lobby', element: <LobbyPage /> },
           { path: '/inventory', element: <InventoryPage /> },
           { path: '/cases', element: <CasesPage /> },
+          { path: '/shop', element: <ShopPage /> },
           { path: '/friends', element: <FriendsPage /> },
           { path: '/history', element: <HistoryPage /> },
           { path: '/history/:gameId', element: <ReplayPage /> },
