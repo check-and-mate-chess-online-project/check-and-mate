@@ -10,18 +10,19 @@ using Application.Abstractions.GameSessions;
 using Application.Abstractions.Matchmaking;
 using Application.Abstractions.Security;
 using Application.Abstractions.UnitOfWork;
+using Application.Orchestration.EventHandlers;
+using Application.Abstractions.Events;
+using Application.Events;
 using Infrastructure.Settings;
 using Infrastructure.Realtime;
 using Infrastructure.Security;
 using Infrastructure.Persistence.InMemory;
-using Core.Repositories;
-using Core.Models.Interfaces;
 using Infrastructure.Chess;
-using Application.Abstractions.Events;
 using Infrastructure.Events;
 using Infrastructure.Background;
-using Application.Events;
-using Application.Orchestration.EventHandlers;
+using Core.Repositories;
+using Core.Models.Interfaces;
+
 
 namespace Presentation;
 
@@ -31,21 +32,25 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Configuration.AddEnvironmentVariables(); 
+
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddControllers();
         builder.Services.AddSignalR();
 
+        string key = builder.Configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("jwt key not found");
+        if (key.Length < 32) throw new InvalidOperationException("jwt key too short");
         builder.Services.AddAuthentication("Bearer")
             .AddJwtBearer("Bearer", options =>
             {
-                options.TokenValidationParameters = options.TokenValidationParameters = new TokenValidationParameters
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SUPER_SECRET_KEY_123456"))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
                 };
                 options.Events = new JwtBearerEvents
                 {
@@ -62,6 +67,7 @@ public class Program
 
         builder.Services.AddAuthorization();
 
+        builder.Services.Configure<JwtTokenSettings>(builder.Configuration.GetSection("JwtSettings"));
         builder.Services.Configure<GameSettings>(builder.Configuration.GetSection("GameSettings"));
         builder.Services.AddScoped<IGameSettingsProvider, GameSettingsProvider>();
 
@@ -79,19 +85,26 @@ public class Program
 
         builder.Services.AddHostedService<TimeService>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddScoped<IUserAuthService, UserAuthService>();
         builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
         builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
         builder.Services.AddScoped<IGameplayService, GameplayService>();
 
         builder.Services.AddSingleton<ConnectionManager>();
 
-        var app = builder.Build();
+        WebApplication app = builder.Build();
 
         app.UseSwagger();
         app.UseSwaggerUI();
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseCors(policy => policy
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed(origin => true));
 
         app.MapControllers();
         app.MapHub<GameHub>("/hub");
