@@ -1,5 +1,6 @@
 using Application.Services.Interfaces;
 using Application.Abstractions.UnitOfWork;
+using Application.Abstractions.Security;
 using Application.Dtos;
 using Application.Mappers;
 using Core.Repositories;
@@ -7,8 +8,9 @@ using Core.Models.Users;
 
 namespace Application.Services;
 
-public class UserRegistrationService(IUserRepository userRepos, IUnitOfWork uow) : IUserRegistrationService
+public class UserRegistrationService(IPasswordHasher hasher, IUserRepository userRepos, IUnitOfWork uow) : IUserRegistrationService
 {
+    private readonly IPasswordHasher _hasher = hasher;
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
 
@@ -18,7 +20,8 @@ public class UserRegistrationService(IUserRepository userRepos, IUnitOfWork uow)
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
         if (await _userRepos.GetAsync(login) != null) throw new InvalidOperationException($"user {login} already exist");
-        User user = new(login, password, email, role);
+        string passwordHash = _hasher.GetHash(password);
+        User user = new(login, passwordHash, email, role);
         _userRepos.Add(user);
         await _uow.CommitChangesAsync();
         return UserMapper.GetDto(user);

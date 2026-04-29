@@ -24,6 +24,7 @@ using Infrastructure.Background;
 using Core.Repositories;
 using Core.Models.Interfaces;
 using Presentation.Events;
+using Microsoft.AspNetCore.Diagnostics;
 
 
 namespace Presentation;
@@ -112,6 +113,31 @@ public class Program
 
         app.MapControllers();
         app.MapHub<GameHub>("/hub");
+
+        app.UseExceptionHandler(ex =>
+        {
+            ex.Run(async context =>
+            {
+                IExceptionHandlerFeature? exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+                if (exceptionFeature == null) return;
+                Exception exception = exceptionFeature.Error;
+                context.Response.StatusCode = exception switch
+                {
+                    InvalidOperationException => StatusCodes.Status400BadRequest,
+                    ArgumentException => StatusCodes.Status400BadRequest,
+                    UnauthorizedAccessException => StatusCodes.Status403Forbidden,
+                    _ => StatusCodes.Status500InternalServerError
+                };
+                var errorResponse = new
+                {
+                    message = context.Response.StatusCode == StatusCodes.Status500InternalServerError
+                        ? "an unexpected error occurred"
+                        : exception.Message,
+                    statusCode = context.Response.StatusCode
+                };
+                await context.Response.WriteAsJsonAsync(errorResponse);
+            });
+        });
 
         app.Run();
     }

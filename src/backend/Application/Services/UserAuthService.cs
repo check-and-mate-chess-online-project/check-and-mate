@@ -1,9 +1,9 @@
 using Application.Services.Interfaces;
+using Application.Abstractions.Security;
 using Application.Mappers;
 using Application.Dtos;
 using Core.Models.Users;
 using Core.Repositories;
-using Application.Abstractions.Security;
 
 namespace Application.Services;
 
