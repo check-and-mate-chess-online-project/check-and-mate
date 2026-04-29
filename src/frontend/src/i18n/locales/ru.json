@@ -15,8 +15,26 @@
       "logout": "Выйти"
     }
   },
-  "auth": {
-    "logoutAlert": "Выход будет реализован вместе с auth"
+  "forms": {
+    "login": {
+      "loginPlaceholder": "Логин",
+      "passwordPlaceholder": "Пароль",
+      "submit": "Войти",
+      "submitting": "Входим...",
+      "invalidCredentials": "Неверный логин или пароль",
+      "networkError": "Ошибка сети, попробуйте ещё раз"
+    },
+    "register": {
+      "loginPlaceholder": "Логин",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Пароль",
+      "confirmPlaceholder": "Повторите пароль",
+      "submit": "Зарегистрироваться",
+      "submitting": "Регистрируем...",
+      "passwordsDontMatch": "Пароли не совпадают",
+      "loginTaken": "Логин или email уже заняты",
+      "networkError": "Ошибка сети, попробуйте ещё раз"
+    }
   },
   "landing": {
     "tagline": "Шахматы со скинами из кейсов",
@@ -29,12 +47,10 @@
       "placeholder": "Тут будет матчмейкинг и список игр"
     },
     "login": {
-      "title": "Вход",
-      "placeholder": "Тут будет форма входа"
+      "title": "Вход"
     },
     "register": {
-      "title": "Регистрация",
-      "placeholder": "Тут будет форма регистрации"
+      "title": "Регистрация"
     },
     "game": {
       "title": "Игра",

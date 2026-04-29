@@ -1,17 +1,20 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import logo from '../assets/logo.svg'
 import { Dropdown } from '../shared/ui/Dropdown'
 import { LanguageToggle } from '../shared/ui/LanguageToggle'
+import { useAuthStore } from '../shared/auth/authStore'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'text-slate-100' : 'text-slate-400 hover:text-slate-100'
 
 export function RootLayout() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   const handleLogout = () => {
-    alert(t('auth.logoutAlert'))
+    useAuthStore.getState().clearSession()
+    navigate('/')
   }
 
   return (

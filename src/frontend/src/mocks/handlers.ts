@@ -14,7 +14,24 @@ const mockUser: UserDto = {
 }
 
 export const handlers = [
-  http.post('/api/auth/register', () => {
+  // потом убрать — должен идти к реальному /api/auth/login
+  http.post('/api/auth/login', async ({ request }) => {
+    const body = (await request.json()) as { login?: string; password?: string }
+    if (!body.login || !body.password) {
+      return new HttpResponse(null, { status: 400 })
+    }
+    return HttpResponse.json({ token: 'mock-token' })
+  }),
+
+  http.post('/api/auth/register', async ({ request }) => {
+    const body = (await request.json()) as {
+      login?: string
+      email?: string
+      password?: string
+    }
+    if (!body.login || !body.email || !body.password) {
+      return new HttpResponse(null, { status: 400 })
+    }
     return HttpResponse.json({ token: 'mock-token' })
   }),
 

@@ -15,8 +15,26 @@
       "logout": "Logout"
     }
   },
-  "auth": {
-    "logoutAlert": "Logout will be implemented together with auth"
+  "forms": {
+    "login": {
+      "loginPlaceholder": "Login",
+      "passwordPlaceholder": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "invalidCredentials": "Invalid login or password",
+      "networkError": "Network error, try again"
+    },
+    "register": {
+      "loginPlaceholder": "Login",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Password",
+      "confirmPlaceholder": "Confirm password",
+      "submit": "Sign up",
+      "submitting": "Signing up...",
+      "passwordsDontMatch": "Passwords don't match",
+      "loginTaken": "Login or email is already taken",
+      "networkError": "Network error, try again"
+    }
   },
   "landing": {
     "tagline": "Chess with skins from cases",
@@ -29,12 +47,10 @@
       "placeholder": "Matchmaking and game list will be here"
     },
     "login": {
-      "title": "Login",
-      "placeholder": "Login form will be here"
+      "title": "Sign in"
     },
     "register": {
-      "title": "Register",
-      "placeholder": "Registration form will be here"
+      "title": "Sign up"
     },
     "game": {
       "title": "Game",
