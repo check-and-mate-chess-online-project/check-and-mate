@@ -5,8 +5,17 @@ import { router } from './app/router'
 import './i18n'
 import './index.css'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
-)
+async function startMocks() {
+  if (import.meta.env.DEV) {
+    const { worker } = await import('./mocks/browser')
+    await worker.start({ onUnhandledRequest: 'bypass' })
+  }
+}
+
+startMocks().then(() => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <RouterProvider router={router} />
+    </StrictMode>,
+  )
+})
