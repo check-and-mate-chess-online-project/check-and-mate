@@ -4,6 +4,7 @@ import logo from '../assets/logo.svg'
 import { Dropdown } from '../shared/ui/Dropdown'
 import { LanguageToggle } from '../shared/ui/LanguageToggle'
 import { useAuthStore } from '../shared/auth/authStore'
+import { stopGameHub } from '../shared/realtime/gameHub'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'text-slate-100' : 'text-slate-400 hover:text-slate-100'
@@ -13,6 +14,7 @@ export function RootLayout() {
   const navigate = useNavigate()
 
   const handleLogout = () => {
+    stopGameHub().catch(() => {})
     useAuthStore.getState().clearSession()
     navigate('/')
   }
