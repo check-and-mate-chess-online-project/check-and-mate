@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Presentation.Hubs;
+using Presentation.Events.Handlers;
 using Application.Services.Interfaces;
 using Application.Services;
 using Application.Abstractions.Settings;
@@ -14,7 +15,7 @@ using Application.Orchestration.EventHandlers;
 using Application.Abstractions.Events;
 using Application.Events;
 using Infrastructure.Settings;
-using Infrastructure.Realtime;
+using Infrastructure.Connections;
 using Infrastructure.Security;
 using Infrastructure.Persistence.InMemory;
 using Infrastructure.Chess;
@@ -22,6 +23,7 @@ using Infrastructure.Events;
 using Infrastructure.Background;
 using Core.Repositories;
 using Core.Models.Interfaces;
+using Presentation.Events;
 
 
 namespace Presentation;
@@ -81,7 +83,9 @@ public class Program
         builder.Services.AddScoped<IGameSessionService, GameSessionService>();
 
         builder.Services.AddSingleton<IEventDispatcher, EventDispatcher>();
-        builder.Services.AddScoped<IEventHandler<TimeExpired>, GameTimeoutHandler>();
+        builder.Services.AddScoped<IEventHandler<TimeExpired>, TimeExpiredHandler>();
+        builder.Services.AddScoped<IEventHandler<TimeExpired>, TimeExpiredSignalRHandler>();
+        builder.Services.AddSingleton<INotifier, Notifier>();
 
         builder.Services.AddHostedService<TimeService>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

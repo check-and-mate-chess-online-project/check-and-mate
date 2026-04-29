@@ -7,5 +7,5 @@ public interface IMatchmakingPool
 {
     Dictionary<User, ITimeControl> GetAll();
     void AddUser(User user, ITimeControl timeControl);
-    void RemoveUser(User user);
+    bool TryRemoveUser(User user);
 }

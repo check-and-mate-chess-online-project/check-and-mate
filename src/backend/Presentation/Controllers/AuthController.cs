@@ -4,7 +4,6 @@ using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Presentation.Requests;
 using Application.Services.Interfaces;
 using Application.Dtos;
 using Infrastructure.Settings;
@@ -19,10 +18,10 @@ public class AuthController(IOptions<JwtTokenSettings> jwtOptions, IUserAuthServ
     private readonly IUserAuthService _auth = auth;
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginRequest request)
+    public async Task<IActionResult> Login(string login, string password)
     {
-        UserDto? user = await _auth.Authorize(request.Login, request.Password);
-        if (user == null) return Unauthorized("incorrect login or password");        
+        UserDto? user = await _auth.Authorize(login, password);
+        if (user == null) return Unauthorized("incorrect login or password");     
         string token = GenerateToken(user.Id, user.Login);
         return Ok(new { token });
     }

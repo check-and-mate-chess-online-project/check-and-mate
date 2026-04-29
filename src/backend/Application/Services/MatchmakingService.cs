@@ -3,7 +3,8 @@ using Application.Orchestration.GameSessions;
 using Application.Abstractions.Matchmaking;
 using Application.Abstractions.UnitOfWork;
 using Application.Abstractions.Settings;
-using Application.Dtos;
+using Application.Abstractions.Events;
+using Application.Events;
 using Application.Mappers;
 using Core.Repositories;
 using Core.Models.Games;
@@ -12,48 +13,80 @@ using Core.Models.Interfaces;
 
 namespace Application.Services;
 
-public class MatchmakingService(IGameSettingsProvider settings, IGameSessionService sessionService, IUserRepository userRepos, IMatchmakingPool pool, IUnitOfWork uow) : IMatchmakingService
+public class MatchmakingService(
+    IGameSettingsProvider settings,
+    IEventDispatcher eventDispatcher,
+    IGameSessionService sessionService, 
+    IUserRepository userRepos, 
+    IMatchmakingPool pool, 
+    IUnitOfWork uow) : IMatchmakingService
 {
     private readonly IGameSettingsProvider _settings = settings;
+    private readonly IEventDispatcher _eventDispatcher = eventDispatcher;
     private readonly IGameSessionService _sessionService = sessionService;
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IMatchmakingPool _pool = pool;
     private readonly IUnitOfWork _uow = uow;
+    private readonly Lock _matchLock = new();
 
-    public async Task<GameDto?> StartGameAsync(Guid userId, bool isEnabled, int initialTimeSec, int incrementPerMoveSec)
+    public async Task StartOpponentSearchAsync(Guid userId, bool timeControlEnabled, int initialTimeSec, int incrementPerMoveSec)
     {
-        User player = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not found");
-        if (player.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
-        ITimeControl timeControl = isEnabled ? new TimeControl(initialTimeSec, incrementPerMoveSec) : new DisabledTimeControl();
-        Dictionary<User, ITimeControl> candidates = _pool.GetAll();
-        User? opponent = candidates
-            .Where(x =>
-                x.Key.Id != userId &&
-                !x.Key.IsDeleted &&
-                (
-                    (!x.Value.IsEnabled && !timeControl.IsEnabled) ||
-                    (
-                        x.Value.IsEnabled && 
-                        timeControl.IsEnabled &&
-                        x.Value.InitialTimeSec == timeControl.InitialTimeSec &&
-                        x.Value.IncrementPerMoveSec == timeControl.IncrementPerMoveSec
-                    )
-                ) &&
-                Math.Abs(x.Key.Rating - player.Rating) <= _settings.RatingRange)
-            .Select(x => x.Key)
-            .FirstOrDefault();
-        if (opponent == null)
+        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not found");
+        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
+        ITimeControl timeControl;
+        if (timeControlEnabled)
         {
-            _pool.AddUser(player, timeControl);
-            return null;
+            if (initialTimeSec <= 0 || incrementPerMoveSec < 0) throw new ArgumentException("invalid time control");
+            timeControl = new TimeControl(initialTimeSec, incrementPerMoveSec);
         }
-        _pool.RemoveUser(player);
-        _pool.RemoveUser(opponent);
+        else timeControl = new DisabledTimeControl();
+        _pool.AddUser(user, timeControl);
+        await TryFindOpponent(user, timeControl);
+    }
+
+    public async Task StopOpponentSearchAsync(Guid userId)
+    {
+        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not found");
+        _pool.TryRemoveUser(user);
+    }
+
+    private async Task TryFindOpponent(User user, ITimeControl timeControl)
+    {
+        User? opponent;
+        bool isMatched = false;
+        lock (_matchLock)
+        {
+            opponent = _pool.GetAll()
+                .Where(x =>
+                    x.Key.Id != user.Id &&
+                    !x.Key.IsDeleted &&
+                    (
+                        (!x.Value.IsEnabled && !timeControl.IsEnabled) ||
+                        (x.Value.IsEnabled && timeControl.IsEnabled &&
+                            x.Value.InitialTimeSec == timeControl.InitialTimeSec &&
+                            x.Value.IncrementPerMoveSec == timeControl.IncrementPerMoveSec)
+                    ) &&
+                    Math.Abs(x.Key.Rating - user.Rating) <= _settings.RatingRange)
+                .Select(x => x.Key)
+                .FirstOrDefault();
+            if (opponent == null) return;
+            bool playerRemoved = _pool.TryRemoveUser(user);
+            bool opponentRemoved = _pool.TryRemoveUser(opponent);
+            if (!playerRemoved || !opponentRemoved)
+            {
+                if (playerRemoved) _pool.AddUser(user, timeControl);
+                else _pool.AddUser(opponent, timeControl);
+                return;
+            }
+            isMatched = true;
+        }
+
+        if (opponent == null || !isMatched) return;
         bool userIsWhite = Random.Shared.Next(2) == 0;
-        Guid whiteId = userIsWhite ? userId : opponent.Id;
-        Guid blackId = userIsWhite ? opponent.Id : userId;
+        Guid whiteId = userIsWhite ? user.Id : opponent.Id;
+        Guid blackId = userIsWhite ? opponent.Id : user.Id;
         Game game = _sessionService.Create(whiteId, blackId, timeControl);
+        await _eventDispatcher.PublishAsync(new GameStarted(GameMapper.GetDto(game)));
         await _uow.CommitChangesAsync();
-        return GameMapper.GetDto(game);
     }
 }

@@ -48,7 +48,8 @@ public class GameplayService(
 
     public async Task HandleTimeoutAsync(Guid userId)
     {
-        Game game = _sessionService.GetByUserId(userId) ?? throw new ArgumentException($"user {userId} not in game");
+        Game? game = _sessionService.GetByUserId(userId);
+        if (game == null) return;
         game.EndByTimeout(userId);
         await UpdatePlayerStats(game, userId, GameTerminationReason.Timeout);
         _sessionService.Remove(game);
@@ -70,7 +71,8 @@ public class GameplayService(
     
     public async Task HandleDisconnectAsync(Guid userId)
     {
-        Game game = _sessionService.GetByUserId(userId) ?? throw new ArgumentException($"user {userId} not in game");
+        Game? game = _sessionService.GetByUserId(userId);
+        if (game == null) return;
         game.EndByDisconnect(userId);
         await UpdatePlayerStats(game, userId, GameTerminationReason.Disconnect);
         _sessionService.Remove(game);
