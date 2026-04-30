@@ -51,7 +51,12 @@
   "pages": {
     "lobby": {
       "title": "Лобби",
-      "welcome": "Привет, {{name}}",
+      "greeting": {
+        "morning": "Доброе утро, капитан {{name}}",
+        "afternoon": "Добрый день, капитан {{name}}",
+        "evening": "Добрый вечер, капитан {{name}}",
+        "night": "Доброй ночи, капитан {{name}}"
+      },
       "mode": {
         "title": "Режим",
         "casual": "Без рейтинга",

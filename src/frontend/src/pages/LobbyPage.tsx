@@ -12,6 +12,14 @@ interface TimeControl {
   incSec: number
 }
 
+function getGreetingKey(): 'morning' | 'afternoon' | 'evening' | 'night' {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 12) return 'morning'
+  if (h >= 12 && h < 18) return 'afternoon'
+  if (h >= 18 && h < 23) return 'evening'
+  return 'night'
+}
+
 const TIME_CONTROLS: TimeControl[] = [
   { id: 'bullet', initialSec: 120, incSec: 1 },
   { id: 'blitz', initialSec: 180, incSec: 2 },
@@ -62,7 +70,9 @@ export function LobbyPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="text-4xl mb-10">
-        {t('pages.lobby.welcome', { name: user?.login ?? '...' })}
+        {t(`pages.lobby.greeting.${getGreetingKey()}`, {
+          name: user?.login ?? '...',
+        })}
       </h1>
 
       <section className="mb-8">
