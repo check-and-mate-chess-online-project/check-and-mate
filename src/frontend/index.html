@@ -11,9 +11,44 @@
       rel="stylesheet"
     />
     <title>Check &amp; Mate</title>
+    <style>
+      html,
+      body {
+        background: #000;
+        margin: 0;
+      }
+      #initial-splash {
+        position: fixed;
+        inset: 0;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #initial-splash img {
+        width: 96px;
+        height: 96px;
+        animation: splash-pulse 1.2s ease-in-out infinite;
+      }
+      @keyframes splash-pulse {
+        0%,
+        100% {
+          opacity: 0.4;
+          transform: scale(0.95);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.05);
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="initial-splash">
+        <img src="/favicon.svg" alt="" />
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
