@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Exo 2', system-ui, sans-serif;
+  --font-sans: 'Rubik', system-ui, sans-serif;
   --font-display: 'Russo One', sans-serif;
 }
 
