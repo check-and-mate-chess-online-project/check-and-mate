@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router-dom'
 import { LanguageToggle } from '../shared/ui/LanguageToggle'
+import { PageTransition } from '../shared/ui/PageTransition'
 
 export function GuestLayout() {
   return (
@@ -8,7 +8,7 @@ export function GuestLayout() {
         <LanguageToggle />
       </div>
       <div className="flex-1 flex items-center justify-center p-6">
-        <Outlet />
+        <PageTransition />
       </div>
     </div>
   )

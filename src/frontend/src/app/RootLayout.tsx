@@ -1,8 +1,9 @@
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import logo from '../assets/logo.svg'
 import { Dropdown } from '../shared/ui/Dropdown'
 import { LanguageToggle } from '../shared/ui/LanguageToggle'
+import { PageTransition } from '../shared/ui/PageTransition'
 import { useAuthStore } from '../shared/auth/authStore'
 import { useAuth } from '../shared/auth/useAuth'
 import { stopGameHub } from '../shared/realtime/gameHub'
@@ -59,7 +60,7 @@ export function RootLayout() {
         </nav>
       </header>
       <main className="flex-1 p-6">
-        <Outlet />
+        <PageTransition />
       </main>
     </div>
   )
