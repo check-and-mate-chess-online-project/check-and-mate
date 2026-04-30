@@ -52,11 +52,21 @@
     "lobby": {
       "title": "Lobby",
       "welcome": "Welcome, {{name}}",
-      "rating": "Rating",
-      "balance": "Balance",
-      "cases": "Cases",
+      "mode": {
+        "title": "Mode",
+        "casual": "Unrated",
+        "rated": "Rated",
+        "story": "Story mode",
+        "soon": "in development"
+      },
+      "tc": {
+        "title": "Time control",
+        "bullet": "Bullet",
+        "blitz": "Blitz",
+        "rapid": "Rapid"
+      },
       "play": "Play",
-      "soon": "Matchmaking soon"
+      "soonToast": "Matchmaking soon"
     },
     "login": {
       "title": "Sign in"
