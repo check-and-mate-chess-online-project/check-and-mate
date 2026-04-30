@@ -12,7 +12,7 @@ interface State {
 function ErrorFallback() {
   const { t } = useTranslation()
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-6">
+    <div className="min-h-screen text-slate-100 flex items-center justify-center p-6">
       <div className="text-center max-w-md">
         <h1 className="text-3xl font-bold mb-2">
           {t('errors.boundary.title')}

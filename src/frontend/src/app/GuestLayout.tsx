@@ -3,7 +3,7 @@ import { LanguageToggle } from '../shared/ui/LanguageToggle'
 
 export function GuestLayout() {
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <div className="min-h-screen text-slate-100 flex flex-col">
       <div className="flex justify-end p-4">
         <LanguageToggle />
       </div>

@@ -1,1 +1,15 @@
 @import 'tailwindcss';
+
+body {
+  background: #000;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}

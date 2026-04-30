@@ -20,7 +20,7 @@ export function RootLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <div className="min-h-screen text-slate-100 flex flex-col">
       <header className="border-b border-slate-800 px-6 py-4">
         <nav className="flex items-center justify-between">
           <div className="flex items-center gap-6">

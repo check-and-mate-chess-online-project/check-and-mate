@@ -10,6 +10,7 @@ import { ErrorBoundary } from './app/ErrorBoundary'
 import { ApiError, api } from './shared/api/http'
 import type { UserDto } from './shared/api'
 import { useAuthStore } from './shared/auth/authStore'
+import { Starfield } from './shared/ui/Starfield'
 import './i18n'
 import './index.css'
 
@@ -41,6 +42,7 @@ async function bootstrap() {
     <StrictMode>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
+          <Starfield />
           <RouterProvider router={router} />
           <Toaster theme="dark" richColors position="top-right" />
           {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
