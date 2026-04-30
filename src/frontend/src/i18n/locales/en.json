@@ -15,6 +15,13 @@
       "logout": "Logout"
     }
   },
+  "errors": {
+    "boundary": {
+      "title": "Something broke",
+      "subtitle": "Try reloading the page",
+      "reload": "Reload"
+    }
+  },
   "forms": {
     "login": {
       "loginPlaceholder": "Login",

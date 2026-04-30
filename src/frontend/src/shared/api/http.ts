@@ -1,3 +1,4 @@
+import { useAuthStore } from '../auth/authStore'
 import { getToken } from '../auth/token'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
@@ -32,6 +33,9 @@ async function request<T>(
   })
 
   if (!res.ok) {
+    if (res.status === 401 && path !== '/api/auth/login') {
+      useAuthStore.getState().clearSession()
+    }
     const text = await res.text().catch(() => '')
     throw new ApiError(res.status, text || res.statusText)
   }

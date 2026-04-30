@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Toaster } from 'sonner'
 import { router } from './app/router'
 import { queryClient } from './app/queryClient'
+import { ErrorBoundary } from './app/ErrorBoundary'
 import { ApiError, api } from './shared/api/http'
 import type { UserDto } from './shared/api'
 import { useAuthStore } from './shared/auth/authStore'
@@ -38,11 +39,13 @@ async function bootstrap() {
   await bootstrapAuth()
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <Toaster theme="dark" richColors position="top-right" />
-        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
-      </QueryClientProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+          <Toaster theme="dark" richColors position="top-right" />
+          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+        </QueryClientProvider>
+      </ErrorBoundary>
     </StrictMode>,
   )
 }

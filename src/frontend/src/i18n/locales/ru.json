@@ -15,6 +15,13 @@
       "logout": "Выйти"
     }
   },
+  "errors": {
+    "boundary": {
+      "title": "Что-то сломалось",
+      "subtitle": "Попробуйте перезагрузить страницу",
+      "reload": "Перезагрузить"
+    }
+  },
   "forms": {
     "login": {
       "loginPlaceholder": "Логин",
