@@ -84,7 +84,7 @@ export function Dropdown({ label, items, align = 'left' }: DropdownProps) {
               >
                 {item.label}
               </button>
-            )
+            ),
           )}
         </div>
       )}

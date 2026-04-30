@@ -7,7 +7,9 @@ export function UserProfilePage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-2">{t('pages.userProfile.title')}</h1>
+      <h1 className="text-3xl font-bold mb-2">
+        {t('pages.userProfile.title')}
+      </h1>
       <p className="text-slate-400">
         {t('pages.userProfile.label')}: {userId}
       </p>

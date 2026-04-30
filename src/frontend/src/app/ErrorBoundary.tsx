@@ -14,7 +14,9 @@ function ErrorFallback() {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-6">
       <div className="text-center max-w-md">
-        <h1 className="text-3xl font-bold mb-2">{t('errors.boundary.title')}</h1>
+        <h1 className="text-3xl font-bold mb-2">
+          {t('errors.boundary.title')}
+        </h1>
         <p className="text-slate-400 mb-6">{t('errors.boundary.subtitle')}</p>
         <button
           type="button"
@@ -35,7 +37,10 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true }
   }
 
-  componentDidCatch(error: Error, info: { componentStack?: string | null }): void {
+  componentDidCatch(
+    error: Error,
+    info: { componentStack?: string | null },
+  ): void {
     console.error('ErrorBoundary caught', error, info)
   }
 

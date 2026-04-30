@@ -22,16 +22,19 @@ export function LoginPage() {
     setError(null)
     setLoading(true)
     try {
-      const { token } = await api.post<{ token: string }>(
-        '/api/auth/login',
-        { login, password },
-      )
+      const { token } = await api.post<{ token: string }>('/api/auth/login', {
+        login,
+        password,
+      })
       setToken(token)
       const user = await api.get<UserDto>('/api/users/me')
       useAuthStore.getState().setSession(token, user)
       navigate('/lobby')
     } catch (err) {
-      if (err instanceof ApiError && (err.status === 401 || err.status === 400)) {
+      if (
+        err instanceof ApiError &&
+        (err.status === 401 || err.status === 400)
+      ) {
         setError(t('forms.login.invalidCredentials'))
       } else {
         setError(t('forms.login.networkError'))

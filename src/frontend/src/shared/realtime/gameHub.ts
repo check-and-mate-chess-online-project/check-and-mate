@@ -36,7 +36,10 @@ export async function stopGameHub(): Promise<void> {
 }
 
 export const gameHub = {
-  startGame: async (timeSec: number, increment: number): Promise<GameDto | null> => {
+  startGame: async (
+    timeSec: number,
+    increment: number,
+  ): Promise<GameDto | null> => {
     const c = await ensureStarted()
     return c.invoke<GameDto | null>('StartGame', timeSec, increment)
   },

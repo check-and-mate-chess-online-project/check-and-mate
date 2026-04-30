@@ -14,17 +14,54 @@ const mockUser: UserDto = {
 }
 
 const MOCK_SKINS = [
-  { id: 'skin-king-1', figureType: FigureType.King, rarity: SkinRarity.Legendary, name: 'Nebula King', isActive: true },
-  { id: 'skin-queen-1', figureType: FigureType.Queen, rarity: SkinRarity.Rare, name: 'Stardust Queen', isActive: true },
-  { id: 'skin-rook-1', figureType: FigureType.Rook, rarity: SkinRarity.Common, name: 'Asteroid Rook', isActive: true },
-  { id: 'skin-bishop-1', figureType: FigureType.Bishop, rarity: SkinRarity.Common, name: 'Comet Bishop', isActive: true },
-  { id: 'skin-knight-1', figureType: FigureType.Knight, rarity: SkinRarity.Rare, name: 'Voidrunner', isActive: true },
-  { id: 'skin-pawn-1', figureType: FigureType.Pawn, rarity: SkinRarity.Common, name: 'Cosmic Recruit', isActive: true },
+  {
+    id: 'skin-king-1',
+    figureType: FigureType.King,
+    rarity: SkinRarity.Legendary,
+    name: 'Nebula King',
+    isActive: true,
+  },
+  {
+    id: 'skin-queen-1',
+    figureType: FigureType.Queen,
+    rarity: SkinRarity.Rare,
+    name: 'Stardust Queen',
+    isActive: true,
+  },
+  {
+    id: 'skin-rook-1',
+    figureType: FigureType.Rook,
+    rarity: SkinRarity.Common,
+    name: 'Asteroid Rook',
+    isActive: true,
+  },
+  {
+    id: 'skin-bishop-1',
+    figureType: FigureType.Bishop,
+    rarity: SkinRarity.Common,
+    name: 'Comet Bishop',
+    isActive: true,
+  },
+  {
+    id: 'skin-knight-1',
+    figureType: FigureType.Knight,
+    rarity: SkinRarity.Rare,
+    name: 'Voidrunner',
+    isActive: true,
+  },
+  {
+    id: 'skin-pawn-1',
+    figureType: FigureType.Pawn,
+    rarity: SkinRarity.Common,
+    name: 'Cosmic Recruit',
+    isActive: true,
+  },
 ]
 
 function requireAuth(request: Request): HttpResponse<null> | null {
   const auth = request.headers.get('Authorization')
-  if (!auth?.startsWith('Bearer ')) return new HttpResponse(null, { status: 401 })
+  if (!auth?.startsWith('Bearer '))
+    return new HttpResponse(null, { status: 401 })
   return null
 }
 

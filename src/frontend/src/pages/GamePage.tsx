@@ -35,7 +35,10 @@ export function GamePage() {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
       <header className="flex items-center justify-between px-6 py-3 border-b border-slate-800">
-        <Link to="/lobby" className="text-slate-400 hover:text-slate-100 text-sm">
+        <Link
+          to="/lobby"
+          className="text-slate-400 hover:text-slate-100 text-sm"
+        >
           ← {t('nav.lobby')}
         </Link>
         <span className="text-sm text-slate-500">id: {gameId}</span>
