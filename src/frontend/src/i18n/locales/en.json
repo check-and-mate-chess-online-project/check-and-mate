@@ -51,7 +51,12 @@
   "pages": {
     "lobby": {
       "title": "Lobby",
-      "placeholder": "Matchmaking and game list will be here"
+      "welcome": "Welcome, {{name}}",
+      "rating": "Rating",
+      "balance": "Balance",
+      "cases": "Cases",
+      "play": "Play",
+      "soon": "Matchmaking soon"
     },
     "login": {
       "title": "Sign in"
