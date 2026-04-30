@@ -4,6 +4,7 @@ import logo from '../assets/logo.svg'
 import { Dropdown } from '../shared/ui/Dropdown'
 import { LanguageToggle } from '../shared/ui/LanguageToggle'
 import { useAuthStore } from '../shared/auth/authStore'
+import { useAuth } from '../shared/auth/useAuth'
 import { stopGameHub } from '../shared/realtime/gameHub'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -12,6 +13,7 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 export function RootLayout() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const handleLogout = () => {
     stopGameHub().catch(() => {})
@@ -44,7 +46,7 @@ export function RootLayout() {
           <div className="flex items-center gap-4">
             <LanguageToggle />
             <Dropdown
-              label={t('nav.profile')}
+              label={user?.login ?? t('nav.profile')}
               align="right"
               items={[
                 { label: t('nav.profileItems.myProfile'), to: '/profile' },
