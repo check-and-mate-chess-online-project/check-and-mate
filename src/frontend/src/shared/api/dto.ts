@@ -4,6 +4,7 @@ import type {
   GameResult,
   GameTerminationReason,
   PlayerColor,
+  SkinRarity,
   UserRole,
 } from './enums'
 
@@ -49,6 +50,18 @@ export interface MoveResultDto {
 export interface LootBoxDropResultDto {
   skinId: Guid
   isDuplicate: boolean
+}
+
+// shape пока придумали мы, друг ещё не определил
+export interface SkinDto {
+  id: Guid
+  figureType: FigureType
+  rarity: SkinRarity
+  name: string
+}
+
+export interface OwnedSkinDto extends SkinDto {
+  isActive: boolean
 }
 
 // формат options — TODO, см. api-needs.md #7
