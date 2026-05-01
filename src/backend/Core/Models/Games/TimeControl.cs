@@ -10,8 +10,8 @@ public class TimeControl : ITimeControl
     public int IncrementPerMoveSec { get; }
     private double _whiteTimeLeftSec;
     private double _blackTimeLeftSec;
-    private DateTime? _whiteLastMoveStartTimeUtc;
-    private DateTime? _blackLastMoveStartTimeUtc;
+    private DateTime _whiteLastMoveStartTimeUtc;
+    private DateTime _blackLastMoveStartTimeUtc;
 
     public TimeControl(int initialTimeSec, int incrementPerMoveSec)
     {
@@ -42,17 +42,12 @@ public class TimeControl : ITimeControl
             : Check(_blackLastMoveStartTimeUtc, _blackTimeLeftSec, currentTime);
     }
 
-    private void Update(ref DateTime? lastMove, ref double timeLeft, DateTime currentTime)
+    private void Update(ref DateTime lastMove, ref double timeLeft, DateTime currentTime)
     {
-        if (lastMove == null) throw new InvalidOperationException("game has not started yet");
-        double spent = (currentTime - lastMove.Value).TotalSeconds;
+        double spent = (currentTime - lastMove).TotalSeconds;
         timeLeft = timeLeft - spent + IncrementPerMoveSec;
         lastMove = currentTime;
     }
 
-    private bool Check(DateTime? lastMove, double timeLeft, DateTime currentTime)
-    {
-        if (lastMove == null) throw new InvalidOperationException("game has not started yet");
-        return timeLeft > (currentTime - (DateTime)lastMove).TotalSeconds;
-    }
+    private bool Check(DateTime lastMove, double timeLeft, DateTime currentTime) => timeLeft > (currentTime - lastMove).TotalSeconds;
 }

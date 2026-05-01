@@ -19,7 +19,7 @@ public class Game
 
     public Game(Guid whitePlayerId, Guid blackPlayerId, IChessEngine engine, ITimeControl timeControl)
     {
-        if (whitePlayerId == blackPlayerId) throw new ArgumentException("players must be different");
+        if (whitePlayerId == blackPlayerId) throw new InvalidOperationException("players must be different");
         Id = Guid.NewGuid();
         WhitePlayerId = whitePlayerId;
         BlackPlayerId = blackPlayerId;
