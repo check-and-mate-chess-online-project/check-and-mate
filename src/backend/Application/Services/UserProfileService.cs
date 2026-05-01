@@ -1,16 +1,24 @@
 using Application.Services.Interfaces;
 using Application.Abstractions.Security;
 using Application.Abstractions.UnitOfWork;
+using Application.Dtos;
 using Core.Repositories;
 using Core.Models.Users;
+using Application.Mappers;
 
 namespace Application.Services;
 
-public class UserSettingsService(IUserRepository userRepos, IPasswordHasher hasher, IUnitOfWork uow) : IUserSettingsService
+public class UserProfileService(IUserRepository userRepos, IPasswordHasher hasher, IUnitOfWork uow) : IUserProfileService
 {
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IPasswordHasher _hasher = hasher;
     private readonly IUnitOfWork _uow = uow;
+
+    public async Task<UserDto> GetUserProfile(Guid userId)
+    {
+        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
+        return UserMapper.GetDto(user);
+    }
 
     public async Task ChangeUserLoginAsync(Guid userId, string login)
     {

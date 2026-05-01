@@ -12,9 +12,9 @@ public class AuthController(IUserAuthService auth) : ControllerBase
     private readonly IUserAuthService _auth = auth;
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login([FromBody]LoginRequest request)
     {
         AuthResultDto authResult = await _auth.Authorize(request.Login, request.Password);
-        return Ok(new { authResult });
+        return Ok(authResult);
     }
 }
