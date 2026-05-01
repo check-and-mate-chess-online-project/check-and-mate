@@ -1,6 +1,7 @@
 using Application.Services.Interfaces;
 using Application.Orchestration.GameSessions;
 using Application.Abstractions.UnitOfWork;
+using Application.Exceptions;
 using Core.Repositories;
 using Core.Models.Requests;
 using Core.Models.Games;
@@ -9,7 +10,11 @@ using Core.Models.Users;
 
 namespace Application.Services;
 
-public class GameInvitationService(IGameSessionService sessionService, IGameInvitationRepository invitationRepos, IUserRepository userRepos, IUnitOfWork uow) : IGameInvitationService
+public class GameInvitationService(
+    IGameSessionService sessionService, 
+    IGameInvitationRepository invitationRepos, 
+    IUserRepository userRepos, 
+    IUnitOfWork uow) : IGameInvitationService
 {
     private readonly IGameSessionService _sessionService = sessionService;
     private readonly IGameInvitationRepository _invitationRepos = invitationRepos;
@@ -18,12 +23,12 @@ public class GameInvitationService(IGameSessionService sessionService, IGameInvi
 
     public async Task SendGameInvitationAsync(Guid senderId, Guid userId, int initialTimeSec, int incrementPerMoveSec)
     {
-        User sender = await _userRepos.GetAsync(senderId) ?? throw new ArgumentException($"user {senderId} not exist");
-        if (sender.IsDeleted) throw new InvalidOperationException($"user {senderId} is deleted");
-        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
-        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
-        if (await _invitationRepos.GetPendingAsync(senderId, userId) != null) throw new InvalidOperationException($"game invitation from {senderId} to {userId} already exist");
-        if (_sessionService.GetByPlayers(senderId, userId) != null) throw new InvalidOperationException($"game session beetwen {senderId} and {userId} already exist");
+        User sender = await _userRepos.GetAsync(senderId) ?? throw new NotFoundException($"user {senderId} not found");
+        if (sender.IsDeleted) throw new UserDeletedException($"user {senderId} is deleted");
+        User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {senderId} not found");
+        if (user.IsDeleted) throw new UserDeletedException($"user {senderId} is deleted");
+        if (await _invitationRepos.GetPendingAsync(senderId, userId) != null) throw new ConflictException($"game invitation from {senderId} to {userId} already exist");
+        if (_sessionService.GetByPlayers(senderId, userId) != null) throw new ConflictException($"game session beetwen {senderId} and {userId} already exist");
         ITimeControl timeControl = initialTimeSec != 0 ? new TimeControl(initialTimeSec, incrementPerMoveSec) : new DisabledTimeControl();
         GameInvitation invitation = new(senderId, userId, timeControl, GameInvitationState.Pending);
         _invitationRepos.Add(invitation);
@@ -32,7 +37,7 @@ public class GameInvitationService(IGameSessionService sessionService, IGameInvi
 
     public async Task AcceptGameInvitationAsync(Guid invitationId)
     {
-        GameInvitation invitation = await _invitationRepos.GetAsync(invitationId) ?? throw new ArgumentException($"game invitation {invitationId} not exist");
+        GameInvitation invitation = await _invitationRepos.GetAsync(invitationId) ?? throw new NotFoundException($"game invitation {invitationId} not found");
         _sessionService.Create(invitation.SenderId, invitation.UserId, invitation.TimeControl);
         invitation.ChangeState(GameInvitationState.Accepted);
         _invitationRepos.Update(invitation);
@@ -41,7 +46,7 @@ public class GameInvitationService(IGameSessionService sessionService, IGameInvi
 
     public async Task RejectGameInvitationAsync(Guid invitationId)
     {
-        GameInvitation invitation = await _invitationRepos.GetAsync(invitationId) ?? throw new ArgumentException($"game invitation {invitationId} not exist");
+        GameInvitation invitation = await _invitationRepos.GetAsync(invitationId) ?? throw new NotFoundException($"game invitation {invitationId} not found");
         invitation.ChangeState(GameInvitationState.Rejected);
         _invitationRepos.Update(invitation);
         await _uow.CommitChangesAsync();

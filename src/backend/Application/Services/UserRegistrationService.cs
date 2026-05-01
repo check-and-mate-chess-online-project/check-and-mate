@@ -4,12 +4,17 @@ using Application.Abstractions.Security;
 using Application.Abstractions.Tokens;
 using Application.Dtos;
 using Application.Mappers;
+using Application.Exceptions;
 using Core.Repositories;
 using Core.Models.Users;
 
 namespace Application.Services;
 
-public class UserRegistrationService(ITokenGenerator tokenGenerator, IPasswordHasher hasher, IUserRepository userRepos, IUnitOfWork uow) : IUserRegistrationService
+public class UserRegistrationService(
+    ITokenGenerator tokenGenerator, 
+    IPasswordHasher hasher, 
+    IUserRepository userRepos, 
+    IUnitOfWork uow) : IUserRegistrationService
 {
     private readonly ITokenGenerator _tokenGenerator = tokenGenerator;
     private readonly IPasswordHasher _hasher = hasher;
@@ -21,7 +26,7 @@ public class UserRegistrationService(ITokenGenerator tokenGenerator, IPasswordHa
         ArgumentException.ThrowIfNullOrWhiteSpace(login);
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
-        if (await _userRepos.GetAsync(login) != null) throw new InvalidOperationException($"user {login} already exist");
+        if (await _userRepos.GetAsync(login) != null) throw new ConflictException($"user {login} already exist");
         string passwordHash = _hasher.GetHash(password);
         User user = new(login, passwordHash, email, role);
         _userRepos.Add(user);

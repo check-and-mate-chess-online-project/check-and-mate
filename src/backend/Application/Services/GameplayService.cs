@@ -4,6 +4,7 @@ using Application.Abstractions.Settings;
 using Application.Orchestration.GameSessions;
 using Application.Dtos;
 using Application.Mappers;
+using Application.Exceptions;
 using Core.Repositories;
 using Core.Models.Chess;
 using Core.Models.Games;
@@ -32,9 +33,9 @@ public class GameplayService(
 
     public async Task<MoveResultDto> MakeMoveAsync(Guid userId, Move move)
     {
-        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
-        Game game = _sessionService.GetByUserId(userId) ?? throw new ArgumentException($"user {userId} not in game");
-        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
+        User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
+        Game game = _sessionService.GetByUserId(userId) ?? throw new NotFoundException($"active game not found");
+        if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
         MoveResult moveResult = game.MakeMove(move, userId);
         if (moveResult.IsGameOver == true) 
         {
@@ -59,9 +60,9 @@ public class GameplayService(
 
     public async Task HandleResignAsync(Guid userId)
     {
-        Game game = _sessionService.GetByUserId(userId) ?? throw new ArgumentException($"user {userId} not in game");
-        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
-        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
+        User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
+        Game game = _sessionService.GetByUserId(userId) ?? throw new NotFoundException($"active game not found");
+        if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
         game.EndByResignation(userId);
         await UpdatePlayerStats(game, userId, GameTerminationReason.Resignation);
         _sessionService.Remove(game);
@@ -82,8 +83,8 @@ public class GameplayService(
 
     private async Task UpdatePlayerStats(Game game, Guid userId, GameTerminationReason terminationReason)
     {
-        User whitePlayer = await _userRepos.GetAsync(game.WhitePlayerId) ?? throw new ArgumentException($"white player not exist");
-        User blackPlayer = await _userRepos.GetAsync(game.BlackPlayerId) ?? throw new ArgumentException($"black player not exist");
+        User whitePlayer = await _userRepos.GetAsync(game.WhitePlayerId) ?? throw new NotFoundException($"white player not found");
+        User blackPlayer = await _userRepos.GetAsync(game.BlackPlayerId) ?? throw new NotFoundException($"black player not found");
         GameResult gameResult = game.GetGameResultByTerminationReason(terminationReason, userId);
         await ChangePlayerRatings(whitePlayer, blackPlayer, gameResult);
         User winner = gameResult == GameResult.WhiteVictory ? whitePlayer : blackPlayer;

@@ -6,6 +6,7 @@ using Application.Abstractions.Settings;
 using Application.Abstractions.Events;
 using Application.Events;
 using Application.Mappers;
+using Application.Exceptions;
 using Core.Repositories;
 using Core.Models.Games;
 using Core.Models.Users;
@@ -31,8 +32,8 @@ public class MatchmakingService(
 
     public async Task StartOpponentSearchAsync(Guid userId, bool timeControlEnabled, int initialTimeSec, int incrementPerMoveSec)
     {
-        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not found");
-        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
+        User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
+        if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
         ITimeControl timeControl;
         if (timeControlEnabled)
         {
@@ -46,7 +47,7 @@ public class MatchmakingService(
 
     public async Task StopOpponentSearchAsync(Guid userId)
     {
-        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not found");
+        User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
         _pool.TryRemoveUser(user);
     }
 

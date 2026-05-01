@@ -2,6 +2,7 @@ using Application.Services.Interfaces;
 using Application.Orchestration.SkinDrops;
 using Application.Abstractions.UnitOfWork;
 using Application.Abstractions.Settings;
+using Application.Exceptions;
 using Application.Dtos;
 using Core.Repositories;
 using Core.Models.Skins;
@@ -9,7 +10,12 @@ using Core.Models.Users;
 
 namespace Application.Services;
 
-public class LootBoxService(IGameSettingsProvider settings, ISkinDropService skinSropService, IUserRepository userRepos, IUserSkinRepository userSkinRepos, IUnitOfWork uow) : ILootBoxService
+public class LootBoxService(
+    IGameSettingsProvider settings, 
+    ISkinDropService skinSropService, 
+    IUserRepository userRepos, 
+    IUserSkinRepository userSkinRepos, 
+    IUnitOfWork uow) : ILootBoxService
 {
     private readonly IGameSettingsProvider _settings = settings;
     private readonly ISkinDropService _skinSropService = skinSropService;
@@ -19,8 +25,8 @@ public class LootBoxService(IGameSettingsProvider settings, ISkinDropService ski
 
     public async Task<LootBoxDropResultDto> OpenUserLootBoxAsync(Guid userId)
     {
-        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
-        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
+        User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
+        if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
         user.OpenLootBox();
         Skin skin = await _skinSropService.DropSkinAsync();
         bool isDuplicate;
@@ -42,8 +48,8 @@ public class LootBoxService(IGameSettingsProvider settings, ISkinDropService ski
 
     public async Task BuyLootBoxesAsync(Guid userId, int count)
     {
-        User user = await _userRepos.GetAsync(userId) ?? throw new ArgumentException($"user {userId} not exist");
-        if (user.IsDeleted) throw new InvalidOperationException($"user {userId} is deleted");
+        User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
+        if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
         int totalPrice = _settings.LootBoxPrice * count;
         user.SpendBalance(totalPrice);
         user.AddLootBoxes(count);

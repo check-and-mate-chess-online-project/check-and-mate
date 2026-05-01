@@ -1,4 +1,5 @@
 using Application.Abstractions.GameSessions;
+using Application.Exceptions;
 using Core.Models.Games;
 using Core.Models.Interfaces;
 
@@ -17,7 +18,7 @@ public class GameSessionService(IGameSessionStore sessionStore, IChessEngine eng
 
     public Game Create(Guid whitePlayerId, Guid blackPlayerId, ITimeControl timeControl)
     {
-        if (_sessionStore.GetByPlayers(whitePlayerId, blackPlayerId) != null) throw new InvalidOperationException($"game session beetwen {whitePlayerId} and {blackPlayerId} already exist");
+        if (_sessionStore.GetByPlayers(whitePlayerId, blackPlayerId) != null) throw new ConflictException($"game session beetwen {whitePlayerId} and {blackPlayerId} already exist");
         Game game = new(whitePlayerId, blackPlayerId, _engine, timeControl);
         _sessionStore.Add(game);
         return game;
@@ -25,7 +26,7 @@ public class GameSessionService(IGameSessionStore sessionStore, IChessEngine eng
 
     public void Remove(Game game)
     {
-        if (_sessionStore.Get(game.Id) == null) throw new ArgumentException($"game session {game.Id} not exist");
+        if (_sessionStore.Get(game.Id) == null) throw new NotFoundException($"game session {game.Id} not exist");
         _sessionStore.Remove(game);
     }
 }
