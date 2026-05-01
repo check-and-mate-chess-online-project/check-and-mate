@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
 
-const BACKEND = 'http://localhost:5000'
+const BACKEND = 'http://localhost:5065'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
