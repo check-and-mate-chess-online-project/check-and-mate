@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.SignalR;
 using System.Text;
 using Presentation.Hubs;
 using Presentation.Events.Handlers;
+using Presentation.Events;
 using Application.Services.Interfaces;
 using Application.Services;
 using Application.Abstractions.Settings;
@@ -23,8 +26,7 @@ using Infrastructure.Events;
 using Infrastructure.Background;
 using Core.Repositories;
 using Core.Models.Interfaces;
-using Presentation.Events;
-using Microsoft.AspNetCore.Diagnostics;
+
 using Application.Abstractions.Tokens;
 
 
@@ -34,14 +36,17 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var builder = WebApplication.CreateBuilder(args);
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
         builder.Configuration.AddEnvironmentVariables(); 
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddControllers();
-        builder.Services.AddSignalR();
+        builder.Services.AddSignalR(hubOptions =>
+        {
+            hubOptions.AddFilter<HubExceptionFilter>();
+        });
 
         string key = builder.Configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("jwt key not found");
         if (key.Length < 32) throw new InvalidOperationException("jwt key too short");
