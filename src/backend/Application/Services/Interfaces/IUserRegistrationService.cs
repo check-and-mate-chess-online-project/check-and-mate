@@ -5,5 +5,5 @@ namespace Application.Services.Interfaces;
 
 public interface IUserRegistrationService
 {
-    Task<UserDto> RegisterAsync(string login, string password, string email, UserRole role);
+    Task<AuthResultDto> RegisterAsync(string login, string password, string email, UserRole role);
 }

@@ -15,7 +15,7 @@ public class RegistrationController(IUserRegistrationService registration) : Con
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        UserDto user = await _registration.RegisterAsync(request.Login, request.Password, request.Email, UserRole.Player);
-        return Ok( new { user } );
+        AuthResultDto authResult = await _registration.RegisterAsync(request.Login, request.Password, request.Email, UserRole.Player);
+        return Ok( new { authResult } );
     }
 }

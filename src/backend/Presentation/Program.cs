@@ -25,6 +25,7 @@ using Core.Repositories;
 using Core.Models.Interfaces;
 using Presentation.Events;
 using Microsoft.AspNetCore.Diagnostics;
+using Application.Abstractions.Tokens;
 
 
 namespace Presentation;
@@ -80,6 +81,7 @@ public class Program
         builder.Services.AddSingleton<IChessEngine, ChessEngine>();
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
         builder.Services.AddSingleton<IMatchmakingPool, MatchmakingPool>();
+        builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
         builder.Services.AddSingleton<IPasswordHasher, SimplePasswordHasher>();
         builder.Services.AddScoped<IGameSessionService, GameSessionService>();
 

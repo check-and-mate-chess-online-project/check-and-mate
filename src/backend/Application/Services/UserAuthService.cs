@@ -1,5 +1,6 @@
 using Application.Services.Interfaces;
 using Application.Abstractions.Security;
+using Application.Abstractions.Tokens;
 using Application.Mappers;
 using Application.Dtos;
 using Core.Models.Users;
@@ -7,15 +8,19 @@ using Core.Repositories;
 
 namespace Application.Services;
 
-public class UserAuthService(IPasswordHasher hasher, IUserRepository userRepos) : IUserAuthService
+public class UserAuthService(ITokenGenerator tokenGenerator, IPasswordHasher hasher, IUserRepository userRepos) : IUserAuthService
 {
+    private readonly ITokenGenerator _tokenGenerator = tokenGenerator;
     private readonly IPasswordHasher _hasher = hasher;
     private readonly IUserRepository _userRepos = userRepos;
 
-    public async Task<UserDto?> Authorize(string login, string password)
+    public async Task<AuthResultDto> Authorize(string login, string password)
     {
         User? user = await _userRepos.GetAsync(login);
-        if (user == null || user.PasswordHash != _hasher.GetHash(password)) return null;
-        return UserMapper.GetDto(user);
+        if (user == null || user.PasswordHash != _hasher.GetHash(password)) throw new UnauthorizedAccessException("incorrect login or password");
+        string token = _tokenGenerator.GenerateToken(user.Id, login);
+        UserDto userDto =  UserMapper.GetDto(user);
+        AuthResultDto result = new() { User = userDto, Token = token };
+        return result;
     }
 }

@@ -4,5 +4,5 @@ namespace Application.Services.Interfaces;
 
 public interface IUserAuthService
 {
-    Task<UserDto?> Authorize(string login, string password);
+    Task<AuthResultDto> Authorize(string login, string password);
 }
