@@ -46,6 +46,9 @@ export function RootLayout() {
           </div>
           <div className="flex items-center gap-4">
             <LanguageToggle />
+            <span className="text-yellow-400 text-sm tabular-nums">
+              {user?.balance ?? 0} ◈
+            </span>
             <Dropdown
               label={user?.login ?? t('nav.profile')}
               align="right"
