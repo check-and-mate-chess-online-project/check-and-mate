@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useAuth } from '../shared/auth/useAuth'
+import { TypedText } from '../shared/ui/TypedText'
 
 type Mode = 'casual' | 'rated'
 type TimeControlId = 'bullet' | 'blitz' | 'rapid'
@@ -70,9 +71,11 @@ export function LobbyPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="text-4xl mb-10">
-        {t(`pages.lobby.greeting.${getGreetingKey()}`, {
-          name: user?.login ?? '...',
-        })}
+        <TypedText
+          text={t(`pages.lobby.greeting.${getGreetingKey()}`, {
+            name: user?.login ?? '...',
+          })}
+        />
       </h1>
 
       <section className="mb-8">
