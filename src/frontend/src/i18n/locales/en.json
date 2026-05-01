@@ -101,7 +101,20 @@
     },
     "inventory": {
       "title": "Inventory",
-      "placeholder": "All skins and selection will be here"
+      "active": "active",
+      "figures": {
+        "1": "King",
+        "2": "Queen",
+        "3": "Rook",
+        "4": "Bishop",
+        "5": "Knight",
+        "6": "Pawn"
+      },
+      "rarity": {
+        "1": "Common",
+        "2": "Rare",
+        "3": "Legendary"
+      }
     },
     "cases": {
       "title": "Cases",

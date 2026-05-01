@@ -13,49 +13,35 @@ const mockUser: UserDto = {
   isDeleted: false,
 }
 
-const MOCK_SKINS = [
-  {
-    id: 'skin-king-1',
-    figureType: FigureType.King,
-    rarity: SkinRarity.Legendary,
-    name: 'Nebula King',
-    isActive: true,
-  },
-  {
-    id: 'skin-queen-1',
-    figureType: FigureType.Queen,
-    rarity: SkinRarity.Rare,
-    name: 'Stardust Queen',
-    isActive: true,
-  },
-  {
-    id: 'skin-rook-1',
-    figureType: FigureType.Rook,
-    rarity: SkinRarity.Common,
-    name: 'Asteroid Rook',
-    isActive: true,
-  },
-  {
-    id: 'skin-bishop-1',
-    figureType: FigureType.Bishop,
-    rarity: SkinRarity.Common,
-    name: 'Comet Bishop',
-    isActive: true,
-  },
-  {
-    id: 'skin-knight-1',
-    figureType: FigureType.Knight,
-    rarity: SkinRarity.Rare,
-    name: 'Voidrunner',
-    isActive: true,
-  },
-  {
-    id: 'skin-pawn-1',
-    figureType: FigureType.Pawn,
-    rarity: SkinRarity.Common,
-    name: 'Cosmic Recruit',
-    isActive: true,
-  },
+interface MockSkin {
+  id: string
+  figureType: FigureType
+  rarity: SkinRarity
+  name: string
+  isActive: boolean
+}
+
+let MOCK_SKINS: MockSkin[] = [
+  { id: 'king-default', figureType: FigureType.King, rarity: SkinRarity.Common, name: 'Default King', isActive: false },
+  { id: 'king-stellar', figureType: FigureType.King, rarity: SkinRarity.Rare, name: 'Stellar Monarch', isActive: false },
+  { id: 'king-nebula', figureType: FigureType.King, rarity: SkinRarity.Legendary, name: 'Nebula King', isActive: true },
+
+  { id: 'queen-default', figureType: FigureType.Queen, rarity: SkinRarity.Common, name: 'Default Queen', isActive: false },
+  { id: 'queen-stardust', figureType: FigureType.Queen, rarity: SkinRarity.Rare, name: 'Stardust Queen', isActive: true },
+  { id: 'queen-supernova', figureType: FigureType.Queen, rarity: SkinRarity.Legendary, name: 'Supernova', isActive: false },
+
+  { id: 'rook-default', figureType: FigureType.Rook, rarity: SkinRarity.Common, name: 'Asteroid Rook', isActive: true },
+  { id: 'rook-bunker', figureType: FigureType.Rook, rarity: SkinRarity.Rare, name: 'Orbital Bunker', isActive: false },
+
+  { id: 'bishop-default', figureType: FigureType.Bishop, rarity: SkinRarity.Common, name: 'Comet Bishop', isActive: true },
+  { id: 'bishop-prophet', figureType: FigureType.Bishop, rarity: SkinRarity.Rare, name: 'Void Prophet', isActive: false },
+
+  { id: 'knight-default', figureType: FigureType.Knight, rarity: SkinRarity.Common, name: 'Default Knight', isActive: false },
+  { id: 'knight-voidrunner', figureType: FigureType.Knight, rarity: SkinRarity.Rare, name: 'Voidrunner', isActive: true },
+  { id: 'knight-eclipse', figureType: FigureType.Knight, rarity: SkinRarity.Legendary, name: 'Eclipse Rider', isActive: false },
+
+  { id: 'pawn-default', figureType: FigureType.Pawn, rarity: SkinRarity.Common, name: 'Cosmic Recruit', isActive: true },
+  { id: 'pawn-trooper', figureType: FigureType.Pawn, rarity: SkinRarity.Rare, name: 'Star Trooper', isActive: false },
 ]
 
 function requireAuth(request: Request): HttpResponse<null> | null {
@@ -112,6 +98,12 @@ export const handlers = [
   http.post('/api/users/me/customizations', async ({ request }) => {
     const denied = requireAuth(request)
     if (denied) return denied
+    const body = (await request.json()) as { figureType: number; skinId: string }
+    MOCK_SKINS = MOCK_SKINS.map((s) =>
+      s.figureType === body.figureType
+        ? { ...s, isActive: s.id === body.skinId }
+        : s,
+    )
     return new HttpResponse(null, { status: 204 })
   }),
 
