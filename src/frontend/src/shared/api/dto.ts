@@ -53,11 +53,20 @@ export interface LootBoxDropResultDto {
 }
 
 // shape пока придумали мы, друг ещё не определил
+export interface PlanetDto {
+  id: Guid
+  name: string
+  imageUrl: string
+}
+
 export interface SkinDto {
   id: Guid
+  planetId: Guid
   figureType: FigureType
   rarity: SkinRarity
-  name: string
+  name: string | null
+  imageUrl: string | null
+  description: string | null
 }
 
 export interface OwnedSkinDto extends SkinDto {

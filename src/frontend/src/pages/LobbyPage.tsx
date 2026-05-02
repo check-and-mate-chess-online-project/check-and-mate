@@ -41,7 +41,7 @@ function Choice({ label, hint, active, disabled, onClick }: ChoiceProps) {
   const stateClass = disabled
     ? 'border-slate-800 text-slate-600 cursor-not-allowed'
     : active
-      ? 'border-blue-500 bg-blue-500/10 text-slate-100'
+      ? 'border-violet-500 bg-violet-500/10 text-slate-100'
       : 'border-slate-800 hover:border-slate-600 text-slate-300'
   return (
     <button
@@ -124,7 +124,7 @@ export function LobbyPage() {
         <button
           type="button"
           onClick={handlePlay}
-          className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-lg rounded-lg"
+          className="w-full py-4 bg-violet-600 hover:bg-violet-500 text-white font-semibold text-lg rounded-lg"
         >
           {t('pages.lobby.play')}
         </button>

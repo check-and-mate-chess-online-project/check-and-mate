@@ -13,36 +13,144 @@ const mockUser: UserDto = {
   isDeleted: false,
 }
 
+const PLANETS = [
+  {
+    id: 'earth',
+    name: 'Earth',
+    imageUrl: '/planets/earth_big.webp',
+  },
+  {
+    id: 'mars',
+    name: 'Mars',
+    imageUrl: '/planets/mars_big.webp',
+  },
+]
+
 interface MockSkin {
   id: string
+  planetId: string
   figureType: FigureType
   rarity: SkinRarity
-  name: string
-  isActive: boolean
+  name: string | null
+  imageUrl: string | null
+  description: string | null
 }
 
-let MOCK_SKINS: MockSkin[] = [
-  { id: 'king-default', figureType: FigureType.King, rarity: SkinRarity.Common, name: 'Default King', isActive: false },
-  { id: 'king-stellar', figureType: FigureType.King, rarity: SkinRarity.Rare, name: 'Stellar Monarch', isActive: false },
-  { id: 'king-nebula', figureType: FigureType.King, rarity: SkinRarity.Legendary, name: 'Nebula King', isActive: true },
-
-  { id: 'queen-default', figureType: FigureType.Queen, rarity: SkinRarity.Common, name: 'Default Queen', isActive: false },
-  { id: 'queen-stardust', figureType: FigureType.Queen, rarity: SkinRarity.Rare, name: 'Stardust Queen', isActive: true },
-  { id: 'queen-supernova', figureType: FigureType.Queen, rarity: SkinRarity.Legendary, name: 'Supernova', isActive: false },
-
-  { id: 'rook-default', figureType: FigureType.Rook, rarity: SkinRarity.Common, name: 'Asteroid Rook', isActive: true },
-  { id: 'rook-bunker', figureType: FigureType.Rook, rarity: SkinRarity.Rare, name: 'Orbital Bunker', isActive: false },
-
-  { id: 'bishop-default', figureType: FigureType.Bishop, rarity: SkinRarity.Common, name: 'Comet Bishop', isActive: true },
-  { id: 'bishop-prophet', figureType: FigureType.Bishop, rarity: SkinRarity.Rare, name: 'Void Prophet', isActive: false },
-
-  { id: 'knight-default', figureType: FigureType.Knight, rarity: SkinRarity.Common, name: 'Default Knight', isActive: false },
-  { id: 'knight-voidrunner', figureType: FigureType.Knight, rarity: SkinRarity.Rare, name: 'Voidrunner', isActive: true },
-  { id: 'knight-eclipse', figureType: FigureType.Knight, rarity: SkinRarity.Legendary, name: 'Eclipse Rider', isActive: false },
-
-  { id: 'pawn-default', figureType: FigureType.Pawn, rarity: SkinRarity.Common, name: 'Cosmic Recruit', isActive: true },
-  { id: 'pawn-trooper', figureType: FigureType.Pawn, rarity: SkinRarity.Rare, name: 'Star Trooper', isActive: false },
+const PLANET_SKINS: MockSkin[] = [
+  {
+    id: 'gagarin-king',
+    planetId: 'earth',
+    figureType: FigureType.King,
+    rarity: SkinRarity.Legendary,
+    name: 'Gagarin',
+    imageUrl: '/skins/gagarin-king-idle.webp',
+    description: 'Первый человек в космосе. Ведёт землян за собой к звёздам.',
+  },
+  {
+    id: 'earth-queen-locked',
+    planetId: 'earth',
+    figureType: FigureType.Queen,
+    rarity: SkinRarity.Rare,
+    name: null,
+    imageUrl: null,
+    description: null,
+  },
+  {
+    id: 'earth-rook-locked',
+    planetId: 'earth',
+    figureType: FigureType.Rook,
+    rarity: SkinRarity.Common,
+    name: null,
+    imageUrl: null,
+    description: null,
+  },
+  {
+    id: 'earth-bishop-locked',
+    planetId: 'earth',
+    figureType: FigureType.Bishop,
+    rarity: SkinRarity.Common,
+    name: null,
+    imageUrl: null,
+    description: null,
+  },
+  {
+    id: 'earth-knight-locked',
+    planetId: 'earth',
+    figureType: FigureType.Knight,
+    rarity: SkinRarity.Rare,
+    name: null,
+    imageUrl: null,
+    description: null,
+  },
+  {
+    id: 'earth-pawn-locked',
+    planetId: 'earth',
+    figureType: FigureType.Pawn,
+    rarity: SkinRarity.Common,
+    name: null,
+    imageUrl: null,
+    description: null,
+  },
+  {
+    id: 'mars-king-locked',
+    planetId: 'mars',
+    figureType: FigureType.King,
+    rarity: SkinRarity.Legendary,
+    name: null,
+    imageUrl: null,
+    description: null,
+  },
+  {
+    id: 'mars-queen-locked',
+    planetId: 'mars',
+    figureType: FigureType.Queen,
+    rarity: SkinRarity.Rare,
+    name: null,
+    imageUrl: null,
+    description: null,
+  },
+  {
+    id: 'mars-rook-locked',
+    planetId: 'mars',
+    figureType: FigureType.Rook,
+    rarity: SkinRarity.Common,
+    name: null,
+    imageUrl: null,
+    description: null,
+  },
+  {
+    id: 'mars-bishop-locked',
+    planetId: 'mars',
+    figureType: FigureType.Bishop,
+    rarity: SkinRarity.Common,
+    name: null,
+    imageUrl: null,
+    description: null,
+  },
+  {
+    id: 'mars-knight-locked',
+    planetId: 'mars',
+    figureType: FigureType.Knight,
+    rarity: SkinRarity.Rare,
+    name: null,
+    imageUrl: null,
+    description: null,
+  },
+  {
+    id: 'mars-pawn-locked',
+    planetId: 'mars',
+    figureType: FigureType.Pawn,
+    rarity: SkinRarity.Common,
+    name: null,
+    imageUrl: null,
+    description: null,
+  },
 ]
+
+const OWNED_SKIN_IDS = new Set<string>(['gagarin-king'])
+const ACTIVE_BY_FIGURE: Record<number, string | null> = {
+  [FigureType.King]: 'gagarin-king',
+}
 
 function requireAuth(request: Request): HttpResponse<null> | null {
   const auth = request.headers.get('Authorization')
@@ -52,7 +160,6 @@ function requireAuth(request: Request): HttpResponse<null> | null {
 }
 
 export const handlers = [
-  // потом убрать — должен идти к реальному /api/auth/login
   http.post('/api/auth/login', async ({ request }) => {
     const body = (await request.json()) as { login?: string; password?: string }
     if (!body.login || !body.password) {
@@ -89,28 +196,49 @@ export const handlers = [
     })
   }),
 
+  http.get('/api/planets', ({ request }) => {
+    const denied = requireAuth(request)
+    if (denied) return denied
+    return HttpResponse.json(PLANETS)
+  }),
+
+  http.get('/api/planets/:planetId/skins', ({ request, params }) => {
+    const denied = requireAuth(request)
+    if (denied) return denied
+    const list = PLANET_SKINS.filter((s) => s.planetId === params.planetId)
+    return HttpResponse.json(list)
+  }),
+
   http.get('/api/users/me/inventory', ({ request }) => {
     const denied = requireAuth(request)
     if (denied) return denied
-    return HttpResponse.json(MOCK_SKINS)
+    const owned = PLANET_SKINS.filter((s) => OWNED_SKIN_IDS.has(s.id)).map(
+      (s) => ({
+        ...s,
+        isActive: ACTIVE_BY_FIGURE[s.figureType] === s.id,
+      }),
+    )
+    return HttpResponse.json(owned)
   }),
 
   http.post('/api/users/me/customizations', async ({ request }) => {
     const denied = requireAuth(request)
     if (denied) return denied
-    const body = (await request.json()) as { figureType: number; skinId: string }
-    MOCK_SKINS = MOCK_SKINS.map((s) =>
-      s.figureType === body.figureType
-        ? { ...s, isActive: s.id === body.skinId }
-        : s,
-    )
+    const body = (await request.json()) as {
+      figureType: number
+      skinId: string
+    }
+    if (!OWNED_SKIN_IDS.has(body.skinId)) {
+      return new HttpResponse(null, { status: 400 })
+    }
+    ACTIVE_BY_FIGURE[body.figureType] = body.skinId
     return new HttpResponse(null, { status: 204 })
   }),
 
   http.post('/api/lootboxes/open', ({ request }) => {
     const denied = requireAuth(request)
     if (denied) return denied
-    const random = MOCK_SKINS[Math.floor(Math.random() * MOCK_SKINS.length)]
+    const random = PLANET_SKINS[Math.floor(Math.random() * PLANET_SKINS.length)]
     return HttpResponse.json({
       skinId: random.id,
       isDuplicate: Math.random() > 0.4,

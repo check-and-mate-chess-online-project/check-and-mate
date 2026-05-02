@@ -21,7 +21,7 @@ function ErrorFallback() {
         <button
           type="button"
           onClick={() => location.reload()}
-          className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-md font-medium"
+          className="px-6 py-2 bg-violet-600 hover:bg-violet-500 rounded-md font-medium"
         >
           {t('errors.boundary.reload')}
         </button>

@@ -18,13 +18,13 @@ export function LandingPage() {
       <div className="flex gap-4 justify-center">
         <Link
           to="/login"
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-md font-medium"
+          className="px-6 py-3 bg-violet-700 hover:bg-violet-600 rounded-md font-medium"
         >
           {t('landing.signIn')}
         </Link>
         <Link
           to="/register"
-          className="px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-md font-medium"
+          className="px-6 py-3 bg-orange-700 hover:bg-orange-600 rounded-md font-medium"
         >
           {t('landing.signUp')}
         </Link>

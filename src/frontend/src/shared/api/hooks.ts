@@ -5,6 +5,8 @@ import type {
   Guid,
   LootBoxDropResultDto,
   OwnedSkinDto,
+  PlanetDto,
+  SkinDto,
   UserDto,
 } from '.'
 import type { FigureType } from './enums'
@@ -21,6 +23,21 @@ export function useUserProfile(id: Guid) {
     queryKey: ['user', id],
     queryFn: () => api.get<UserDto>(`/api/users/${id}`),
     enabled: !!id,
+  })
+}
+
+export function usePlanets() {
+  return useQuery({
+    queryKey: ['planets'],
+    queryFn: () => api.get<PlanetDto[]>('/api/planets'),
+  })
+}
+
+export function usePlanetSkins(planetId: Guid) {
+  return useQuery({
+    queryKey: ['planet-skins', planetId],
+    queryFn: () => api.get<SkinDto[]>(`/api/planets/${planetId}/skins`),
+    enabled: !!planetId,
   })
 }
 

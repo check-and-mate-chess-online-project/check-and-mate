@@ -15,7 +15,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 const inputClass =
-  'bg-slate-800 border border-slate-700 text-slate-100 px-3 py-2 rounded-md focus:outline-none focus:border-blue-500'
+  'bg-slate-800 border border-slate-700 text-slate-100 px-3 py-2 rounded-md focus:outline-none focus:border-violet-500'
 
 export function LoginPage() {
   const { t } = useTranslation()
@@ -80,7 +80,7 @@ export function LoginPage() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-4 py-2 rounded-md font-medium"
+        className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-4 py-2 rounded-md font-medium"
       >
         {isSubmitting ? t('forms.login.submitting') : t('forms.login.submit')}
       </button>

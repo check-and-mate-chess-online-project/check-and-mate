@@ -85,7 +85,17 @@
     },
     "history": {
       "title": "History",
-      "placeholder": "List of played games will be here"
+      "empty": "No games yet",
+      "result": {
+        "win": "Win",
+        "loss": "Loss",
+        "draw": "Draw"
+      },
+      "filters": {
+        "all": "All",
+        "wins": "Wins",
+        "losses": "Losses"
+      }
     },
     "replay": {
       "title": "Replay",
@@ -100,8 +110,24 @@
       "label": "Player profile"
     },
     "inventory": {
-      "title": "Inventory",
+      "title": "Planets",
+      "back": "back",
       "active": "active",
+      "setActive": "Set active",
+      "locked": "Locked",
+      "lockedHint": "Unlock this skin from cases",
+      "toCases": "Open cases",
+      "noSkins": "No skins owned in this collection",
+      "planets": {
+        "earth": "Earth",
+        "mars": "Mars"
+      },
+      "skins": {
+        "gagarin-king": {
+          "name": "Gagarin",
+          "description": "First man in space. Leads earthlings to the stars."
+        }
+      },
       "figures": {
         "1": "King",
         "2": "Queen",
@@ -118,15 +144,35 @@
     },
     "cases": {
       "title": "Cases",
-      "placeholder": "Cases inventory and opening will be here"
+      "youHave": "You have {{count}} cases",
+      "openButton": "Open case",
+      "duplicate": "Duplicate skin — converted to currency",
+      "dropped": "Dropped: {{id}}",
+      "noCases": "No cases. Buy some in the shop"
     },
     "shop": {
       "title": "Shop",
-      "placeholder": "Cases shop will be here"
+      "caseTitle": "Lootbox",
+      "caseDescription": "Random skin from any planet",
+      "amount": "Amount",
+      "total": "Total",
+      "buyButton": "Buy",
+      "notEnoughBalance": "Not enough balance"
     },
     "friends": {
       "title": "Friends",
-      "placeholder": "Friends, requests and game invitations will be here"
+      "tabs": {
+        "friends": "Friends",
+        "incoming": "Incoming",
+        "outgoing": "Outgoing",
+        "invitations": "Game invitations"
+      },
+      "empty": "Empty",
+      "searchPlaceholder": "Find friend by login",
+      "addButton": "Add",
+      "accept": "Accept",
+      "reject": "Reject",
+      "remove": "Remove"
     },
     "notFound": {
       "title": "404",

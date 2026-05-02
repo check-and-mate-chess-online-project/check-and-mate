@@ -5,6 +5,7 @@ export interface DropdownItem {
   label: string
   to?: string
   onClick?: () => void
+  danger?: boolean
 }
 
 interface DropdownProps {
@@ -47,14 +48,14 @@ export function Dropdown({ label, items, align = 'left' }: DropdownProps) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="text-slate-400 hover:text-slate-100 flex items-center gap-1"
+        className="text-violet-400 hover:text-violet-300 flex items-center gap-1"
       >
         {label}
         <span className="text-xs">▾</span>
       </button>
       {open && (
         <div
-          className={`absolute ${alignClass} top-full mt-2 bg-slate-800 border border-slate-700 rounded-md py-1 min-w-[160px] shadow-lg z-10`}
+          className={`absolute ${alignClass} top-full mt-2 bg-violet-900/40 border border-violet-500/20 backdrop-blur rounded-md py-1 min-w-[160px] shadow-lg z-50`}
         >
           {items.map((item, i) =>
             item.to ? (
@@ -65,8 +66,8 @@ export function Dropdown({ label, items, align = 'left' }: DropdownProps) {
                 className={({ isActive }) =>
                   `block px-4 py-2 ${
                     isActive
-                      ? 'text-slate-100 bg-slate-700'
-                      : 'text-slate-300 hover:bg-slate-700 hover:text-slate-100'
+                      ? 'text-violet-100 bg-violet-500/20'
+                      : 'text-violet-200 hover:bg-violet-500/10 hover:text-violet-100'
                   }`
                 }
               >
@@ -80,7 +81,11 @@ export function Dropdown({ label, items, align = 'left' }: DropdownProps) {
                   item.onClick?.()
                   setOpen(false)
                 }}
-                className="block w-full text-left px-4 py-2 text-slate-300 hover:bg-slate-700 hover:text-slate-100"
+                className={`block w-full text-left px-4 py-2 ${
+                  item.danger
+                    ? 'text-orange-400 hover:bg-orange-500/20 hover:text-orange-300'
+                    : 'text-violet-200 hover:bg-violet-500/10 hover:text-violet-100'
+                }`}
               >
                 {item.label}
               </button>

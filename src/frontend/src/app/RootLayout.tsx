@@ -9,7 +9,7 @@ import { useAuth } from '../shared/auth/useAuth'
 import { stopGameHub } from '../shared/realtime/gameHub'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  isActive ? 'text-slate-100' : 'text-slate-400 hover:text-slate-100'
+  isActive ? 'text-violet-100' : 'text-violet-400 hover:text-violet-200'
 
 export function RootLayout() {
   const { t } = useTranslation()
@@ -24,7 +24,7 @@ export function RootLayout() {
 
   return (
     <div className="min-h-screen text-slate-100 flex flex-col">
-      <header className="border-b border-slate-800 px-6 py-4">
+      <header className="border-b border-violet-900 px-6 py-4">
         <nav className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/lobby" className="block">
@@ -56,7 +56,11 @@ export function RootLayout() {
                 { label: t('nav.profileItems.myProfile'), to: '/profile' },
                 { label: t('nav.profileItems.history'), to: '/history' },
                 { label: t('nav.profileItems.friends'), to: '/friends' },
-                { label: t('nav.profileItems.logout'), onClick: handleLogout },
+                {
+                  label: t('nav.profileItems.logout'),
+                  onClick: handleLogout,
+                  danger: true,
+                },
               ]}
             />
           </div>

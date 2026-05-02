@@ -19,7 +19,7 @@ function Clock({ label, ms, active }: ClockProps) {
   return (
     <div
       className={`px-4 py-2 rounded-md border ${
-        active ? 'border-blue-500 bg-blue-500/10' : 'border-slate-800'
+        active ? 'border-violet-500 bg-violet-500/10' : 'border-slate-800'
       }`}
     >
       <div className="text-xs uppercase text-slate-500">{label}</div>
@@ -67,7 +67,7 @@ export function GamePage() {
 
   return (
     <div className="min-h-screen text-slate-100 flex flex-col">
-      <header className="flex items-center justify-between px-6 py-3 border-b border-slate-800">
+      <header className="flex items-center justify-between px-6 py-3 border-b border-violet-900">
         <Link
           to="/lobby"
           className="text-slate-400 hover:text-slate-100 text-sm"
