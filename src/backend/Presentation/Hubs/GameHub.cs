@@ -44,6 +44,13 @@ public class GameHub(ConnectionManager connections, IMatchmakingService matchmak
         await Clients.Caller.SendAsync("StartOpponentSearch");
     }
 
+    public async Task CancelSearch()
+    {
+        Guid userId = GetUserId();
+        await _matchmaking.StopOpponentSearchAsync(userId);
+        await Clients.Caller.SendAsync("StopOpponentSearch");
+    }
+
     public async Task<MoveResultDto> MakeMove(Move move)
     {
         Guid userId = GetUserId();
