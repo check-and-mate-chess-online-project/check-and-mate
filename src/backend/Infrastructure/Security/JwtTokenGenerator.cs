@@ -19,9 +19,7 @@ public class JwtTokenGenerator(IOptions<JwtTokenSettings> jwtOptions) : ITokenGe
         Claim[] claims =
         [
             new(ClaimTypes.NameIdentifier, userId.ToString()),
-            new(ClaimTypes.Name, login),
-            new(JwtRegisteredClaimNames.Iss, _jwtSettings.Issuer),
-            new(JwtRegisteredClaimNames.Aud, _jwtSettings.Audience)
+            new(ClaimTypes.Name, login)
         ];
         JwtSecurityToken token = new(
             issuer: _jwtSettings.Issuer,

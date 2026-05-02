@@ -56,7 +56,9 @@ public class Program
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
+                    ValidIssuer = builder.Configuration["JwtSettings:Issuer"] ?? throw new InvalidOperationException("issuer not found"),
                     ValidateAudience = true,
+                    ValidAudience = builder.Configuration["JwtSettings:Audience"] ?? throw new InvalidOperationException("audience not found"),
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
@@ -99,6 +101,7 @@ public class Program
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IUserAuthService, UserAuthService>();
         builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
+        builder.Services.AddScoped<IUserProfileService, UserProfileService>();
         builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
         builder.Services.AddScoped<IGameplayService, GameplayService>();
 
