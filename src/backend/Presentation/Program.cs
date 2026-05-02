@@ -17,6 +17,7 @@ using Application.Abstractions.UnitOfWork;
 using Application.Orchestration.EventHandlers;
 using Application.Abstractions.Events;
 using Application.Events;
+using Application.Exceptions;
 using Infrastructure.Settings;
 using Infrastructure.Connections;
 using Infrastructure.Security;
@@ -122,7 +123,7 @@ public class Program
         app.UseAuthorization();
 
         app.MapControllers();
-        app.MapHub<GameHub>("/hub");
+        app.MapHub<GameHub>("/hub/game");
 
         app.UseExceptionHandler(ex =>
         {
@@ -135,7 +136,10 @@ public class Program
                 {
                     InvalidOperationException => StatusCodes.Status400BadRequest,
                     ArgumentException => StatusCodes.Status400BadRequest,
-                    UnauthorizedAccessException => StatusCodes.Status403Forbidden,
+                    UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+                    NotFoundException => StatusCodes.Status404NotFound,
+                    ConflictException => StatusCodes.Status409Conflict,
+                    UserDeletedException => StatusCodes.Status410Gone,
                     _ => StatusCodes.Status500InternalServerError
                 };
                 var errorResponse = new

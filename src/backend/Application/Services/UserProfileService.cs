@@ -31,12 +31,14 @@ public class UserProfileService(IUserRepository userRepos, IPasswordHasher hashe
         await _uow.CommitChangesAsync();
     }
 
-    public async Task ChangeUserPasswordAsync(Guid userId, string password)
+    public async Task ChangeUserPasswordAsync(Guid userId, string password, string newPassword)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
+        ArgumentException.ThrowIfNullOrWhiteSpace(newPassword);
         User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
         if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
-        string passworHash = _hasher.GetHash(password);
+        if (user.PasswordHash != _hasher.GetHash(password)) throw new UnauthorizedAccessException("incorrect password");
+        string passworHash = _hasher.GetHash(newPassword);
         user.ChangePasswordHash(passworHash);
         _userRepos.Update(user);
         await _uow.CommitChangesAsync();
@@ -52,10 +54,11 @@ public class UserProfileService(IUserRepository userRepos, IPasswordHasher hashe
         await _uow.CommitChangesAsync();
     }
 
-    public async Task RemoveUserAsync(Guid userId)
+    public async Task RemoveUserAsync(Guid userId, string password)
     {
         User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
         if (user.IsDeleted) throw new UserDeletedException($"user {userId} already deleted");
+        if (user.PasswordHash != _hasher.GetHash(password)) throw new UnauthorizedAccessException("incorrect password");
         user.Delete();
         _userRepos.Update(user);
         await _uow.CommitChangesAsync();
