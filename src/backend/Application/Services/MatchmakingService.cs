@@ -7,6 +7,7 @@ using Application.Abstractions.Events;
 using Application.Events;
 using Application.Mappers;
 using Application.Exceptions;
+using Application.Models;
 using Core.Repositories;
 using Core.Models.Games;
 using Core.Models.Users;
@@ -34,6 +35,7 @@ public class MatchmakingService(
     {
         User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
         if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
+        if (_pool.ContainsUser(user.Id)) throw new ConflictException("already searching for an opponent");
         ITimeControl timeControl;
         if (timeControlEnabled)
         {
@@ -41,42 +43,44 @@ public class MatchmakingService(
             timeControl = new TimeControl(initialTimeSec, incrementPerMoveSec);
         }
         else timeControl = new DisabledTimeControl();
-        _pool.AddUser(user, timeControl);
-        await TryFindOpponent(user, timeControl);
+        MatchmakingContext context = new(user, timeControl);
+        _pool.AddUser(context);
+        await TryFindOpponent(context);
     }
 
     public async Task StopOpponentSearchAsync(Guid userId)
     {
         User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
-        _pool.TryRemoveUser(user);
+        _pool.TryRemoveUser(user.Id);
     }
 
-    private async Task TryFindOpponent(User user, ITimeControl timeControl)
+    private async Task TryFindOpponent(MatchmakingContext context)
     {
-        User? opponent;
+        User user = context.User;
+        ITimeControl timeControl = context.TimeControl;
+        User opponent;
         bool isMatched = false;
         lock (_matchLock)
         {
-            opponent = _pool.GetAll()
-                .Where(x =>
-                    x.Key.Id != user.Id &&
-                    !x.Key.IsDeleted &&
+            MatchmakingContext? opponentContext = _pool.GetAll()
+                .FirstOrDefault(opponent =>
+                    opponent.User.Id != user.Id &&
+                    !opponent.User.IsDeleted &&
                     (
-                        (!x.Value.IsEnabled && !timeControl.IsEnabled) ||
-                        (x.Value.IsEnabled && timeControl.IsEnabled &&
-                            x.Value.InitialTimeSec == timeControl.InitialTimeSec &&
-                            x.Value.IncrementPerMoveSec == timeControl.IncrementPerMoveSec)
+                        (!opponent.TimeControl.IsEnabled && !timeControl.IsEnabled) ||
+                        (opponent.TimeControl.IsEnabled && timeControl.IsEnabled &&
+                            opponent.TimeControl.InitialTimeSec == timeControl.InitialTimeSec &&
+                            opponent.TimeControl.IncrementPerMoveSec == timeControl.IncrementPerMoveSec)
                     ) &&
-                    Math.Abs(x.Key.Rating - user.Rating) <= _settings.RatingRange)
-                .Select(x => x.Key)
-                .FirstOrDefault();
-            if (opponent == null) return;
-            bool playerRemoved = _pool.TryRemoveUser(user);
-            bool opponentRemoved = _pool.TryRemoveUser(opponent);
+                    Math.Abs(opponent.User.Rating - user.Rating) <= _settings.RatingRange);
+            if (opponentContext == null) return;
+            opponent = opponentContext.User;
+            bool playerRemoved = _pool.TryRemoveUser(user.Id);
+            bool opponentRemoved = _pool.TryRemoveUser(opponent.Id);
             if (!playerRemoved || !opponentRemoved)
             {
-                if (playerRemoved) _pool.AddUser(user, timeControl);
-                else _pool.AddUser(opponent, timeControl);
+                if (playerRemoved) _pool.AddUser(new MatchmakingContext(user, timeControl));
+                if (opponentRemoved) _pool.AddUser(new MatchmakingContext(opponent, opponentContext.TimeControl));
                 return;
             }
             isMatched = true;

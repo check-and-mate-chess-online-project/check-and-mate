@@ -1,17 +1,18 @@
 using System.Collections.Concurrent;
 using Application.Abstractions.Matchmaking;
-using Core.Models.Interfaces;
-using Core.Models.Users;
+using Application.Models;
 
 namespace Infrastructure.Persistence.InMemory;
 
 public class MatchmakingPool : IMatchmakingPool
 {
-    private readonly ConcurrentDictionary<User, ITimeControl> _pool = [];
+    private readonly ConcurrentDictionary<Guid, MatchmakingContext> _pool = [];
 
-    public Dictionary<User, ITimeControl> GetAll() => _pool.ToDictionary();
+    public bool ContainsUser(Guid userId) => _pool.ContainsKey(userId);
 
-    public void AddUser(User user, ITimeControl timeControl) => _pool[user] = timeControl;
+    public List<MatchmakingContext> GetAll() => [.. _pool.Values];
 
-    public bool TryRemoveUser(User user) => _pool.TryRemove(user, out _);
+    public void AddUser(MatchmakingContext context) => _pool[context.User.Id] = context;
+
+    public bool TryRemoveUser(Guid userId) => _pool.TryRemove(userId, out _);
 }

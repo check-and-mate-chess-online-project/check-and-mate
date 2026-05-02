@@ -112,14 +112,14 @@ public class Program
         app.UseSwagger();
         app.UseSwaggerUI();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
-
         app.UseCors(policy => policy
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()
             .SetIsOriginAllowed(origin => true));
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapControllers();
         app.MapHub<GameHub>("/hub");

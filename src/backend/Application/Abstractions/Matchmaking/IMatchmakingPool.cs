@@ -1,11 +1,11 @@
-using Core.Models.Interfaces;
-using Core.Models.Users;
+using Application.Models;
 
 namespace Application.Abstractions.Matchmaking;
 
 public interface IMatchmakingPool
 {
-    Dictionary<User, ITimeControl> GetAll();
-    void AddUser(User user, ITimeControl timeControl);
-    bool TryRemoveUser(User user);
+    bool ContainsUser(Guid userId);
+    List<MatchmakingContext> GetAll();
+    void AddUser(MatchmakingContext context);
+    bool TryRemoveUser(Guid userId);
 }
