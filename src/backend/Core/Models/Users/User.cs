@@ -1,3 +1,5 @@
+using Core.Exceptions;
+
 namespace Core.Models.Users;
 
 public class User
@@ -34,7 +36,7 @@ public class User
     public void SpendBalance(int amount)
     {
         if (amount <= 0) throw new ArgumentException("amount must be positive");
-        if (Balance < amount) throw new InvalidOperationException("not enough balance"); 
+        if (Balance < amount) throw new CoreLogicException("not enough balance"); 
         Balance -= amount;
     }
 
@@ -46,7 +48,7 @@ public class User
 
     public void OpenLootBox()
     {
-        if (LootBoxCount == 0) throw new InvalidOperationException("no lootboxes");
+        if (LootBoxCount == 0) throw new CoreLogicException("no lootboxes");
         LootBoxCount--;
     }
 

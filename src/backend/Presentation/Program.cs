@@ -16,6 +16,8 @@ using Application.Abstractions.Security;
 using Application.Abstractions.UnitOfWork;
 using Application.Orchestration.EventHandlers;
 using Application.Abstractions.Events;
+using Application.Orchestration.UserSkins;
+using Application.Abstractions.Tokens;
 using Application.Events;
 using Application.Exceptions;
 using Infrastructure.Settings;
@@ -27,8 +29,7 @@ using Infrastructure.Events;
 using Infrastructure.Background;
 using Core.Repositories;
 using Core.Models.Interfaces;
-
-using Application.Abstractions.Tokens;
+using Core.Exceptions;
 
 
 namespace Presentation;
@@ -43,6 +44,9 @@ public class Program
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+
+        builder.Services.AddSwaggerGen();
+
         builder.Services.AddControllers();
         builder.Services.AddSignalR(hubOptions =>
         {
@@ -85,6 +89,8 @@ public class Program
 
         builder.Services.AddSingleton<IGameRepository, GameRepository>();
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
+        builder.Services.AddSingleton<ISkinRepository, SkinRepository>();
+        builder.Services.AddSingleton<IUserSkinRepository, UserSkinRepository>();
 
         builder.Services.AddSingleton<IChessEngine, ChessEngine>();
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
@@ -92,6 +98,7 @@ public class Program
         builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
         builder.Services.AddSingleton<IPasswordHasher, SimplePasswordHasher>();
         builder.Services.AddScoped<IGameSessionService, GameSessionService>();
+        builder.Services.AddScoped<IUserSkinService, UserSkinService>();
 
         builder.Services.AddSingleton<IEventDispatcher, EventDispatcher>();
         builder.Services.AddScoped<IEventHandler<TimeExpired>, TimeExpiredHandler>();
@@ -105,6 +112,7 @@ public class Program
         builder.Services.AddScoped<IUserProfileService, UserProfileService>();
         builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
         builder.Services.AddScoped<IGameplayService, GameplayService>();
+        builder.Services.AddScoped<IUserInventoryService, UserInventoryService>();
 
         builder.Services.AddSingleton<ConnectionManager>();
 
@@ -134,12 +142,13 @@ public class Program
                 Exception exception = exceptionFeature.Error;
                 context.Response.StatusCode = exception switch
                 {
-                    InvalidOperationException => StatusCodes.Status400BadRequest,
+                    CoreLogicException => StatusCodes.Status400BadRequest,
                     ArgumentException => StatusCodes.Status400BadRequest,
                     UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
                     NotFoundException => StatusCodes.Status404NotFound,
                     ConflictException => StatusCodes.Status409Conflict,
                     UserDeletedException => StatusCodes.Status410Gone,
+                    InvalidOperationException => StatusCodes.Status500InternalServerError,
                     _ => StatusCodes.Status500InternalServerError
                 };
                 var errorResponse = new

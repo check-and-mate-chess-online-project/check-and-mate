@@ -2,8 +2,10 @@ using Application.Services.Interfaces;
 using Application.Orchestration.SkinDrops;
 using Application.Abstractions.UnitOfWork;
 using Application.Abstractions.Settings;
+using Application.Orchestration.UserSkins;
 using Application.Exceptions;
 using Application.Dtos;
+using Application.Mappers;
 using Core.Repositories;
 using Core.Models.Skins;
 using Core.Models.Users;
@@ -12,15 +14,15 @@ namespace Application.Services;
 
 public class LootBoxService(
     IGameSettingsProvider settings, 
-    ISkinDropService skinSropService, 
-    IUserRepository userRepos, 
-    IUserSkinRepository userSkinRepos, 
+    ISkinDropService skinSropService,
+    IUserSkinService userSkinService,
+    IUserRepository userRepos,
     IUnitOfWork uow) : ILootBoxService
 {
     private readonly IGameSettingsProvider _settings = settings;
     private readonly ISkinDropService _skinSropService = skinSropService;
+    private readonly IUserSkinService _userSkinService = userSkinService;
     private readonly IUserRepository _userRepos = userRepos;
-    private readonly IUserSkinRepository _userSkinRepos = userSkinRepos;
     private readonly IUnitOfWork _uow = uow;
 
     public async Task<LootBoxDropResultDto> OpenUserLootBoxAsync(Guid userId)
@@ -30,10 +32,9 @@ public class LootBoxService(
         user.OpenLootBox();
         Skin skin = await _skinSropService.DropSkinAsync();
         bool isDuplicate;
-        if (await _userRepos.GetAsync(skin.Id) == null)
+        if (await _userSkinService.TryAddSkinAsync(user.Id, skin.Id))
         {
             isDuplicate = false;
-            _userSkinRepos.Add(userId, skin.Id);
         }
         else
         {
@@ -42,7 +43,7 @@ public class LootBoxService(
         }
         _userRepos.Update(user);
         await _uow.CommitChangesAsync();
-        LootBoxDropResultDto dropResult = new() { SkinId = skin.Id, IsDuplicate = isDuplicate };
+        LootBoxDropResultDto dropResult = new() { Skin = SkinMapper.GetDto(skin), IsDuplicate = isDuplicate };
         return dropResult;
     }
 

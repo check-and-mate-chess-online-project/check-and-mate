@@ -2,6 +2,6 @@ namespace Application.Dtos;
 
 public class LootBoxDropResultDto
 {
-    public Guid SkinId { get; init; }
+    public SkinDto Skin { get; init; } = null!;
     public bool IsDuplicate { get; init; }
 }

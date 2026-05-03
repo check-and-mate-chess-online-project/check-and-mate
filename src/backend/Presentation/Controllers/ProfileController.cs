@@ -10,15 +10,15 @@ namespace Presentation.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/profile")]
-public class ProfileController(IUserProfileService profileService) : ControllerBase
+public class ProfileController(IUserProfileService profile) : ControllerBase
 {
-    private readonly IUserProfileService _profileService = profileService;
+    private readonly IUserProfileService _profile = profile;
 
     [HttpGet("me")]
     public async Task<IActionResult> GetUserProfile()
     {
         Guid userId = GetUserId();
-        UserDto user = await _profileService.GetUserProfile(userId);
+        UserDto user = await _profile.GetUserProfile(userId);
         return Ok(user);
     }
 
@@ -26,7 +26,7 @@ public class ProfileController(IUserProfileService profileService) : ControllerB
     public async Task<IActionResult> ChangeLogin([FromBody]ChangeLoginRequest request)
     {
         Guid userId = GetUserId();
-        await _profileService.ChangeUserLoginAsync(userId, request.Login);
+        await _profile.ChangeUserLoginAsync(userId, request.Login);
         return NoContent();
     }
 
@@ -34,7 +34,7 @@ public class ProfileController(IUserProfileService profileService) : ControllerB
     public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordRequest request)
     {
         Guid userId = GetUserId();
-        await _profileService.ChangeUserPasswordAsync(userId, request.OldPassword, request.NewPassword);
+        await _profile.ChangeUserPasswordAsync(userId, request.OldPassword, request.NewPassword);
         return NoContent();
     }
 
@@ -42,7 +42,7 @@ public class ProfileController(IUserProfileService profileService) : ControllerB
     public async Task<IActionResult> ChangeEmail([FromBody]ChangeEmailRequest request)
     {
         Guid userId = GetUserId();
-        await _profileService.ChangeUserEmailAsync(userId, request.Email);
+        await _profile.ChangeUserEmailAsync(userId, request.Email);
         return NoContent();
     }
 
@@ -50,7 +50,7 @@ public class ProfileController(IUserProfileService profileService) : ControllerB
     public async Task<IActionResult> DeleteAccount([FromBody]DeleteAccountRequest request)
     {
         Guid userId = GetUserId();
-        await _profileService.RemoveUserAsync(userId, request.Password);
+        await _profile.RemoveUserAsync(userId, request.Password);
         return NoContent();
     }
 

@@ -1,5 +1,6 @@
 using Core.Models.Interfaces;
 using Core.Models.Chess;
+using Core.Exceptions;
 
 namespace Core.Models.Games;
 
@@ -7,7 +8,7 @@ public class ActiveGameState : IGameState
 {
     public MoveResult MakeMove(Game game, Move move, Guid playerId)
     {
-        if (playerId != game.GetCurrentPlayerId()) throw new InvalidOperationException("invalid player");
+        if (playerId != game.GetCurrentPlayerId()) throw new CoreLogicException("invalid player");
         DateTime currentTime = DateTime.UtcNow;
         if (!game.CheckPlayerLeftTime(playerId, currentTime)) 
         {
@@ -33,22 +34,22 @@ public class ActiveGameState : IGameState
 
     public void HandleTimeout(Game game, Guid playerId)
     {
-        if (playerId != game.GetCurrentPlayerId()) throw new InvalidOperationException("invalid player");
-        if (game.CheckPlayerLeftTime(playerId, DateTime.UtcNow)) throw new InvalidOperationException("time is not yet up");
+        if (playerId != game.GetCurrentPlayerId()) throw new CoreLogicException("invalid player");
+        if (game.CheckPlayerLeftTime(playerId, DateTime.UtcNow)) throw new CoreLogicException("time is not yet up");
         game.FinishGame(GameTerminationReason.Timeout, playerId);
         game.SetState(new FinishedGameState());
     }
 
     public void HandleResign(Game game, Guid playerId) 
     {
-        if (playerId != game.WhitePlayerId && playerId != game.BlackPlayerId) throw new InvalidOperationException("invalid player");
+        if (playerId != game.WhitePlayerId && playerId != game.BlackPlayerId) throw new CoreLogicException("invalid player");
         game.FinishGame(GameTerminationReason.Resignation, playerId);
         game.SetState(new FinishedGameState());
     }
 
     public void HandleDisconnect(Game game, Guid playerId)
     {
-        if (playerId != game.WhitePlayerId && playerId != game.BlackPlayerId) throw new InvalidOperationException("invalid player");
+        if (playerId != game.WhitePlayerId && playerId != game.BlackPlayerId) throw new CoreLogicException("invalid player");
         game.FinishGame(GameTerminationReason.Disconnect, playerId);
         game.SetState(new FinishedGameState());
     }
