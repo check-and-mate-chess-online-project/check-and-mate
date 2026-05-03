@@ -15,19 +15,19 @@ public class InventoryController(IUserInventoryService inventory, ILootBoxServic
     private readonly ILootBoxService _loot = loot;
 
     [HttpGet("skins")]
-    public async Task<IActionResult> GetUserSkins()
+    public async Task<ActionResult<List<SkinDto>>> GetUserSkins()
     {
         Guid userId = GetUserId();
         List<SkinDto> skins = await _inventory.GetUserSkinsAsync(userId);
-        return Ok(skins);
+        return skins;
     }
 
     [HttpPost("lootboxes/open")]
-    public async Task<IActionResult> OpenLootBox()
+    public async Task<ActionResult<LootBoxDropResultDto>> OpenLootBox()
     {
         Guid userId = GetUserId();
         LootBoxDropResultDto drop = await _loot.OpenUserLootBoxAsync(userId);
-        return Ok(drop);
+        return drop;
     }
 
     private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) 

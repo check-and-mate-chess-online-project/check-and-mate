@@ -13,9 +13,9 @@ public class RegistrationController(IUserRegistrationService registration) : Con
     private readonly IUserRegistrationService _registration = registration;
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody]RegisterRequest request)
+    public async Task<ActionResult<AuthResultDto>> Register([FromBody]RegisterRequest request)
     {
         AuthResultDto authResult = await _registration.RegisterAsync(request.Login, request.Password, request.Email, UserRole.Player);
-        return Ok(authResult);
+        return authResult;
     }
 }

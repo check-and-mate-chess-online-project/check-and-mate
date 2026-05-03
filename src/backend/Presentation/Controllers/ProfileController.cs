@@ -15,15 +15,16 @@ public class ProfileController(IUserProfileService profile) : ControllerBase
     private readonly IUserProfileService _profile = profile;
 
     [HttpGet("me")]
-    public async Task<IActionResult> GetUserProfile()
+    public async Task<ActionResult<UserDto>> GetUserProfile()
     {
         Guid userId = GetUserId();
         UserDto user = await _profile.GetUserProfile(userId);
-        return Ok(user);
+        return user;
     }
 
     [HttpPatch("login")]
-    public async Task<IActionResult> ChangeLogin([FromBody]ChangeLoginRequest request)
+    [ProducesResponseType(204)]
+    public async Task<ActionResult> ChangeLogin([FromBody]ChangeLoginRequest request)
     {
         Guid userId = GetUserId();
         await _profile.ChangeUserLoginAsync(userId, request.Login);
@@ -31,7 +32,8 @@ public class ProfileController(IUserProfileService profile) : ControllerBase
     }
 
     [HttpPatch("password")]
-    public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordRequest request)
+    [ProducesResponseType(204)]
+    public async Task<ActionResult> ChangePassword([FromBody]ChangePasswordRequest request)
     {
         Guid userId = GetUserId();
         await _profile.ChangeUserPasswordAsync(userId, request.OldPassword, request.NewPassword);
@@ -39,7 +41,8 @@ public class ProfileController(IUserProfileService profile) : ControllerBase
     }
 
     [HttpPatch("email")]
-    public async Task<IActionResult> ChangeEmail([FromBody]ChangeEmailRequest request)
+    [ProducesResponseType(204)]
+    public async Task<ActionResult> ChangeEmail([FromBody]ChangeEmailRequest request)
     {
         Guid userId = GetUserId();
         await _profile.ChangeUserEmailAsync(userId, request.Email);
@@ -47,7 +50,8 @@ public class ProfileController(IUserProfileService profile) : ControllerBase
     }
 
     [HttpDelete("me")]
-    public async Task<IActionResult> DeleteAccount([FromBody]DeleteAccountRequest request)
+    [ProducesResponseType(204)]
+    public async Task<ActionResult> DeleteAccount([FromBody]DeleteAccountRequest request)
     {
         Guid userId = GetUserId();
         await _profile.RemoveUserAsync(userId, request.Password);
