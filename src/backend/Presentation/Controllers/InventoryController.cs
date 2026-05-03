@@ -9,9 +9,10 @@ namespace Presentation.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/inventory")]
-public class InventoryController(IUserInventoryService inventory) : ControllerBase
+public class InventoryController(IUserInventoryService inventory, ILootBoxService loot) : ControllerBase
 {
     private readonly IUserInventoryService _inventory = inventory;
+    private readonly ILootBoxService _loot = loot;
 
     [HttpGet("skins")]
     public async Task<IActionResult> GetUserSkins()
@@ -19,6 +20,14 @@ public class InventoryController(IUserInventoryService inventory) : ControllerBa
         Guid userId = GetUserId();
         List<SkinDto> skins = await _inventory.GetUserSkinsAsync(userId);
         return Ok(skins);
+    }
+
+    [HttpPost("lootboxes/open")]
+    public async Task<IActionResult> OpenLootBox()
+    {
+        Guid userId = GetUserId();
+        LootBoxDropResultDto drop = await _loot.OpenUserLootBoxAsync(userId);
+        return Ok(drop);
     }
 
     private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) 

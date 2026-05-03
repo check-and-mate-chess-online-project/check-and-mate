@@ -17,6 +17,7 @@ public class SkinDropService(ISkinRepository skinRepos) : ISkinDropService
     {
         SkinRarity rarity = RollRarity();
         List<Skin> skins = await _skinRepos.GetByRarityAsync(rarity);
+        if (skins.Count == 0) throw new InvalidOperationException("skin repository is empty");
         Skin skin = skins[Random.Shared.Next(skins.Count)];
         return skin;
     }

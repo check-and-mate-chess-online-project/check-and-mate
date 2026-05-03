@@ -17,6 +17,7 @@ using Application.Abstractions.UnitOfWork;
 using Application.Orchestration.EventHandlers;
 using Application.Abstractions.Events;
 using Application.Orchestration.UserSkins;
+using Application.Orchestration.SkinDrops;
 using Application.Abstractions.Tokens;
 using Application.Events;
 using Application.Exceptions;
@@ -95,10 +96,11 @@ public class Program
         builder.Services.AddSingleton<IChessEngine, ChessEngine>();
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
         builder.Services.AddSingleton<IMatchmakingPool, MatchmakingPool>();
-        builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
-        builder.Services.AddSingleton<IPasswordHasher, SimplePasswordHasher>();
+        builder.Services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
+        builder.Services.AddScoped<IPasswordHasher, SimplePasswordHasher>();
         builder.Services.AddScoped<IGameSessionService, GameSessionService>();
         builder.Services.AddScoped<IUserSkinService, UserSkinService>();
+        builder.Services.AddScoped<ISkinDropService, SkinDropService>();
 
         builder.Services.AddSingleton<IEventDispatcher, EventDispatcher>();
         builder.Services.AddScoped<IEventHandler<TimeExpired>, TimeExpiredHandler>();
@@ -113,6 +115,7 @@ public class Program
         builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
         builder.Services.AddScoped<IGameplayService, GameplayService>();
         builder.Services.AddScoped<IUserInventoryService, UserInventoryService>();
+        builder.Services.AddScoped<ILootBoxService, LootBoxService>();
 
         builder.Services.AddSingleton<ConnectionManager>();
 

@@ -20,7 +20,7 @@ public class LootBoxService(
     IUnitOfWork uow) : ILootBoxService
 {
     private readonly IGameSettingsProvider _settings = settings;
-    private readonly ISkinDropService _skinSropService = skinSropService;
+    private readonly ISkinDropService _skinDropService = skinSropService;
     private readonly IUserSkinService _userSkinService = userSkinService;
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
@@ -30,7 +30,7 @@ public class LootBoxService(
         User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
         if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
         user.OpenLootBox();
-        Skin skin = await _skinSropService.DropSkinAsync();
+        Skin skin = await _skinDropService.DropSkinAsync();
         bool isDuplicate;
         if (await _userSkinService.TryAddSkinAsync(user.Id, skin.Id))
         {
