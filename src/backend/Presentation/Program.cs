@@ -92,6 +92,7 @@ public class Program
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<ISkinRepository, SkinRepository>();
         builder.Services.AddSingleton<IUserSkinRepository, UserSkinRepository>();
+        builder.Services.AddSingleton<IUserCustomizationRepository, UserCustomizationRepository>();
 
         builder.Services.AddSingleton<IChessEngine, ChessEngine>();
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
