@@ -156,7 +156,7 @@ public class Program
                     InvalidOperationException => StatusCodes.Status500InternalServerError,
                     _ => StatusCodes.Status500InternalServerError
                 };
-                ErrorResponce errorResponse = new
+                ErrorResponse errorResponse = new
                 (
                     context.Response.StatusCode, 
                     context.Response.StatusCode == StatusCodes.Status500InternalServerError

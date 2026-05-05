@@ -19,7 +19,7 @@ public class InventoryController(IInventoryService inventory, ILootBoxService lo
 
     [HttpGet("skins")]
     [ProducesResponseType(typeof(List<SkinDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<SkinDto>>> GetUserSkins()
     {
         Guid userId = GetUserId();
@@ -29,11 +29,11 @@ public class InventoryController(IInventoryService inventory, ILootBoxService lo
 
     [HttpPost("lootboxes/open")]
     [ProducesResponseType(typeof(LootBoxDropResultDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status410Gone)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<LootBoxDropResultDto>> OpenLootBox()
     {
         Guid userId = GetUserId();
@@ -43,9 +43,9 @@ public class InventoryController(IInventoryService inventory, ILootBoxService lo
 
     [HttpPost("skins/equip")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status410Gone)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
     public async Task<ActionResult> EquipSkin([FromBody]EquipSkinRequest request)
     {
         Guid userId = GetUserId();

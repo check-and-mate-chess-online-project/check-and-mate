@@ -16,10 +16,10 @@ public class ShopController(ILootBoxService loot) : ControllerBase
 
     [HttpPost("lootboxes/buy")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status410Gone)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
     public async Task<ActionResult> BuyLootBoxes([FromBody]BuyLootBoxesRequest request)
     {
         Guid userId = GetUserId();
