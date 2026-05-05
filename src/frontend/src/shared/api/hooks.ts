@@ -4,7 +4,6 @@ import type {
   GameDto,
   Guid,
   LootBoxDropResultDto,
-  OwnedSkinDto,
   PlanetDto,
   SkinDto,
   UserDto,
@@ -14,7 +13,7 @@ import type { FigureType } from './enums'
 export function useMe() {
   return useQuery({
     queryKey: ['me'],
-    queryFn: () => api.get<UserDto>('/api/users/me'),
+    queryFn: () => api.get<UserDto>('/api/profile/me'),
   })
 }
 
@@ -44,15 +43,15 @@ export function usePlanetSkins(planetId: Guid) {
 export function useInventory() {
   return useQuery({
     queryKey: ['inventory'],
-    queryFn: () => api.get<OwnedSkinDto[]>('/api/users/me/inventory'),
+    queryFn: () => api.get<SkinDto[]>('/api/inventory/skins'),
   })
 }
 
-export function useUpdateCustomization() {
+export function useEquipSkin() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (body: { figureType: FigureType; skinId: Guid }) =>
-      api.post<void>('/api/users/me/customizations', body),
+    mutationFn: (body: { figure: FigureType; skinId: Guid }) =>
+      api.post<void>('/api/inventory/skins/equip', body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['inventory'] }),
   })
 }
@@ -60,7 +59,8 @@ export function useUpdateCustomization() {
 export function useOpenLootbox() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: () => api.post<LootBoxDropResultDto>('/api/lootboxes/open'),
+    mutationFn: () =>
+      api.post<LootBoxDropResultDto>('/api/inventory/lootboxes/open'),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['me'] })
       qc.invalidateQueries({ queryKey: ['inventory'] })
@@ -72,10 +72,7 @@ export function useBuyLootbox() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (count: number) =>
-      api.post<{ balance: number; lootBoxCount: number }>(
-        '/api/lootboxes/buy',
-        { count },
-      ),
+      api.post<void>('/api/shop/lootboxes/buy', { count }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['me'] }),
   })
 }

@@ -19,6 +19,11 @@ export interface UserDto {
   isDeleted: boolean
 }
 
+export interface AuthResultDto {
+  user: UserDto
+  token: string
+}
+
 // у бэка пока named tuple — приходит как {Item1..Item4}, см. api-needs.md #6
 export interface FigurePosition {
   a: number
@@ -52,7 +57,7 @@ export interface LootBoxDropResultDto {
   isDuplicate: boolean
 }
 
-// shape пока придумали мы, друг ещё не определил
+// shape пока придумали мы, бэк не отдаёт планеты как entity
 export interface PlanetDto {
   id: Guid
   name: string
@@ -61,16 +66,11 @@ export interface PlanetDto {
 
 export interface SkinDto {
   id: Guid
-  planetId: Guid
-  figureType: FigureType
+  setId: Guid
+  figure: FigureType
   rarity: SkinRarity
-  name: string | null
-  imageUrl: string | null
-  description: string | null
-}
-
-export interface OwnedSkinDto extends SkinDto {
-  isActive: boolean
+  image: string
+  isDefault: boolean
 }
 
 // формат options — TODO, см. api-needs.md #7

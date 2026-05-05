@@ -2,32 +2,23 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import type { OwnedSkinDto, PlanetDto, SkinDto } from '../shared/api'
+import type { PlanetDto, SkinDto } from '../shared/api'
 import {
+  useEquipSkin,
   useInventory,
   usePlanetSkins,
   usePlanets,
-  useUpdateCustomization,
 } from '../shared/api/hooks'
+import { skinImageSrc } from '../shared/lib/skinImage'
 import { Skeleton } from '../shared/ui/Skeleton'
 
 interface DisplaySkin extends SkinDto {
   isOwned: boolean
-  isActive: boolean
 }
 
-function mergeSkins(
-  planetSkins: SkinDto[],
-  inventory: OwnedSkinDto[],
-): DisplaySkin[] {
-  return planetSkins.map((s) => {
-    const owned = inventory.find((o) => o.id === s.id)
-    return {
-      ...s,
-      isOwned: !!owned,
-      isActive: owned?.isActive ?? false,
-    }
-  })
+function mergeSkins(planetSkins: SkinDto[], inventory: SkinDto[]): DisplaySkin[] {
+  const ownedIds = new Set(inventory.map((s) => s.id))
+  return planetSkins.map((s) => ({ ...s, isOwned: ownedIds.has(s.id) }))
 }
 
 interface PlanetGridProps {
@@ -86,7 +77,7 @@ interface PlanetDetailProps {
 
 function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
   const { t } = useTranslation()
-  const update = useUpdateCustomization()
+  const equip = useEquipSkin()
   const [idx, setIdx] = useState(0)
   const skin = skins[idx]
 
@@ -94,14 +85,10 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
     defaultValue: planet.name,
   })
   const skinName = skin
-    ? t(`pages.inventory.skins.${skin.id}.name`, {
-        defaultValue: skin.name ?? '',
-      })
+    ? t(`pages.inventory.skins.${skin.id}.name`, { defaultValue: '' })
     : ''
   const skinDescription = skin
-    ? t(`pages.inventory.skins.${skin.id}.description`, {
-        defaultValue: skin.description ?? '',
-      })
+    ? t(`pages.inventory.skins.${skin.id}.description`, { defaultValue: '' })
     : ''
 
   const prev = () =>
@@ -159,13 +146,13 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
               className="absolute left-1/2 -translate-x-1/2 z-20 pointer-events-none"
               style={{
                 bottom: '0',
-                height: '80vh',
+                height: '65vh',
                 aspectRatio: '832 / 1216',
               }}
             >
-              {skin.isOwned && skin.imageUrl ? (
+              {skin.isOwned && skin.image ? (
                 <img
-                  src={skin.imageUrl}
+                  src={skinImageSrc(skin.image)}
                   alt={skinName}
                   className="h-full w-full object-contain"
                 />
@@ -198,7 +185,7 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
         )}
       </div>
 
-      <aside className="absolute right-0 top-0 bottom-0 w-80 p-6 z-30 flex flex-col bg-slate-950/40 border-l border-violet-900 overflow-y-auto">
+      <aside className="absolute right-0 top-0 bottom-0 w-80 p-6 z-30 flex flex-col bg-slate-950/40 border-l border-slate-800 overflow-y-auto">
         <div className="text-xs uppercase text-slate-500 tracking-wider mb-1">
           {planetName}
         </div>
@@ -206,9 +193,9 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
         {skin ? (
           skin.isOwned ? (
             <>
-              <h2 className="text-2xl mb-1">{skinName}</h2>
+              <h2 className="text-2xl mb-1">{skinName || '—'}</h2>
               <div className="text-sm text-slate-400 mb-4">
-                {t(`pages.inventory.figures.${skin.figureType}`)} ·{' '}
+                {t(`pages.inventory.figures.${skin.figure}`)} ·{' '}
                 {t(`pages.inventory.rarity.${skin.rarity}`)}
               </div>
               {skinDescription && (
@@ -216,31 +203,22 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
                   {skinDescription}
                 </p>
               )}
-              {skin.isActive ? (
-                <span className="self-start px-3 py-1 text-xs rounded-full bg-violet-500 text-white uppercase tracking-wider">
-                  {t('pages.inventory.active')}
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  disabled={update.isPending}
-                  onClick={() =>
-                    update.mutate({
-                      figureType: skin.figureType,
-                      skinId: skin.id,
-                    })
-                  }
-                  className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 rounded-md text-sm self-start"
-                >
-                  {t('pages.inventory.setActive')}
-                </button>
-              )}
+              <button
+                type="button"
+                disabled={equip.isPending}
+                onClick={() =>
+                  equip.mutate({ figure: skin.figure, skinId: skin.id })
+                }
+                className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 rounded-md text-sm self-start"
+              >
+                {t('pages.inventory.setActive')}
+              </button>
             </>
           ) : (
             <>
               <h2 className="text-2xl mb-1 text-slate-500">???</h2>
               <div className="text-sm text-slate-500 mb-4">
-                {t(`pages.inventory.figures.${skin.figureType}`)} ·{' '}
+                {t(`pages.inventory.figures.${skin.figure}`)} ·{' '}
                 {t(`pages.inventory.rarity.${skin.rarity}`)}
               </div>
               <p className="text-sm text-slate-400 mb-6">
@@ -268,7 +246,7 @@ function PlanetDetailLoader({
   onBack,
 }: {
   planet: PlanetDto
-  inventory: OwnedSkinDto[]
+  inventory: SkinDto[]
   onBack: () => void
 }) {
   const { data: planetSkins, isLoading } = usePlanetSkins(planet.id)
