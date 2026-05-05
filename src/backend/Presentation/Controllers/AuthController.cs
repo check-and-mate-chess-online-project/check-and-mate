@@ -8,9 +8,9 @@ namespace Presentation.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController(IUserAuthService auth) : ControllerBase
+public class AuthController(IAuthService auth) : ControllerBase
 {
-    private readonly IUserAuthService _auth = auth;
+    private readonly IAuthService _auth = auth;
 
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResultDto), StatusCodes.Status200OK)]

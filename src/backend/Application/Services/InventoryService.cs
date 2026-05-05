@@ -6,7 +6,7 @@ using Core.Models.Skins;
 
 namespace Application.Services;
 
-public class UserInventoryService(IUserSkinService userSkinService) : IUserInventoryService
+public class InventoryService(IUserSkinService userSkinService) : IInventoryService
 {
     private readonly IUserSkinService _userSkinService = userSkinService;
 

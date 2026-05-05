@@ -11,9 +11,9 @@ namespace Presentation.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/profile")]
-public class ProfileController(IUserProfileService profile) : ControllerBase
+public class ProfileController(IProfileService profile) : ControllerBase
 {
-    private readonly IUserProfileService _profile = profile;
+    private readonly IProfileService _profile = profile;
 
     [HttpGet("me")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]

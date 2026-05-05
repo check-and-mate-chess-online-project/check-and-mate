@@ -111,12 +111,12 @@ public class Program
 
         builder.Services.AddHostedService<TimeService>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-        builder.Services.AddScoped<IUserAuthService, UserAuthService>();
-        builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
-        builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+        builder.Services.AddScoped<IProfileService, ProfileService>();
         builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
         builder.Services.AddScoped<IGameplayService, GameplayService>();
-        builder.Services.AddScoped<IUserInventoryService, UserInventoryService>();
+        builder.Services.AddScoped<IInventoryService, InventoryService>();
         builder.Services.AddScoped<ILootBoxService, LootBoxService>();
 
         builder.Services.AddSingleton<ConnectionManager>();

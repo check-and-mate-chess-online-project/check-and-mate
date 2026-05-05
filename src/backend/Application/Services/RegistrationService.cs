@@ -10,11 +10,11 @@ using Core.Models.Users;
 
 namespace Application.Services;
 
-public class UserRegistrationService(
+public class RegistrationService(
     ITokenGenerator tokenGenerator, 
     IPasswordHasher hasher, 
     IUserRepository userRepos, 
-    IUnitOfWork uow) : IUserRegistrationService
+    IUnitOfWork uow) : IRegistrationService
 {
     private readonly ITokenGenerator _tokenGenerator = tokenGenerator;
     private readonly IPasswordHasher _hasher = hasher;

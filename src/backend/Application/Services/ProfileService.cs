@@ -9,7 +9,7 @@ using Core.Models.Users;
 
 namespace Application.Services;
 
-public class UserProfileService(IUserRepository userRepos, IPasswordHasher hasher, IUnitOfWork uow) : IUserProfileService
+public class ProfileService(IUserRepository userRepos, IPasswordHasher hasher, IUnitOfWork uow) : IProfileService
 {
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IPasswordHasher _hasher = hasher;

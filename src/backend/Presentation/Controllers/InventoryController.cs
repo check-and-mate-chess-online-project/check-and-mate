@@ -11,11 +11,11 @@ namespace Presentation.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/inventory")]
-public class InventoryController(IUserInventoryService inventory, ILootBoxService loot, IUserSkinConfigurationService configuration) : ControllerBase
+public class InventoryController(IInventoryService inventory, ILootBoxService loot, ISkinConfigurationService configuration) : ControllerBase
 {
-    private readonly IUserInventoryService _inventory = inventory;
+    private readonly IInventoryService _inventory = inventory;
     private readonly ILootBoxService _loot = loot;
-    private readonly IUserSkinConfigurationService _configuration = configuration;
+    private readonly ISkinConfigurationService _configuration = configuration;
 
     [HttpGet("skins")]
     [ProducesResponseType(typeof(List<SkinDto>), StatusCodes.Status200OK)]

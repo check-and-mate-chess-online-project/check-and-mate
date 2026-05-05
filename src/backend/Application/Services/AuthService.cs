@@ -8,7 +8,7 @@ using Core.Repositories;
 
 namespace Application.Services;
 
-public class UserAuthService(ITokenGenerator tokenGenerator, IPasswordHasher hasher, IUserRepository userRepos) : IUserAuthService
+public class AuthService(ITokenGenerator tokenGenerator, IPasswordHasher hasher, IUserRepository userRepos) : IAuthService
 {
     private readonly ITokenGenerator _tokenGenerator = tokenGenerator;
     private readonly IPasswordHasher _hasher = hasher;

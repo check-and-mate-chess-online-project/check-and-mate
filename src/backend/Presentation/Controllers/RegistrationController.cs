@@ -9,9 +9,9 @@ namespace Presentation.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class RegistrationController(IUserRegistrationService registration) : ControllerBase
+public class RegistrationController(IRegistrationService registration) : ControllerBase
 {
-    private readonly IUserRegistrationService _registration = registration;
+    private readonly IRegistrationService _registration = registration;
 
     [HttpPost("register")]
     [ProducesResponseType(typeof(AuthResultDto), StatusCodes.Status200OK)]

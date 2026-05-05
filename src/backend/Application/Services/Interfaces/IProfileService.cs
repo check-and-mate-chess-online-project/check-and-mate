@@ -2,7 +2,7 @@ using Application.Dtos;
 
 namespace Application.Services.Interfaces;
 
-public interface IUserProfileService
+public interface IProfileService
 {
     Task<UserDto> GetUserProfile(Guid userId);
     Task ChangeUserLoginAsync(Guid userId, string login);
