@@ -86,7 +86,20 @@ export function GamePage() {
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-xl flex flex-col gap-3">
           <Clock label="black" ms={clock.blackMs} active={clock.active === 'black'} />
-          <Chessboard options={{ position: fen, onPieceDrop }} />
+          <Chessboard options={{
+              position: fen,
+              onPieceDrop,
+              boardStyle: {
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+              },
+              darkSquareStyle: {
+                backgroundColor: '#4c1d95', // темный фиолетовый
+              },
+              lightSquareStyle: {
+                backgroundColor: '#e5e7eb', // светло-серый
+              },
+            }} />
           <Clock label="white" ms={clock.whiteMs} active={clock.active === 'white'} />
         </div>
       </main>
