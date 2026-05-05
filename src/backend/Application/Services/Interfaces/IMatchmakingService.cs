@@ -1,9 +1,7 @@
-using Core.Models.Interfaces;
-using Core.Models.Games;
-
 namespace Application.Services.Interfaces;
 
 public interface IMatchmakingService
 {
-    Task<Game?> StartGameAsync(Guid userId, ITimeControl timeControl);
+    Task StartOpponentSearchAsync(Guid userId, bool timeControlEnabled, int initialTimeSec, int incrementPerMoveSec);
+    Task StopOpponentSearchAsync(Guid userId);
 }

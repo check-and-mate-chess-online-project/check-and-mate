@@ -1,0 +1,32 @@
+using Application.Abstractions.GameSessions;
+using Application.Exceptions;
+using Core.Models.Games;
+using Core.Models.Interfaces;
+
+namespace Application.Orchestration.GameSessions;
+
+public class GameSessionService(IGameSessionStore sessionStore, IChessEngine engine) : IGameSessionService
+{
+    private readonly IGameSessionStore _sessionStore = sessionStore;
+    private readonly IChessEngine _engine = engine;
+
+    public Game? Get(Guid gameId) => _sessionStore.Get(gameId);
+    
+    public Game? GetByPlayers(Guid playerAId, Guid playerBId) => _sessionStore.GetByPlayers(playerAId, playerBId);
+
+    public Game? GetByUserId(Guid userId) => _sessionStore.GetByUserId(userId);
+
+    public Game Create(Guid whitePlayerId, Guid blackPlayerId, ITimeControl timeControl)
+    {
+        if (_sessionStore.GetByPlayers(whitePlayerId, blackPlayerId) != null) throw new ConflictException($"game session beetwen {whitePlayerId} and {blackPlayerId} already exist");
+        Game game = new(whitePlayerId, blackPlayerId, _engine, timeControl);
+        _sessionStore.Add(game);
+        return game;
+    }
+
+    public void Remove(Game game)
+    {
+        if (_sessionStore.Get(game.Id) == null) throw new NotFoundException($"game session {game.Id} not exist");
+        _sessionStore.Remove(game);
+    }
+}

@@ -1,5 +1,6 @@
 using Core.Models.Interfaces;
 using Core.Models.Chess;
+using Core.Exceptions;
 
 namespace Core.Models.Games;
 
@@ -18,7 +19,7 @@ public class Game
 
     public Game(Guid whitePlayerId, Guid blackPlayerId, IChessEngine engine, ITimeControl timeControl)
     {
-        if (whitePlayerId == blackPlayerId) throw new ArgumentException("players must be different");
+        if (whitePlayerId == blackPlayerId) throw new CoreLogicException("players must be different");
         Id = Guid.NewGuid();
         WhitePlayerId = whitePlayerId;
         BlackPlayerId = blackPlayerId;
@@ -37,11 +38,43 @@ public class Game
 
     public int GetMoveCount() => _engine.MoveCount;
 
-    public bool IsValidMove(Move move) => _engine.IsValidMove(move);
+    public bool IsValidMove(Move move, PlayerColor color) => _engine.IsValidMove(move, color);
+
+    public List<(int A, int B, FigureType Figure, PlayerColor Color)> GetFigures() => _engine.GetFigures();
 
     public Guid GetCurrentPlayerId() => _engine.GetCurrentPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
 
     public Guid GetDefendingPlayerId() => _engine.GetDefendingPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
+
+    public bool IsTimeExpired(out Guid userId)
+    {
+        PlayerColor color;
+        if (_engine.GetCurrentPlayer() == PlayerColor.White)
+        {
+            color = PlayerColor.White;
+            userId = WhitePlayerId;
+        }
+        else
+        {
+            color = PlayerColor.Black;
+            userId = BlackPlayerId;
+        }
+        return TimeControl.CheckLeftTime(color, DateTime.UtcNow);
+    }
+
+    public GameResult GetGameResultByTerminationReason(GameTerminationReason terminationReason, Guid? playerId = null)
+    {
+        return terminationReason switch
+        {
+            GameTerminationReason.CheckMate => playerId == WhitePlayerId ? GameResult.WhiteVictory : GameResult.BlackVictory,
+            GameTerminationReason.StaleMate => GameResult.Draw,
+            GameTerminationReason.Resignation => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
+            GameTerminationReason.Timeout => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
+            GameTerminationReason.DrawAgreement => GameResult.Draw,
+            GameTerminationReason.Disconnect => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
+            _ => throw new ArgumentException("invalid game termination reason")
+        };
+    }
 
     internal void SetState(IGameState state) => State = state;
 
@@ -72,15 +105,6 @@ public class Game
     {
         TerminationReason = terminationReason;
         EndTimeUtc = DateTime.UtcNow;
-        Result = terminationReason switch
-        {
-            GameTerminationReason.CheckMate => playerId == WhitePlayerId ? GameResult.WhiteVictory : GameResult.BlackVictory,
-            GameTerminationReason.StaleMate => GameResult.Draw,
-            GameTerminationReason.Resignation => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
-            GameTerminationReason.Timeout => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
-            GameTerminationReason.DrawAgreement => GameResult.Draw,
-            GameTerminationReason.Disconnect => playerId == WhitePlayerId ? GameResult.BlackVictory : GameResult.WhiteVictory,
-            _ => throw new ArgumentException("invalid game termination reason")
-        };
+        Result = GetGameResultByTerminationReason(terminationReason, playerId);
     }
 }

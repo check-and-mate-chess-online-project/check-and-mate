@@ -1,3 +1,5 @@
+using Core.Exceptions;
+
 namespace Core.Models.Users;
 
 public class Friendship
@@ -7,7 +9,7 @@ public class Friendship
 
     public Friendship(Guid friendAId, Guid friendBId)
     {
-        if (friendAId == friendBId) throw new ArgumentException("users must be different"); 
+        if (friendAId == friendBId) throw new CoreLogicException("users must be different"); 
         FriendAId = friendAId < friendBId ? friendAId : friendBId;
         FriendBId = friendAId < friendBId ? friendBId : friendAId;
     }

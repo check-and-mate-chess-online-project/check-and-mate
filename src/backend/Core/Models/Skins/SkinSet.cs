@@ -1,4 +1,5 @@
 using Core.Models.Chess;
+using Core.Exceptions;
 
 namespace Core.Models.Skins;
 
@@ -20,7 +21,7 @@ public class SkinSet
 
     public void AddSkin(FigureType figure, Guid skinId)
     {
-        if (_skinIds.ContainsKey(figure)) throw new InvalidOperationException("skin for this figure already exists");
+        if (_skinIds.ContainsKey(figure)) throw new CoreLogicException("skin for this figure already exists");
         _skinIds.Add(figure, skinId);
     }
 }
