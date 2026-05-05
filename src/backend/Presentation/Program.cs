@@ -6,6 +6,7 @@ using System.Text;
 using Presentation.Hubs;
 using Presentation.Events.Handlers;
 using Presentation.Events;
+using Presentation.Responces;
 using Application.Services.Interfaces;
 using Application.Services;
 using Application.Abstractions.Settings;
@@ -155,13 +156,14 @@ public class Program
                     InvalidOperationException => StatusCodes.Status500InternalServerError,
                     _ => StatusCodes.Status500InternalServerError
                 };
-                var errorResponse = new
-                {
-                    message = context.Response.StatusCode == StatusCodes.Status500InternalServerError
+                ErrorResponce errorResponse = new
+                (
+                    context.Response.StatusCode, 
+                    context.Response.StatusCode == StatusCodes.Status500InternalServerError
                         ? "an unexpected error occurred"
-                        : exception.Message,
-                    statusCode = context.Response.StatusCode
-                };
+                        : exception.Message
+                );
+
                 await context.Response.WriteAsJsonAsync(errorResponse);
             });
         });

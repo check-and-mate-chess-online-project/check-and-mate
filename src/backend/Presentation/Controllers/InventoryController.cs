@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Presentation.Requests;
+using Presentation.Responces;
 using Application.Services.Interfaces;
 using Application.Dtos;
 
@@ -17,6 +18,8 @@ public class InventoryController(IUserInventoryService inventory, ILootBoxServic
     private readonly IUserSkinConfigurationService _configuration = configuration;
 
     [HttpGet("skins")]
+    [ProducesResponseType(typeof(List<SkinDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<SkinDto>>> GetUserSkins()
     {
         Guid userId = GetUserId();
@@ -25,6 +28,12 @@ public class InventoryController(IUserInventoryService inventory, ILootBoxServic
     }
 
     [HttpPost("lootboxes/open")]
+    [ProducesResponseType(typeof(LootBoxDropResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status410Gone)]
+    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<LootBoxDropResultDto>> OpenLootBox()
     {
         Guid userId = GetUserId();
@@ -33,7 +42,10 @@ public class InventoryController(IUserInventoryService inventory, ILootBoxServic
     }
 
     [HttpPost("skins/equip")]
-    [ProducesResponseType(204)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponce), StatusCodes.Status410Gone)]
     public async Task<ActionResult> EquipSkin([FromBody]EquipSkinRequest request)
     {
         Guid userId = GetUserId();
