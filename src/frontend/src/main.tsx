@@ -25,7 +25,7 @@ async function bootstrapAuth() {
   const { token, setUser, clearSession } = useAuthStore.getState()
   if (!token) return
   try {
-    const user = await api.get<UserDto>('/api/users/me')
+    const user = await api.get<UserDto>('/api/profile/me')
     setUser(user)
     queryClient.setQueryData(['me'], user)
   } catch (e) {

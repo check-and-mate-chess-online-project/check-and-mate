@@ -4,8 +4,7 @@ import { z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ApiError, api } from '../shared/api/http'
-import type { UserDto } from '../shared/api'
-import { setToken } from '../shared/auth/token'
+import type { AuthResultDto } from '../shared/api'
 import { useAuthStore } from '../shared/auth/authStore'
 
 const schema = z.object({
@@ -32,12 +31,10 @@ export function LoginPage() {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const { token } = await api.post<{ token: string }>(
+      const { user, token } = await api.post<AuthResultDto>(
         '/api/auth/login',
         values,
       )
-      setToken(token)
-      const user = await api.get<UserDto>('/api/users/me')
       useAuthStore.getState().setSession(token, user)
       navigate('/lobby')
     } catch (err) {
