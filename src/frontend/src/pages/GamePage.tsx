@@ -39,11 +39,11 @@ function Clock({ label, ms, active }: ClockProps) {
 }
 
 function coordToSquare(col: number, row: number): string {
-  return String.fromCharCode(96 + col) + row
+  return String.fromCharCode(97 + col) + (row + 1)
 }
 
 function squareToCoord(sq: string): { col: number; row: number } {
-  return { col: sq.charCodeAt(0) - 96, row: parseInt(sq[1], 10) }
+  return { col: sq.charCodeAt(0) - 97, row: parseInt(sq[1], 10) - 1 }
 }
 
 function apiMoveToSquares(move: ApiMove): { from: string; to: string } {
@@ -92,13 +92,17 @@ export function GamePage() {
 
   const game = useMemo(() => new Chess(), [])
   const [fen, setFen] = useState(game.fen())
+  const [turn, setTurn] = useState<Color>('white')
   const [ended, setEnded] = useState<string | null>(null)
   const opponentLeftRef = useRef(false)
 
   const cachedGame = qc.getQueryData<GameDto>(['game', gameId])
   const initialMs = (cachedGame?.initialTimeSec ?? 300) * 1000
   const incMs = (cachedGame?.incrementPerMoveSec ?? 0) * 1000
-  const clock = useChessClock(initialMs, incMs)
+  const { whiteMs, blackMs, active, switchTo, pause } = useChessClock(
+    initialMs,
+    incMs,
+  )
 
   const myColor: Color | null = !user || !cachedGame
     ? null
@@ -111,14 +115,21 @@ export function GamePage() {
   useEffect(() => {
     if (!cachedGame) return
     return subscribeGameHub({
-      onMoveMade: (move) => {
+      onMoveMade: (move, result) => {
         const { from, to } = apiMoveToSquares(move)
         try {
           game.move({ from, to, promotion: 'q' })
           setFen(game.fen())
-          clock.switchTo(game.turn() === 'w' ? 'white' : 'black')
+          if (result.isGameOver) {
+            setEnded(t('pages.game.gameEnded'))
+            pause()
+            return
+          }
+          const nextTurn = game.turn() === 'w' ? 'white' : 'black'
+          setTurn(nextTurn)
+          switchTo(nextTurn)
         } catch {
-          // ход уже применён (вероятно свой) — игнорируем
+          return
         }
       },
       onUserDisconnected: (userId) => {
@@ -129,14 +140,14 @@ export function GamePage() {
       },
       onGameEnded: () => {
         setEnded(t('pages.game.gameEnded'))
-        clock.pause()
+        pause()
       },
       onTimeExpired: () => {
         setEnded(t('pages.game.gameEnded'))
-        clock.pause()
+        pause()
       },
     })
-  }, [cachedGame, myColor, user?.id, t, game, clock])
+  }, [cachedGame, myColor, user?.id, t, game, switchTo, pause])
 
   if (!cachedGame || !myColor) {
     return (
@@ -154,7 +165,7 @@ export function GamePage() {
     )
   }
 
-  const isMyTurn = game.turn() === myColor[0]
+  const isMyTurn = turn === myColor
 
   const onPieceDrop = ({
     sourceSquare,
@@ -165,9 +176,9 @@ export function GamePage() {
   }) => {
     if (!targetSquare) return false
     if (!isMyTurn) return false
-    let applied
+    const preview = new Chess(game.fen())
     try {
-      applied = game.move({
+      preview.move({
         from: sourceSquare,
         to: targetSquare,
         promotion: 'q',
@@ -175,17 +186,11 @@ export function GamePage() {
     } catch {
       return false
     }
-    if (!applied) return false
-    setFen(game.fen())
-    clock.switchTo(game.turn() === 'w' ? 'white' : 'black')
     const apiMove = squaresToApiMove(sourceSquare, targetSquare)
     gameHub.makeMove(apiMove).catch(() => {
-      // откат при ошибке сервера
-      game.undo()
-      setFen(game.fen())
       toast.error('move rejected')
     })
-    return true
+    return false
   }
 
   const handleResign = async () => {
@@ -236,8 +241,8 @@ export function GamePage() {
         <div className="w-full max-w-xl flex flex-col gap-3">
           <Clock
             label={`${t('pages.game.opponent')} (${opponentColor})`}
-            ms={opponentColor === 'white' ? clock.whiteMs : clock.blackMs}
-            active={clock.active === opponentColor}
+            ms={opponentColor === 'white' ? whiteMs : blackMs}
+            active={active === opponentColor}
           />
           <Chessboard
             options={{
@@ -254,8 +259,8 @@ export function GamePage() {
           />
           <Clock
             label={`${t('pages.game.you')} (${myColor})`}
-            ms={myColor === 'white' ? clock.whiteMs : clock.blackMs}
-            active={clock.active === myColor}
+            ms={myColor === 'white' ? whiteMs : blackMs}
+            active={active === myColor}
           />
         </div>
       </main>

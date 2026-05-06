@@ -69,11 +69,7 @@ export function LobbyPage() {
   const [searching, setSearching] = useState(false)
 
   useEffect(() => {
-    if (!searching) return
     return subscribeGameHub({
-      onSearchStarted: () => {
-        // backend подтвердил постановку в pool
-      },
       onSearchStopped: () => {
         setSearching(false)
       },
@@ -83,7 +79,7 @@ export function LobbyPage() {
         navigate(`/game/${game.id}`)
       },
     })
-  }, [searching, navigate, qc])
+  }, [navigate, qc])
 
   const handlePlay = async () => {
     const tcConfig = TIME_CONTROLS.find((x) => x.id === tc)

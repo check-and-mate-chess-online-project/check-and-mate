@@ -8,6 +8,9 @@ import { getToken } from '../auth/token'
 import type { GameDto, Guid, Move, MoveResultDto } from '../api'
 
 let conn: HubConnection | null = null
+const subscribers = new Set<GameHubEventHandlers>()
+const moveHistory: Array<{ move: Move; result: MoveResultDto }> = []
+let listenersAttached = false
 
 export function getGameHub(): HubConnection {
   if (!conn) {
@@ -16,8 +19,45 @@ export function getGameHub(): HubConnection {
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build()
+    attachGameHubListeners(conn)
   }
   return conn
+}
+
+function notify(fn: (handler: GameHubEventHandlers) => void): void {
+  for (const handler of subscribers) fn(handler)
+}
+
+function attachGameHubListeners(c: HubConnection): void {
+  if (listenersAttached) return
+  listenersAttached = true
+
+  c.on('StartOpponentSearch', () => {
+    notify((handler) => handler.onSearchStarted?.())
+  })
+  c.on('StopOpponentSearch', () => {
+    notify((handler) => handler.onSearchStopped?.())
+  })
+  c.on('GameStarted', (game: unknown) => {
+    moveHistory.length = 0
+    notify((handler) => handler.onGameStarted?.(game as GameDto))
+  })
+  c.on('MoveMade', (move: unknown, result: unknown) => {
+    const event = { move: move as Move, result: result as MoveResultDto }
+    moveHistory.push(event)
+    notify((handler) => handler.onMoveMade?.(event.move, event.result))
+  })
+  c.on('UserDisconnected', (userId: unknown) => {
+    notify((handler) => handler.onUserDisconnected?.(userId as Guid))
+  })
+  c.on('GameEnded', () => {
+    notify((handler) => handler.onGameEnded?.())
+  })
+  c.on('TimeExpired', (gameId: unknown, userId: unknown) => {
+    notify((handler) =>
+      handler.onTimeExpired?.(gameId as Guid, userId as Guid),
+    )
+  })
 }
 
 async function ensureStarted(): Promise<HubConnection> {
@@ -33,6 +73,9 @@ export async function stopGameHub(): Promise<void> {
     await conn.stop()
   }
   conn = null
+  listenersAttached = false
+  subscribers.clear()
+  moveHistory.length = 0
 }
 
 export interface SearchOpponentRequest {
@@ -71,49 +114,14 @@ export interface GameHubEventHandlers {
 }
 
 export function subscribeGameHub(handlers: GameHubEventHandlers): () => void {
-  const c = getGameHub()
-  const subs: Array<[string, (...args: unknown[]) => void]> = []
+  getGameHub()
+  subscribers.add(handlers)
 
-  if (handlers.onSearchStarted) {
-    const fn = () => handlers.onSearchStarted!()
-    c.on('StartOpponentSearch', fn)
-    subs.push(['StartOpponentSearch', fn])
-  }
-  if (handlers.onSearchStopped) {
-    const fn = () => handlers.onSearchStopped!()
-    c.on('StopOpponentSearch', fn)
-    subs.push(['StopOpponentSearch', fn])
-  }
-  if (handlers.onGameStarted) {
-    const fn = (game: unknown) => handlers.onGameStarted!(game as GameDto)
-    c.on('GameStarted', fn)
-    subs.push(['GameStarted', fn])
-  }
   if (handlers.onMoveMade) {
-    const fn = (move: unknown, result: unknown) =>
-      handlers.onMoveMade!(move as Move, result as MoveResultDto)
-    c.on('MoveMade', fn)
-    subs.push(['MoveMade', fn])
-  }
-  if (handlers.onUserDisconnected) {
-    const fn = (userId: unknown) =>
-      handlers.onUserDisconnected!(userId as Guid)
-    c.on('UserDisconnected', fn)
-    subs.push(['UserDisconnected', fn])
-  }
-  if (handlers.onGameEnded) {
-    const fn = () => handlers.onGameEnded!()
-    c.on('GameEnded', fn)
-    subs.push(['GameEnded', fn])
-  }
-  if (handlers.onTimeExpired) {
-    const fn = (gameId: unknown, userId: unknown) =>
-      handlers.onTimeExpired!(gameId as Guid, userId as Guid)
-    c.on('TimeExpired', fn)
-    subs.push(['TimeExpired', fn])
+    for (const event of moveHistory) handlers.onMoveMade(event.move, event.result)
   }
 
   return () => {
-    for (const [event, fn] of subs) c.off(event, fn)
+    subscribers.delete(handlers)
   }
 }
