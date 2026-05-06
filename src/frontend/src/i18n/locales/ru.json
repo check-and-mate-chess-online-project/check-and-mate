@@ -103,7 +103,20 @@
       "yourTurn": "Ваш ход",
       "opponentTurn": "Ход оппонента",
       "you": "Вы",
-      "opponent": "Оппонент"
+      "opponent": "Оппонент",
+      "result": {
+        "win": "Победа",
+        "loss": "Поражение",
+        "draw": "Ничья"
+      },
+      "reason": {
+        "checkmate": "матом",
+        "stalemate": "пат",
+        "resignation": "сдачей",
+        "timeout": "по времени",
+        "drawAgreement": "по соглашению",
+        "disconnect": "оппонент отключился"
+      }
     },
     "history": {
       "title": "История",

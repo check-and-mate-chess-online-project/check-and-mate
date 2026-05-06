@@ -6,11 +6,27 @@ import { Chess } from 'chess.js'
 import { Chessboard } from 'react-chessboard'
 import { toast } from 'sonner'
 import type { GameDto, Move as ApiMove } from '../shared/api'
+import { GameTerminationReason } from '../shared/api/enums'
 import { useAuth } from '../shared/auth/useAuth'
 import { gameHub, subscribeGameHub } from '../shared/realtime/gameHub'
 import { formatClock, useChessClock } from '../shared/lib/useChessClock'
 
 type Color = 'white' | 'black'
+type Outcome = 'win' | 'loss' | 'draw'
+
+interface ResultState {
+  outcome: Outcome
+  reason: GameTerminationReason | null
+}
+
+const REASON_KEY: Record<GameTerminationReason, string> = {
+  [GameTerminationReason.CheckMate]: 'checkmate',
+  [GameTerminationReason.StaleMate]: 'stalemate',
+  [GameTerminationReason.Resignation]: 'resignation',
+  [GameTerminationReason.Timeout]: 'timeout',
+  [GameTerminationReason.DrawAgreement]: 'drawAgreement',
+  [GameTerminationReason.Disconnect]: 'disconnect',
+}
 
 interface ClockProps {
   label: string
@@ -60,17 +76,29 @@ function squaresToApiMove(from: string, to: string): ApiMove {
 }
 
 interface ResultModalProps {
-  message: string
+  result: ResultState
   onClose: () => void
 }
 
-function ResultModal({ message, onClose }: ResultModalProps) {
+function ResultModal({ result, onClose }: ResultModalProps) {
   const { t } = useTranslation()
+  const titleClass =
+    result.outcome === 'win'
+      ? 'text-orange-400'
+      : result.outcome === 'loss'
+        ? 'text-violet-300'
+        : 'text-slate-200'
+  const reasonText =
+    result.reason !== null
+      ? t(`pages.game.reason.${REASON_KEY[result.reason]}`)
+      : t('pages.game.gameEnded')
   return (
     <div className="fixed inset-0 z-40 bg-black/70 flex items-center justify-center">
       <div className="bg-slate-900 border border-violet-900 rounded-lg p-8 text-center max-w-sm">
-        <h2 className="text-2xl mb-4">{t('pages.game.gameEnded')}</h2>
-        <p className="text-slate-300 mb-6">{message}</p>
+        <h2 className={`text-3xl mb-2 ${titleClass}`}>
+          {t(`pages.game.result.${result.outcome}`)}
+        </h2>
+        <p className="text-slate-400 mb-6">{reasonText}</p>
         <button
           type="button"
           onClick={onClose}
@@ -93,8 +121,7 @@ export function GamePage() {
   const game = useMemo(() => new Chess(), [])
   const [fen, setFen] = useState(game.fen())
   const [turn, setTurn] = useState<Color>('white')
-  const [ended, setEnded] = useState<string | null>(null)
-  const opponentLeftRef = useRef(false)
+  const [ended, setEnded] = useState<ResultState | null>(null)
   const clockKickedRef = useRef<string | null>(null)
 
   const cachedGame = qc.getQueryData<GameDto>(['game', gameId])
@@ -121,7 +148,7 @@ export function GamePage() {
   }, [cachedGame, ended, switchTo])
 
   useEffect(() => {
-    if (!cachedGame) return
+    if (!cachedGame || !myColor) return
     return subscribeGameHub({
       onMoveMade: (move, result) => {
         const { from, to } = apiMoveToSquares(move)
@@ -129,7 +156,16 @@ export function GamePage() {
           game.move({ from, to, promotion: 'q' })
           setFen(game.fen())
           if (result.isGameOver) {
-            setEnded(t('pages.game.gameEnded'))
+            const moverColor: Color = game.turn() === 'w' ? 'black' : 'white'
+            const reason = result.terminationReason
+            const outcome: Outcome =
+              reason === GameTerminationReason.StaleMate ||
+              reason === GameTerminationReason.DrawAgreement
+                ? 'draw'
+                : moverColor === myColor
+                  ? 'win'
+                  : 'loss'
+            setEnded({ outcome, reason })
             pause()
             return
           }
@@ -141,17 +177,20 @@ export function GamePage() {
         }
       },
       onUserDisconnected: (userId) => {
-        if (myColor && userId !== user?.id) {
-          opponentLeftRef.current = true
-          toast.warning(t('pages.game.opponentDisconnected'))
-        }
-      },
-      onGameEnded: () => {
-        setEnded(t('pages.game.gameEnded'))
+        if (userId === user?.id) return
+        toast.warning(t('pages.game.opponentDisconnected'))
+        setEnded({ outcome: 'win', reason: GameTerminationReason.Disconnect })
         pause()
       },
-      onTimeExpired: () => {
-        setEnded(t('pages.game.gameEnded'))
+      onGameEnded: () => {
+        setEnded((prev) =>
+          prev ?? { outcome: 'win', reason: GameTerminationReason.Resignation },
+        )
+        pause()
+      },
+      onTimeExpired: (_gameId, userId) => {
+        const outcome: Outcome = userId === user?.id ? 'loss' : 'win'
+        setEnded({ outcome, reason: GameTerminationReason.Timeout })
         pause()
       },
     })
@@ -205,6 +244,8 @@ export function GamePage() {
     if (!confirm(t('pages.game.resignConfirm'))) return
     try {
       await gameHub.resign()
+      setEnded({ outcome: 'loss', reason: GameTerminationReason.Resignation })
+      pause()
     } catch {
       toast.error('resign failed')
     }
@@ -274,7 +315,7 @@ export function GamePage() {
       </main>
 
       {ended && (
-        <ResultModal message={ended} onClose={() => navigate('/lobby')} />
+        <ResultModal result={ended} onClose={() => navigate('/lobby')} />
       )}
     </div>
   )

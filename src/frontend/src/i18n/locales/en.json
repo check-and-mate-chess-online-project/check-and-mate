@@ -103,7 +103,20 @@
       "yourTurn": "Your turn",
       "opponentTurn": "Opponent's turn",
       "you": "You",
-      "opponent": "Opponent"
+      "opponent": "Opponent",
+      "result": {
+        "win": "You won",
+        "loss": "You lost",
+        "draw": "Draw"
+      },
+      "reason": {
+        "checkmate": "by checkmate",
+        "stalemate": "stalemate",
+        "resignation": "by resignation",
+        "timeout": "on time",
+        "drawAgreement": "by agreement",
+        "disconnect": "opponent disconnected"
+      }
     },
     "history": {
       "title": "History",
