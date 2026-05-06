@@ -1,8 +1,10 @@
+using Application.Dtos;
+
 namespace Application.Services.Interfaces;
 
 public interface IGameInvitationService
 {
-    Task SendGameInvitationAsync(Guid senderId, Guid userId, int initialTimeSec, int incrementPerMoveSec);
-    Task AcceptGameInvitationAsync(Guid invitationId);
+    Task<GameInvitationDto> SendGameInvitationAsync(Guid senderId, Guid userId, bool TimeControlIsEnabled, int initialTimeSec, int incrementPerMoveSec);
+    Task<GameDto> AcceptGameInvitationAsync(Guid invitationId);
     Task RejectGameInvitationAsync(Guid invitationId);
 }

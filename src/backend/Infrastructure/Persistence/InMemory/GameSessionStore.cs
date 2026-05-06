@@ -22,5 +22,5 @@ public class GameSessionStore : IGameSessionStore
 
     public void Update(Game game) => _games[game.Id] = game;
 
-    public void Remove(Game game) => _games.Remove(game.Id, out _);
+    public void Remove(Guid gameId) => _games.Remove(gameId, out _);
 }

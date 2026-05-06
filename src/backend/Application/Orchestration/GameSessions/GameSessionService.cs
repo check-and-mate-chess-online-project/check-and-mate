@@ -24,9 +24,9 @@ public class GameSessionService(IGameSessionStore sessionStore, IChessEngine eng
         return game;
     }
 
-    public void Remove(Game game)
+    public void Remove(Guid gameId)
     {
-        if (_sessionStore.Get(game.Id) == null) throw new NotFoundException($"game session {game.Id} not exist");
-        _sessionStore.Remove(game);
+        if (_sessionStore.Get(gameId) == null) throw new NotFoundException($"game session {gameId} not exist");
+        _sessionStore.Remove(gameId);
     }
 }

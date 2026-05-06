@@ -10,11 +10,16 @@ using Core.Models.Chess;
 namespace Presentation.Hubs;
 
 [Authorize]
-public class GameHub(ConnectionManager connections, IMatchmakingService matchmaking, IGameplayService gameplay) : Hub
+public class GameHub(
+    ConnectionManager connections, 
+    IMatchmakingService matchmaking, 
+    IGameplayService gameplay, 
+    IGameInvitationService invitation) : Hub
 {
     private readonly ConnectionManager _connections = connections;
     private readonly IMatchmakingService _matchmaking = matchmaking;
     private readonly IGameplayService _gameplay = gameplay;
+    private readonly IGameInvitationService _invitation = invitation;
 
     public override Task OnConnectedAsync()
     {
@@ -40,7 +45,7 @@ public class GameHub(ConnectionManager connections, IMatchmakingService matchmak
     public async Task FindGame(SearchOpponentRequest request)
     {
         Guid userId = GetUserId();
-        await _matchmaking.StartOpponentSearchAsync(userId, request.IsEnabled, request.InitialTimeSec, request.IncrementPerMoveSec);
+        await _matchmaking.StartOpponentSearchAsync(userId, request.TimeControlIsEnabled, request.InitialTimeSec, request.IncrementPerMoveSec);
         await Clients.Caller.SendAsync("StartOpponentSearch");
     }
 
@@ -49,6 +54,30 @@ public class GameHub(ConnectionManager connections, IMatchmakingService matchmak
         Guid userId = GetUserId();
         await _matchmaking.StopOpponentSearchAsync(userId);
         await Clients.Caller.SendAsync("StopOpponentSearch");
+    }
+
+    public async Task SendGameInvitation(SendGameInvitationRequest request)
+    {
+        Guid userId = GetUserId();
+        GameInvitationDto invitation = await _invitation.SendGameInvitationAsync(
+            userId, 
+            request.ReceiverId, 
+            request.TimeControlIsEnabled, 
+            request.InitialTimeSec, 
+            request.IncrementPerMoveSec
+        );
+        await Clients.User(request.ReceiverId.ToString()).SendAsync("GameInvitationReceived", invitation);
+        await Clients.Caller.SendAsync("GameInvitationSent", invitation);
+    }
+
+    public async Task AcceptGameInvitation(Guid invitationId)
+    {
+        
+    }
+
+    public async Task RejectGameInvitation(Guid invitationId)
+    {
+        
     }
 
     public async Task<MoveResultDto> MakeMove(Move move)

@@ -40,7 +40,7 @@ public class GameplayService(
         if (moveResult.IsGameOver == true) 
         {
             await UpdatePlayerStats(game, userId, (GameTerminationReason)moveResult.TerminationReason!);
-            _sessionService.Remove(game);
+            _sessionService.Remove(game.Id);
             _gameRepos.Add(game);
             await _uow.CommitChangesAsync();
         }
@@ -53,7 +53,7 @@ public class GameplayService(
         if (game == null) return;
         game.EndByTimeout(userId);
         await UpdatePlayerStats(game, userId, GameTerminationReason.Timeout);
-        _sessionService.Remove(game);
+        _sessionService.Remove(game.Id);
         _gameRepos.Add(game);
         await _uow.CommitChangesAsync();
     }
@@ -65,7 +65,7 @@ public class GameplayService(
         if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
         game.EndByResignation(userId);
         await UpdatePlayerStats(game, userId, GameTerminationReason.Resignation);
-        _sessionService.Remove(game);
+        _sessionService.Remove(game.Id);
         _gameRepos.Add(game);
         await _uow.CommitChangesAsync();
     }
@@ -76,7 +76,7 @@ public class GameplayService(
         if (game == null) return;
         game.EndByDisconnect(userId);
         await UpdatePlayerStats(game, userId, GameTerminationReason.Disconnect);
-        _sessionService.Remove(game);
+        _sessionService.Remove(game.Id);
         _gameRepos.Add(game);
         await _uow.CommitChangesAsync();
     }

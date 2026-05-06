@@ -21,14 +21,10 @@ public class FriendshipService(
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
 
-    public async Task<List<FriendRequestDto>> GetAllFriendRequestsAsync(Guid userId)
-    {
-        List<FriendRequest> requests = await _requestRepos.GetByUserAsync(userId);
-        List<FriendRequestDto> requestDtos = [];
-        foreach (var request in requests) requestDtos.Add(FriendRequestMapper.GetDto(request));
-        return requestDtos;
-    }
-
+    public async Task<List<FriendRequestDto>> GetAllFriendRequestsAsync(Guid userId) 
+        => [.. (await _requestRepos.GetByUserAsync(userId))
+            .Select(FriendRequestMapper.GetDto)];
+        
     public async Task<List<Guid>> GetAllFriendsAsync(Guid userId) => await _friendshipRepos.GetByUserAsync(userId);
 
     public async Task<FriendRequestDto> SendFriendRequestAsync(Guid senderId, Guid receiverId)

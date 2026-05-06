@@ -7,6 +7,8 @@ using Core.Models.Requests;
 using Core.Models.Games;
 using Core.Models.Interfaces;
 using Core.Models.Users;
+using Application.Dtos;
+using Application.Mappers;
 
 namespace Application.Services;
 
@@ -21,7 +23,16 @@ public class GameInvitationService(
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
 
-    public async Task SendGameInvitationAsync(Guid senderId, Guid receiverId, int initialTimeSec, int incrementPerMoveSec)
+    public async Task<List<GameInvitationDto>> GetAllGameInvitationsAsync(Guid userId) 
+        => [.. (await _invitationRepos.GetByUserAsync(userId))
+            .Select(GameInvitationMapper.GetDto)];
+
+    public async Task<GameInvitationDto> SendGameInvitationAsync(
+        Guid senderId, 
+        Guid receiverId, 
+        bool timeControlIsEnabled, 
+        int initialTimeSec, 
+        int incrementPerMoveSec)
     {
         User sender = await _userRepos.GetAsync(senderId) ?? throw new NotFoundException($"user {senderId} not found");
         if (sender.IsDeleted) throw new UserDeletedException($"user {senderId} is deleted");
@@ -31,20 +42,22 @@ public class GameInvitationService(
             throw new ConflictException($"game invitation from {senderId} to {receiverId} already exist");
         if (_sessionService.GetByPlayers(senderId, receiverId) != null) 
             throw new ConflictException($"game session beetwen {senderId} and {receiverId} already exist");
-        ITimeControl timeControl = initialTimeSec != 0 ? new TimeControl(initialTimeSec, incrementPerMoveSec) : new DisabledTimeControl();
+        ITimeControl timeControl = timeControlIsEnabled ? new TimeControl(initialTimeSec, incrementPerMoveSec) : new DisabledTimeControl();
         GameInvitation invitation = new(senderId, receiverId, timeControl, GameInvitationState.Pending);
         _invitationRepos.Add(invitation);
         await _uow.CommitChangesAsync();
+        return GameInvitationMapper.GetDto(invitation);
     }
 
-    public async Task AcceptGameInvitationAsync(Guid invitationId)
+    public async Task<GameDto> AcceptGameInvitationAsync(Guid invitationId)
     {
         GameInvitation invitation = await _invitationRepos.GetAsync(invitationId) 
             ?? throw new NotFoundException($"game invitation {invitationId} not found");
-        _sessionService.Create(invitation.SenderId, invitation.ReceiverId, invitation.TimeControl);
+        Game game = _sessionService.Create(invitation.SenderId, invitation.ReceiverId, invitation.TimeControl);
         invitation.ChangeState(GameInvitationState.Accepted);
         _invitationRepos.Update(invitation);
         await _uow.CommitChangesAsync();
+        return GameMapper.GetDto(game);
     }
 
     public async Task RejectGameInvitationAsync(Guid invitationId)
