@@ -15,77 +15,79 @@ export function useChessClock(
   initialMs: number,
   incrementMs: number,
 ): ChessClock {
-  const whiteRef = useRef(initialMs)
-  const blackRef = useRef(initialMs)
+  const [whiteMs, setWhiteMs] = useState(initialMs)
+  const [blackMs, setBlackMs] = useState(initialMs)
+  const [active, setActive] = useState<Color | null>(null)
+
   const activeRef = useRef<Color | null>(null)
-  const startedAtRef = useRef<number | null>(null)
-  const [, force] = useState(0)
+  const anchorAtRef = useRef<number | null>(null)
+  const anchorWhiteRef = useRef(initialMs)
+  const anchorBlackRef = useRef(initialMs)
 
   useEffect(() => {
-    const id = setInterval(() => force((n) => n + 1), 100)
-    return () => clearInterval(id)
-  }, [])
-
-  const switchTo = useCallback(
-    (next: Color) => {
-      const now = performance.now()
-      if (activeRef.current !== null && startedAtRef.current !== null) {
-        const elapsed = now - startedAtRef.current
-        if (activeRef.current === 'white') {
-          whiteRef.current =
-            Math.max(0, whiteRef.current - elapsed) + incrementMs
-        } else {
-          blackRef.current =
-            Math.max(0, blackRef.current - elapsed) + incrementMs
-        }
+    if (active === null) return
+    const id = setInterval(() => {
+      if (anchorAtRef.current === null) return
+      const elapsed = performance.now() - anchorAtRef.current
+      if (active === 'white') {
+        setWhiteMs(Math.max(0, anchorWhiteRef.current - elapsed))
+      } else {
+        setBlackMs(Math.max(0, anchorBlackRef.current - elapsed))
       }
-      activeRef.current = next
-      startedAtRef.current = now
-      force((n) => n + 1)
+    }, 100)
+    return () => clearInterval(id)
+  }, [active])
+
+  const settleActive = useCallback(
+    (addIncrement: boolean) => {
+      const prev = activeRef.current
+      if (prev === null || anchorAtRef.current === null) return
+      const elapsed = performance.now() - anchorAtRef.current
+      if (prev === 'white') {
+        const remaining =
+          Math.max(0, anchorWhiteRef.current - elapsed) +
+          (addIncrement ? incrementMs : 0)
+        anchorWhiteRef.current = remaining
+        setWhiteMs(remaining)
+      } else {
+        const remaining =
+          Math.max(0, anchorBlackRef.current - elapsed) +
+          (addIncrement ? incrementMs : 0)
+        anchorBlackRef.current = remaining
+        setBlackMs(remaining)
+      }
     },
     [incrementMs],
   )
 
+  const switchTo = useCallback(
+    (next: Color) => {
+      settleActive(true)
+      anchorAtRef.current = performance.now()
+      activeRef.current = next
+      setActive(next)
+    },
+    [settleActive],
+  )
+
   const pause = useCallback(() => {
-    const now = performance.now()
-    if (activeRef.current !== null && startedAtRef.current !== null) {
-      const elapsed = now - startedAtRef.current
-      if (activeRef.current === 'white') {
-        whiteRef.current = Math.max(0, whiteRef.current - elapsed)
-      } else {
-        blackRef.current = Math.max(0, blackRef.current - elapsed)
-      }
-    }
+    settleActive(false)
+    anchorAtRef.current = null
     activeRef.current = null
-    startedAtRef.current = null
-    force((n) => n + 1)
-  }, [])
+    setActive(null)
+  }, [settleActive])
 
   const reset = useCallback(() => {
-    whiteRef.current = initialMs
-    blackRef.current = initialMs
+    anchorAtRef.current = null
     activeRef.current = null
-    startedAtRef.current = null
-    force((n) => n + 1)
+    anchorWhiteRef.current = initialMs
+    anchorBlackRef.current = initialMs
+    setWhiteMs(initialMs)
+    setBlackMs(initialMs)
+    setActive(null)
   }, [initialMs])
 
-  const now = performance.now()
-  const computed = (color: Color): number => {
-    if (activeRef.current === color && startedAtRef.current !== null) {
-      const ref = color === 'white' ? whiteRef.current : blackRef.current
-      return Math.max(0, ref - (now - startedAtRef.current))
-    }
-    return color === 'white' ? whiteRef.current : blackRef.current
-  }
-
-  return {
-    whiteMs: computed('white'),
-    blackMs: computed('black'),
-    active: activeRef.current,
-    switchTo,
-    pause,
-    reset,
-  }
+  return { whiteMs, blackMs, active, switchTo, pause, reset }
 }
 
 export function formatClock(ms: number): string {

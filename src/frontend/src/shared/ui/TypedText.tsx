@@ -12,23 +12,23 @@ export function TypedText({
   dotIntervalMs = 400,
 }: Props) {
   const [shown, setShown] = useState('')
-  const [done, setDone] = useState(false)
   const [dots, setDots] = useState(1)
+  const [prevText, setPrevText] = useState(text)
+
+  if (text !== prevText) {
+    setPrevText(text)
+    setShown('')
+  }
+
+  const done = shown.length >= text.length
 
   useEffect(() => {
-    setShown('')
-    setDone(false)
-    let i = 0
-    const id = setInterval(() => {
-      i++
-      setShown(text.slice(0, i))
-      if (i >= text.length) {
-        clearInterval(id)
-        setDone(true)
-      }
+    if (done) return
+    const id = setTimeout(() => {
+      setShown(text.slice(0, shown.length + 1))
     }, speedMs)
-    return () => clearInterval(id)
-  }, [text, speedMs])
+    return () => clearTimeout(id)
+  }, [shown, done, text, speedMs])
 
   useEffect(() => {
     if (!done) return
