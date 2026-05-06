@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../shared/auth/useAuth'
 import { TypedText } from '../shared/ui/TypedText'
+import { gameHub, subscribeGameHub } from '../shared/realtime/gameHub'
 
 type Mode = 'casual' | 'rated'
 type TimeControlId = 'bullet' | 'blitz' | 'rapid'
@@ -59,11 +62,52 @@ function Choice({ label, hint, active, disabled, onClick }: ChoiceProps) {
 export function LobbyPage() {
   const { t } = useTranslation()
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const qc = useQueryClient()
   const [mode, setMode] = useState<Mode | null>(null)
   const [tc, setTc] = useState<TimeControlId | null>(null)
+  const [searching, setSearching] = useState(false)
 
-  const handlePlay = () => {
-    toast.info(t('pages.lobby.soonToast'))
+  useEffect(() => {
+    if (!searching) return
+    return subscribeGameHub({
+      onSearchStarted: () => {
+        // backend подтвердил постановку в pool
+      },
+      onSearchStopped: () => {
+        setSearching(false)
+      },
+      onGameStarted: (game) => {
+        qc.setQueryData(['game', game.id], game)
+        setSearching(false)
+        navigate(`/game/${game.id}`)
+      },
+    })
+  }, [searching, navigate, qc])
+
+  const handlePlay = async () => {
+    const tcConfig = TIME_CONTROLS.find((x) => x.id === tc)
+    if (!mode || !tcConfig) return
+    setSearching(true)
+    try {
+      await gameHub.findGame({
+        isEnabled: true,
+        initialTimeSec: tcConfig.initialSec,
+        incrementPerMoveSec: tcConfig.incSec,
+      })
+    } catch {
+      toast.error(t('pages.lobby.searchFailed'))
+      setSearching(false)
+    }
+  }
+
+  const handleCancel = async () => {
+    try {
+      await gameHub.cancelSearch()
+    } catch {
+      // ignore
+    }
+    setSearching(false)
   }
 
   const ready = mode !== null && tc !== null
@@ -128,6 +172,22 @@ export function LobbyPage() {
         >
           {t('pages.lobby.play')}
         </button>
+      )}
+
+      {searching && (
+        <div className="fixed inset-0 z-40 bg-black/70 flex items-center justify-center">
+          <div className="bg-slate-900 border border-violet-900 rounded-lg p-8 text-center max-w-sm">
+            <div className="w-12 h-12 mx-auto mb-4 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+            <div className="text-slate-100 mb-6">{t('pages.lobby.searching')}</div>
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-md"
+            >
+              {t('pages.lobby.cancelSearch')}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -146,7 +146,7 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
               className="absolute left-1/2 -translate-x-1/2 z-20 pointer-events-none"
               style={{
                 bottom: '0',
-                height: '65vh',
+                height: '80vh',
                 aspectRatio: '832 / 1216',
               }}
             >

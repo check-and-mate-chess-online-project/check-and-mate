@@ -71,7 +71,9 @@
         "rapid": "Рапид"
       },
       "play": "Играть",
-      "soonToast": "Скоро будет матчмейкинг"
+      "searching": "Ищем соперника...",
+      "cancelSearch": "Отменить",
+      "searchFailed": "Поиск сорвался"
     },
     "login": {
       "title": "Вход"
@@ -81,7 +83,19 @@
     },
     "game": {
       "title": "Игра",
-      "idLabel": "id"
+      "idLabel": "id",
+      "resign": "Сдаться",
+      "resignConfirm": "Сдаться? Вы проиграете партию.",
+      "exit": "Выйти",
+      "exitConfirm": "Выйти? Это засчитается как поражение.",
+      "opponentDisconnected": "Оппонент отключился",
+      "gameEnded": "Партия завершена",
+      "notFound": "Партия не найдена. Вернитесь в лобби.",
+      "connecting": "Подключение...",
+      "yourTurn": "Ваш ход",
+      "opponentTurn": "Ход оппонента",
+      "you": "Вы",
+      "opponent": "Оппонент"
     },
     "history": {
       "title": "История",

@@ -71,7 +71,9 @@
         "rapid": "Rapid"
       },
       "play": "Play",
-      "soonToast": "Matchmaking soon"
+      "searching": "Searching for opponent...",
+      "cancelSearch": "Cancel",
+      "searchFailed": "Search failed"
     },
     "login": {
       "title": "Sign in"
@@ -81,7 +83,19 @@
     },
     "game": {
       "title": "Game",
-      "idLabel": "id"
+      "idLabel": "id",
+      "resign": "Resign",
+      "resignConfirm": "Resign? You will lose this game.",
+      "exit": "Exit",
+      "exitConfirm": "Leave game? It will count as a resignation.",
+      "opponentDisconnected": "Opponent disconnected",
+      "gameEnded": "Game ended",
+      "notFound": "Game not found. Return to lobby.",
+      "connecting": "Connecting...",
+      "yourTurn": "Your turn",
+      "opponentTurn": "Opponent's turn",
+      "you": "You",
+      "opponent": "Opponent"
     },
     "history": {
       "title": "History",
