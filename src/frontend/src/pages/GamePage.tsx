@@ -95,6 +95,7 @@ export function GamePage() {
   const [turn, setTurn] = useState<Color>('white')
   const [ended, setEnded] = useState<string | null>(null)
   const opponentLeftRef = useRef(false)
+  const clockKickedRef = useRef<string | null>(null)
 
   const cachedGame = qc.getQueryData<GameDto>(['game', gameId])
   const initialMs = (cachedGame?.initialTimeSec ?? 300) * 1000
@@ -111,6 +112,13 @@ export function GamePage() {
       : user.id === cachedGame.blackPlayerId
         ? 'black'
         : null
+
+  useEffect(() => {
+    if (!cachedGame || ended) return
+    if (clockKickedRef.current === cachedGame.id) return
+    clockKickedRef.current = cachedGame.id
+    switchTo('white')
+  }, [cachedGame, ended, switchTo])
 
   useEffect(() => {
     if (!cachedGame) return
