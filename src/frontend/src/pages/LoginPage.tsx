@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -7,18 +8,23 @@ import { ApiError, api } from '../shared/api/http'
 import type { AuthResultDto } from '../shared/api'
 import { useAuthStore } from '../shared/auth/authStore'
 
-const schema = z.object({
-  login: z.string().min(1),
-  password: z.string().min(1),
-})
-type FormValues = z.infer<typeof schema>
-
 const inputClass =
   'bg-slate-800 border border-slate-700 text-slate-100 px-3 py-2 rounded-md focus:outline-none focus:border-violet-500'
 
 export function LoginPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        login: z.string().min(1, t('forms.login.errors.required')),
+        password: z.string().min(1, t('forms.login.errors.required')),
+      }),
+    [t],
+  )
+  type FormValues = z.infer<typeof schema>
+
   const {
     register,
     handleSubmit,
@@ -52,11 +58,12 @@ export function LoginPage() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="w-full max-w-sm flex flex-col gap-4"
+      className="w-full max-w-sm flex flex-col gap-2"
     >
-      <h1 className="text-3xl font-bold text-center mb-2">
+      <h1 className="text-3xl font-bold text-center mb-4">
         {t('pages.login.title')}
       </h1>
+
       <input
         type="text"
         placeholder={t('forms.login.loginPlaceholder')}
@@ -64,6 +71,10 @@ export function LoginPage() {
         className={inputClass}
         {...register('login')}
       />
+      {errors.login && (
+        <p className="text-red-400 text-sm -mt-1">{errors.login.message}</p>
+      )}
+
       <input
         type="password"
         placeholder={t('forms.login.passwordPlaceholder')}
@@ -71,17 +82,23 @@ export function LoginPage() {
         className={inputClass}
         {...register('password')}
       />
-      {errors.root && (
-        <p className="text-red-400 text-sm">{errors.root.message}</p>
+      {errors.password && (
+        <p className="text-red-400 text-sm -mt-1">{errors.password.message}</p>
       )}
+
+      {errors.root && (
+        <p className="text-red-400 text-sm mt-2">{errors.root.message}</p>
+      )}
+
       <button
         type="submit"
         disabled={isSubmitting}
-        className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-4 py-2 rounded-md font-medium"
+        className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-4 py-2 rounded-md font-medium mt-3"
       >
         {isSubmitting ? t('forms.login.submitting') : t('forms.login.submit')}
       </button>
-      <p className="text-center text-sm text-slate-400">
+
+      <p className="text-center text-sm text-slate-400 mt-2">
         <Link to="/register" className="hover:text-slate-100 underline">
           {t('landing.signUp')}
         </Link>

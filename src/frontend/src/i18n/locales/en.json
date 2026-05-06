@@ -29,7 +29,10 @@
       "submit": "Sign in",
       "submitting": "Signing in...",
       "invalidCredentials": "Invalid login or password",
-      "networkError": "Network error, try again"
+      "networkError": "Network error, try again",
+      "errors": {
+        "required": "Field is required"
+      }
     },
     "register": {
       "loginPlaceholder": "Login",
@@ -40,7 +43,12 @@
       "submitting": "Signing up...",
       "passwordsDontMatch": "Passwords don't match",
       "loginTaken": "Login or email is already taken",
-      "networkError": "Network error, try again"
+      "networkError": "Network error, try again",
+      "errors": {
+        "loginShort": "Login must be at least 3 characters",
+        "emailInvalid": "Invalid email",
+        "passwordShort": "Password must be at least 8 characters"
+      }
     }
   },
   "landing": {

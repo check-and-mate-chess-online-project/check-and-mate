@@ -29,7 +29,10 @@
       "submit": "Войти",
       "submitting": "Входим...",
       "invalidCredentials": "Неверный логин или пароль",
-      "networkError": "Ошибка сети, попробуйте ещё раз"
+      "networkError": "Ошибка сети, попробуйте ещё раз",
+      "errors": {
+        "required": "Поле обязательно"
+      }
     },
     "register": {
       "loginPlaceholder": "Логин",
@@ -40,7 +43,12 @@
       "submitting": "Регистрируем...",
       "passwordsDontMatch": "Пароли не совпадают",
       "loginTaken": "Логин или email уже заняты",
-      "networkError": "Ошибка сети, попробуйте ещё раз"
+      "networkError": "Ошибка сети, попробуйте ещё раз",
+      "errors": {
+        "loginShort": "Логин должен быть не короче 3 символов",
+        "emailInvalid": "Некорректный email",
+        "passwordShort": "Пароль должен быть не короче 8 символов"
+      }
     }
   },
   "landing": {
