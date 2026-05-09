@@ -78,7 +78,8 @@ public class GameHub(
         switch (result.Status)
         {
             case MoveAttemptStatus.Success: 
-                await Clients.Group(game.Id.ToString()).SendAsync("moveMade", new { Request = request, Result = result });
+                await Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString())
+                    .SendAsync("moveMade", new { Request = request, Result = result });
                 break;
             case MoveAttemptStatus.Timeout:
             case MoveAttemptStatus.Invalid:
@@ -91,14 +92,16 @@ public class GameHub(
     {
         Guid userId = GetUserId();
         GameDto game = await _gameplay.HandleResignAsync(userId);
-        await Clients.Group(game.Id.ToString()).SendAsync("playerResigned", new { Game = game, UserId = userId });
+        await Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString())
+            .SendAsync("playerResigned", new { Game = game, UserId = userId });
     }
 
     public async Task Leave()
     {
         Guid userId = GetUserId();
         GameDto? game = await _gameplay.HandleDisconnectAsync(userId);
-        if (game != null) await Clients.Group(game.Id.ToString()).SendAsync("playerLeft",  new { Game = game, UserId = userId });
+        if (game != null) await Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString())
+            .SendAsync("playerLeft",  new { Game = game, UserId = userId });
     }
 
     private Guid GetUserId() => Guid.TryParse(Context.UserIdentifier, out Guid userId) 

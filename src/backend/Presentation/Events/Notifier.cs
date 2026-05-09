@@ -10,15 +10,7 @@ public class Notifier(IHubContext<GameHub> context) : INotifier
 
     public async Task NotifyGameStartedAsync(GameDto game)
     {
-        string? whitePlayerConnection = game.WhitePlayerId.ToString();
-        string? blackPlayerConnection = game.BlackPlayerId.ToString();
-        if (!string.IsNullOrEmpty(whitePlayerConnection) && !string.IsNullOrEmpty(blackPlayerConnection))
-        {
-            string groupId = game.Id.ToString();
-            await _context.Groups.AddToGroupAsync(whitePlayerConnection, groupId);
-            await _context.Groups.AddToGroupAsync(blackPlayerConnection, groupId);
-            await _context.Clients.Group(groupId).SendAsync("gameStarted", game);
-        }
+        await _context.Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString()).SendAsync("gameStarted", game);
     }
 
     public async Task NotifyTimeExpiredAsync(GameDto game, Guid userId)

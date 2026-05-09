@@ -86,7 +86,7 @@ public class Program
 
         builder.Services.Configure<JwtTokenSettings>(builder.Configuration.GetSection("JwtSettings"));
         builder.Services.Configure<GameSettings>(builder.Configuration.GetSection("GameSettings"));
-        builder.Services.AddScoped<IGameSettingsProvider, GameSettingsProvider>();
+        builder.Services.AddSingleton<IGameSettingsProvider, GameSettingsProvider>();
 
         builder.Services.AddSingleton<IGameRepository, GameRepository>();
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
@@ -94,18 +94,20 @@ public class Program
         builder.Services.AddSingleton<IUserSkinRepository, UserSkinRepository>();
         builder.Services.AddSingleton<IUserCustomizationRepository, UserCustomizationRepository>();
 
-        builder.Services.AddSingleton<IChessEngineFactory, ChessEngineFactory>();
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
         builder.Services.AddSingleton<IMatchmakingPool, MatchmakingPool>();
-        builder.Services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
-        builder.Services.AddScoped<IPasswordHasher, SimplePasswordHasher>();
-        builder.Services.AddScoped<IGameSessionService, GameSessionService>();
+
+        builder.Services.AddSingleton<IChessEngineFactory, ChessEngineFactory>();
+        builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
+        builder.Services.AddSingleton<IPasswordHasher, SimplePasswordHasher>();
+        builder.Services.AddSingleton<IGameSessionService, GameSessionService>();
         builder.Services.AddScoped<IUserSkinService, UserSkinService>();
         builder.Services.AddScoped<ISkinDropService, SkinDropService>();
 
         builder.Services.AddSingleton<IEventDispatcher, EventDispatcher>();
-        builder.Services.AddScoped<IEventHandler<TimeExpired>, TimeExpiredHandler>();
-        builder.Services.AddScoped<IEventHandler<TimeExpired>, TimeExpiredSignalRHandler>();
+        builder.Services.AddTransient<IEventHandler<TimeExpired>, TimeExpiredHandler>();
+        builder.Services.AddTransient<IEventHandler<TimeExpired>, TimeExpiredSignalRHandler>();
+        builder.Services.AddTransient<IEventHandler<GameStarted>, GameStartedHandler>();
         builder.Services.AddSingleton<INotifier, Notifier>();
 
         builder.Services.AddHostedService<TimeService>();

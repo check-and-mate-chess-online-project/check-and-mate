@@ -48,6 +48,8 @@ public class Game
 
     public bool IsTimeExpired(out Guid userId)
     {
+        userId = default;
+        if (!TimeControl.IsEnabled || State is PendingGameState || State is FinishedGameState) return false;
         PlayerColor color;
         if (_engine.GetCurrentPlayer() == PlayerColor.White)
         {

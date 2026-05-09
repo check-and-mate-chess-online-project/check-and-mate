@@ -2,6 +2,7 @@ using ChessLib.GameLogic;
 using Core.Models.Interfaces;
 using Core.Models.Chess;
 using ChessLib.Entities;
+using ChessLib.MoveOptions;
 
 namespace Infrastructure.Chess;
 
@@ -13,7 +14,7 @@ public class ChessEngine : IChessEngine
     public ChessMoveResult MakeMove(Move move)
     {
         IReadOnlyList<IMoveOption> options = move.Options;
-        ChessLib.MoveOptions.MoveOption[] moveOptions = [];
+        MoveOption[] moveOptions = new MoveOption[options.Count];
         for (int i = 0; i < options.Count; i++) moveOptions[i] = ChessMapper.ToEngine(options[i]);
         MoveResult moveResult = _gameHandler.MakeMove(move.A, move.B, move.X, move.Y, moveOptions);
         ChessGameTerminationReason? terminationReason = moveResult.TerminalType != null 
