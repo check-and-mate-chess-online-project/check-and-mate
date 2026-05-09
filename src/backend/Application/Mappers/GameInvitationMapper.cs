@@ -5,7 +5,7 @@ namespace Application.Mappers;
 
 public static class GameInvitationMapper
 {
-    public static GameInvitationDto GetDto(GameInvitation invitation) => new()
+    public static GameInvitationDto ToDto(GameInvitation invitation) => new()
     {
         Id = invitation.Id,
         ReceiverId = invitation.ReceiverId,

@@ -9,6 +9,7 @@ public class SkinDto
     public Guid SetId { get; init; }
     public FigureType Figure { get; init; }
     public SkinRarity Rarity { get; init; }
-    public byte[] Image { get; init; } = null!;
+    public byte[] WhiteImage { get; init; } = null!;
+    public byte[] BlackImage { get; init; } = null!;
     public bool IsDefault { get; init; }
 }

@@ -5,7 +5,7 @@ namespace Application.Mappers;
 
 public static class GameMapper
 {
-    public static GameDto GetDto(Game game) => new()
+    public static GameDto ToDto(Game game) => new()
     {
         Id = game.Id,
         WhitePlayerId = game.WhitePlayerId,

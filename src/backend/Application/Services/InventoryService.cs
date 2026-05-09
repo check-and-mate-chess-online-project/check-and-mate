@@ -14,7 +14,7 @@ public class InventoryService(IUserSkinService userSkinService) : IInventoryServ
     {
         List<Skin> skins = await _userSkinService.GetUserSkinsAsync(userId);
         List<SkinDto> skinDtos = [];
-        foreach (var skin in skins) skinDtos.Add(SkinMapper.GetDto(skin));
+        foreach (var skin in skins) skinDtos.Add(SkinMapper.ToDto(skin));
         return skinDtos;
     }
 }

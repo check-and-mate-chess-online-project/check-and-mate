@@ -4,8 +4,8 @@ namespace Application.Dtos;
 
 public class MoveResultDto
 {
-    public bool IsApply { get; init; }
-    public bool? IsValid { get; init; }
+    public MoveAttemptStatus Status { get; init; }
+    public GameDto Game { get; init; } = null!;
     public bool IsGameOver { get; init; }
     public GameTerminationReason? TerminationReason { get; init; }
 }

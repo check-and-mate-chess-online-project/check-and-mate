@@ -19,7 +19,7 @@ public class AuthService(ITokenGenerator tokenGenerator, IPasswordHasher hasher,
         User? user = await _userRepos.GetAsync(login);
         if (user == null || user.PasswordHash != _hasher.GetHash(password)) throw new UnauthorizedAccessException("incorrect login or password");
         string token = _tokenGenerator.GenerateToken(user.Id, login);
-        UserDto userDto =  UserMapper.GetDto(user);
+        UserDto userDto =  UserMapper.ToDto(user);
         AuthResultDto result = new() { User = userDto, Token = token };
         return result;
     }

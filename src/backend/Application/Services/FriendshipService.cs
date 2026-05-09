@@ -23,7 +23,7 @@ public class FriendshipService(
 
     public async Task<List<FriendRequestDto>> GetAllFriendRequestsAsync(Guid userId) 
         => [.. (await _requestRepos.GetByUserAsync(userId))
-            .Select(FriendRequestMapper.GetDto)];
+            .Select(FriendRequestMapper.ToDto)];
         
     public async Task<List<Guid>> GetAllFriendsAsync(Guid userId) => await _friendshipRepos.GetByUserAsync(userId);
 
@@ -39,7 +39,7 @@ public class FriendshipService(
         if (reverseRequest != null) 
         {
             await AcceptFriendRequestAsync(reverseRequest.Id);
-            return FriendRequestMapper.GetDto(reverseRequest);
+            return FriendRequestMapper.ToDto(reverseRequest);
         }
         (Guid senderId, Guid userId) key = FriendshipKey.Normalize(senderId, receiverId);
         if (await _friendshipRepos.GetAsync(key.senderId, key.userId) != null) 
@@ -47,7 +47,7 @@ public class FriendshipService(
         FriendRequest request = new(senderId, receiverId, FriendRequestState.Pending);
         _requestRepos.Add(request);
         await _uow.CommitChangesAsync();
-        return FriendRequestMapper.GetDto(request);
+        return FriendRequestMapper.ToDto(request);
     }
 
     public async Task AcceptFriendRequestAsync(Guid requestId)

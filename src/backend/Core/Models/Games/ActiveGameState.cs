@@ -14,12 +14,12 @@ public class ActiveGameState : IGameState
         {
             game.FinishGame(GameTerminationReason.Timeout, playerId);
             game.SetState(new FinishedGameState());
-            return new MoveResult(null, GameTerminationReason.Timeout);
+            return new MoveResult(MoveAttemptStatus.Timeout, GameTerminationReason.Timeout);
         }
         ChessMoveResult result = game.ApplyMove(move);
-        if (!result.IsValid) return new MoveResult(result, null);
+        if (!result.IsValid) return new MoveResult(MoveAttemptStatus.Invalid, null);
         game.UpdatePlayerTime(playerId, currentTime);
-        game.SetMoveStartTime(game.GetDefendingPlayerId(), currentTime);
+        game.SetMoveStartTime(game.GetCurrentPlayerId(), currentTime);
         GameTerminationReason? terminationReason = null;
         if (result.IsGameOver)
         {
@@ -29,7 +29,7 @@ public class ActiveGameState : IGameState
             game.FinishGame((GameTerminationReason)terminationReason, playerId);
             game.SetState(new FinishedGameState());
         }
-        return new MoveResult(result, terminationReason);
+        return new MoveResult(MoveAttemptStatus.Success, terminationReason);
     }
 
     public void HandleTimeout(Game game, Guid playerId)

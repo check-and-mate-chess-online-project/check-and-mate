@@ -2,22 +2,25 @@ using Application.Services.Interfaces;
 using Application.Orchestration.GameSessions;
 using Application.Abstractions.UnitOfWork;
 using Application.Exceptions;
+using Application.Dtos;
+using Application.Mappers;
+using Application.Abstractions.Events;
 using Core.Repositories;
 using Core.Models.Requests;
 using Core.Models.Games;
 using Core.Models.Interfaces;
 using Core.Models.Users;
-using Application.Dtos;
-using Application.Mappers;
 
 namespace Application.Services;
 
 public class GameInvitationService(
+    IEventDispatcher eventDispatcher,
     IGameSessionService sessionService, 
     IGameInvitationRepository invitationRepos, 
     IUserRepository userRepos, 
     IUnitOfWork uow) : IGameInvitationService
 {
+    private readonly IEventDispatcher _eventDispatcher = eventDispatcher;
     private readonly IGameSessionService _sessionService = sessionService;
     private readonly IGameInvitationRepository _invitationRepos = invitationRepos;
     private readonly IUserRepository _userRepos = userRepos;
@@ -25,7 +28,7 @@ public class GameInvitationService(
 
     public async Task<List<GameInvitationDto>> GetAllGameInvitationsAsync(Guid userId) 
         => [.. (await _invitationRepos.GetByUserAsync(userId))
-            .Select(GameInvitationMapper.GetDto)];
+            .Select(GameInvitationMapper.ToDto)];
 
     public async Task<GameInvitationDto> SendGameInvitationAsync(
         Guid senderId, 
@@ -46,26 +49,28 @@ public class GameInvitationService(
         GameInvitation invitation = new(senderId, receiverId, timeControl, GameInvitationState.Pending);
         _invitationRepos.Add(invitation);
         await _uow.CommitChangesAsync();
-        return GameInvitationMapper.GetDto(invitation);
+        return GameInvitationMapper.ToDto(invitation);
     }
 
-    public async Task<GameDto> AcceptGameInvitationAsync(Guid invitationId)
+    public async Task<GameInvitationDto> AcceptGameInvitationAsync(Guid invitationId)
     {
         GameInvitation invitation = await _invitationRepos.GetAsync(invitationId) 
             ?? throw new NotFoundException($"game invitation {invitationId} not found");
-        Game game = _sessionService.Create(invitation.SenderId, invitation.ReceiverId, invitation.TimeControl);
         invitation.ChangeState(GameInvitationState.Accepted);
         _invitationRepos.Update(invitation);
+        Game game = _sessionService.Create(invitation.SenderId, invitation.ReceiverId, invitation.TimeControl);
+        await _eventDispatcher.PublishAsync(game);
         await _uow.CommitChangesAsync();
-        return GameMapper.GetDto(game);
+        return GameInvitationMapper.ToDto(invitation);
     }
 
-    public async Task RejectGameInvitationAsync(Guid invitationId)
+    public async Task<GameInvitationDto> RejectGameInvitationAsync(Guid invitationId)
     {
         GameInvitation invitation = await _invitationRepos.GetAsync(invitationId) 
             ?? throw new NotFoundException($"game invitation {invitationId} not found");
         invitation.ChangeState(GameInvitationState.Rejected);
         _invitationRepos.Update(invitation);
         await _uow.CommitChangesAsync();
+        return GameInvitationMapper.ToDto(invitation);
     }
 }

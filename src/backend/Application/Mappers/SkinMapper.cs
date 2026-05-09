@@ -5,13 +5,14 @@ namespace Application.Mappers;
 
 public static class SkinMapper
 {
-    public static SkinDto GetDto(Skin skin) => new()
+    public static SkinDto ToDto(Skin skin) => new()
     {
         Id = skin.Id,
         SetId = skin.SetId,
         Figure = skin.Figure,
         Rarity = skin.Rarity,
-        Image = skin.Image,
+        WhiteImage = skin.WhiteImage,
+        BlackImage = skin.BlackImage,
         IsDefault = skin.IsDefault
     };
 }

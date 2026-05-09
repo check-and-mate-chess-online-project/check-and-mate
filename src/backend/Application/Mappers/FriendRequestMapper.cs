@@ -5,7 +5,7 @@ namespace Application.Mappers;
 
 public static class FriendRequestMapper
 {
-    public static FriendRequestDto GetDto(FriendRequest friendRequest) => new()
+    public static FriendRequestDto ToDto(FriendRequest friendRequest) => new()
     {
         Id = friendRequest.Id,
         ReceiverId = friendRequest.ReceiverId,

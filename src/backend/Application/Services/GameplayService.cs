@@ -28,57 +28,60 @@ public class GameplayService(
     public GameDto? GetActiveGameByUser(Guid userId)
     {
         Game? game = _sessionService.GetByUserId(userId);
-        return game != null ? GameMapper.GetDto(game) : null;
+        return game != null ? GameMapper.ToDto(game) : null;
     }
 
-    public async Task<MoveResultDto> MakeMoveAsync(Guid userId, Move move)
+    public async Task<MoveResultDto> MakeMoveAsync(Guid userId, int A, int B, int X, int Y, MoveOptionsDto moveOptions)
     {
         User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
         Game game = _sessionService.GetByUserId(userId) ?? throw new NotFoundException($"active game not found");
         if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
+        Move move = new(A, B, X, Y, MoveOptionsMapper.ToDomain(moveOptions));
         MoveResult moveResult = game.MakeMove(move, userId);
         if (moveResult.IsGameOver == true) 
         {
-            await UpdatePlayerStats(game, userId, (GameTerminationReason)moveResult.TerminationReason!);
-            _sessionService.Remove(game.Id);
-            _gameRepos.Add(game);
+            await HandleGameCompletion(game, userId, (GameTerminationReason)moveResult.TerminationReason!);
             await _uow.CommitChangesAsync();
         }
-        return MoveResultMapper.GetDto(moveResult);
+        return MoveResultMapper.ToDto(moveResult, GameMapper.ToDto(game));
     }
 
-    public async Task HandleTimeoutAsync(Guid userId)
+    public async Task<GameDto?> HandleTimeoutAsync(Guid userId)
     {
         Game? game = _sessionService.GetByUserId(userId);
-        if (game == null) return;
+        if (game == null) return null;
         game.EndByTimeout(userId);
-        await UpdatePlayerStats(game, userId, GameTerminationReason.Timeout);
-        _sessionService.Remove(game.Id);
-        _gameRepos.Add(game);
+        await HandleGameCompletion(game, userId, GameTerminationReason.Timeout);
         await _uow.CommitChangesAsync();
+        return GameMapper.ToDto(game);
     }
 
-    public async Task HandleResignAsync(Guid userId)
+    public async Task<GameDto> HandleResignAsync(Guid userId)
     {
         User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
         Game game = _sessionService.GetByUserId(userId) ?? throw new NotFoundException($"active game not found");
         if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
         game.EndByResignation(userId);
+        await HandleGameCompletion(game, userId, GameTerminationReason.Resignation);
+        await _uow.CommitChangesAsync();
+        return GameMapper.ToDto(game);
+    }
+    
+    public async Task<GameDto?> HandleDisconnectAsync(Guid userId)
+    {
+        Game? game = _sessionService.GetByUserId(userId);
+        if (game == null) return null;
+        game.EndByDisconnect(userId);
+        await HandleGameCompletion(game, userId, GameTerminationReason.Disconnect);
+        await _uow.CommitChangesAsync();
+        return GameMapper.ToDto(game);
+    }
+
+    private async Task HandleGameCompletion(Game game, Guid userId, GameTerminationReason terminationReason)
+    {
         await UpdatePlayerStats(game, userId, GameTerminationReason.Resignation);
         _sessionService.Remove(game.Id);
         _gameRepos.Add(game);
-        await _uow.CommitChangesAsync();
-    }
-    
-    public async Task HandleDisconnectAsync(Guid userId)
-    {
-        Game? game = _sessionService.GetByUserId(userId);
-        if (game == null) return;
-        game.EndByDisconnect(userId);
-        await UpdatePlayerStats(game, userId, GameTerminationReason.Disconnect);
-        _sessionService.Remove(game.Id);
-        _gameRepos.Add(game);
-        await _uow.CommitChangesAsync();
     }
 
     private async Task UpdatePlayerStats(Game game, Guid userId, GameTerminationReason terminationReason)

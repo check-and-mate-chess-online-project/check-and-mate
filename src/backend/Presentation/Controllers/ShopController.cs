@@ -27,7 +27,7 @@ public class ShopController(ILootBoxService loot) : ControllerBase
         return Ok();
     }
 
-    private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) 
+    private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Guid userId) 
         ? userId 
         : throw new UnauthorizedAccessException($"invalid user identity");
 }

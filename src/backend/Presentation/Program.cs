@@ -9,28 +9,27 @@ using Presentation.Events;
 using Presentation.Responces;
 using Application.Services.Interfaces;
 using Application.Services;
-using Application.Abstractions.Settings;
-using Application.Orchestration.GameSessions;
 using Application.Abstractions.GameSessions;
 using Application.Abstractions.Matchmaking;
 using Application.Abstractions.Security;
+using Application.Abstractions.Settings;
+using Application.Abstractions.Chess;
+using Application.Abstractions.Tokens;
 using Application.Abstractions.UnitOfWork;
-using Application.Orchestration.EventHandlers;
 using Application.Abstractions.Events;
+using Application.Orchestration.EventHandlers;
 using Application.Orchestration.UserSkins;
 using Application.Orchestration.SkinDrops;
-using Application.Abstractions.Tokens;
+using Application.Orchestration.GameSessions;
 using Application.Events;
 using Application.Exceptions;
 using Infrastructure.Settings;
-using Infrastructure.Connections;
 using Infrastructure.Security;
 using Infrastructure.Persistence.InMemory;
 using Infrastructure.Chess;
 using Infrastructure.Events;
 using Infrastructure.Background;
 using Core.Repositories;
-using Core.Models.Interfaces;
 using Core.Exceptions;
 
 
@@ -95,7 +94,7 @@ public class Program
         builder.Services.AddSingleton<IUserSkinRepository, UserSkinRepository>();
         builder.Services.AddSingleton<IUserCustomizationRepository, UserCustomizationRepository>();
 
-        builder.Services.AddSingleton<IChessEngine, ChessEngine>();
+        builder.Services.AddSingleton<IChessEngineFactory, ChessEngineFactory>();
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
         builder.Services.AddSingleton<IMatchmakingPool, MatchmakingPool>();
         builder.Services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
@@ -118,8 +117,6 @@ public class Program
         builder.Services.AddScoped<IGameplayService, GameplayService>();
         builder.Services.AddScoped<IInventoryService, InventoryService>();
         builder.Services.AddScoped<ILootBoxService, LootBoxService>();
-
-        builder.Services.AddSingleton<ConnectionManager>();
 
         WebApplication app = builder.Build();
 

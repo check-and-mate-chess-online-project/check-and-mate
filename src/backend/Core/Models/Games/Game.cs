@@ -59,7 +59,7 @@ public class Game
             color = PlayerColor.Black;
             userId = BlackPlayerId;
         }
-        return TimeControl.CheckLeftTime(color, DateTime.UtcNow);
+        return !TimeControl.CheckLeftTime(color, DateTime.UtcNow);
     }
 
     public GameResult GetGameResultByTerminationReason(GameTerminationReason terminationReason, Guid? playerId = null)

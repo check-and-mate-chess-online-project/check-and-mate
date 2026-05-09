@@ -8,7 +8,6 @@ namespace Infrastructure.Chess;
 public class ChessEngine : IChessEngine
 {
     public int MoveCount => _gameHandler.Field.AmountMovesOnField;
-
     private readonly GameHandler _gameHandler = new();
 
     public ChessMoveResult MakeMove(Move move)
@@ -18,7 +17,7 @@ public class ChessEngine : IChessEngine
         for (int i = 0; i < options.Count; i++) moveOptions[i] = ChessMapper.ToEngine(options[i]);
         MoveResult moveResult = _gameHandler.MakeMove(move.A, move.B, move.X, move.Y, moveOptions);
         ChessGameTerminationReason? terminationReason = moveResult.TerminalType != null 
-            ? ChessMapper.FromEngine((TerminalPositionType)moveResult.TerminalType) 
+            ? ChessMapper.ToDomain((TerminalPositionType)moveResult.TerminalType) 
             : null;
         ChessMoveResult result = new(moveResult.IsValid, terminationReason);
         return result;
@@ -36,12 +35,12 @@ public class ChessEngine : IChessEngine
         foreach (var cell in _gameHandler.Field.GetCopyOfField())
         {
             if (cell == null) continue;
-            figures.Add((cell.A, cell.B, ChessMapper.FromEngine(cell.Title), ChessMapper.FromEngine(cell.Color)));
+            figures.Add((cell.A, cell.B, ChessMapper.ToDomain(cell.Title), ChessMapper.ToDomain(cell.Color)));
         }
         return figures;
     }
 
-    public PlayerColor GetCurrentPlayer() => ChessMapper.FromEngine(_gameHandler.GetMovingPlayer().Color);
+    public PlayerColor GetCurrentPlayer() => ChessMapper.ToDomain(_gameHandler.GetMovingPlayer().Color);
 
-    public PlayerColor GetDefendingPlayer() => ChessMapper.FromEngine(_gameHandler.GetDefendingPlayer().Color);
+    public PlayerColor GetDefendingPlayer() => ChessMapper.ToDomain(_gameHandler.GetDefendingPlayer().Color);
 }
