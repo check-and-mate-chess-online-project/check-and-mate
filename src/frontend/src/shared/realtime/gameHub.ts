@@ -5,7 +5,13 @@ import {
   LogLevel,
 } from '@microsoft/signalr'
 import { getToken } from '../auth/token'
-import type { GameDto, Guid, MakeMoveRequest, MoveResultDto } from '../api'
+import type {
+  GameDto,
+  GameInvitationDto,
+  Guid,
+  MakeMoveRequest,
+  MoveResultDto,
+} from '../api'
 
 let conn: HubConnection | null = null
 const subscribers = new Set<GameHubEventHandlers>()
@@ -28,34 +34,69 @@ function notify(fn: (handler: GameHubEventHandlers) => void): void {
   for (const handler of subscribers) fn(handler)
 }
 
+interface MoveEventPayload {
+  request: MakeMoveRequest
+  result: MoveResultDto
+}
+
+interface PlayerEventPayload {
+  game: GameDto
+  userId: Guid
+}
+
 function attachGameHubListeners(c: HubConnection): void {
   if (listenersAttached) return
   listenersAttached = true
 
-  c.on('StartOpponentSearch', () => {
+  c.on('startOpponentSearch', () => {
     notify((handler) => handler.onSearchStarted?.())
   })
-  c.on('StopOpponentSearch', () => {
+  c.on('stopOpponentSearch', () => {
     notify((handler) => handler.onSearchStopped?.())
   })
-  c.on('GameStarted', (game: unknown) => {
+  c.on('gameStarted', (game: unknown) => {
     moveHistory.length = 0
     notify((handler) => handler.onGameStarted?.(game as GameDto))
   })
-  c.on('MoveMade', (move: unknown, result: unknown) => {
-    const event = { move: move as MakeMoveRequest, result: result as MoveResultDto }
-    moveHistory.push(event)
-    notify((handler) => handler.onMoveMade?.(event.move, event.result))
+  c.on('moveMade', (payload: unknown) => {
+    const { request, result } = payload as MoveEventPayload
+    moveHistory.push({ move: request, result })
+    notify((handler) => handler.onMoveMade?.(request, result))
   })
-  c.on('UserDisconnected', (userId: unknown) => {
-    notify((handler) => handler.onUserDisconnected?.(userId as Guid))
+  c.on('moveRejected', (payload: unknown) => {
+    const { request, result } = payload as MoveEventPayload
+    notify((handler) => handler.onMoveRejected?.(request, result))
   })
-  c.on('GameEnded', () => {
-    notify((handler) => handler.onGameEnded?.())
+  c.on('playerResigned', (payload: unknown) => {
+    const { game, userId } = payload as PlayerEventPayload
+    notify((handler) => handler.onPlayerResigned?.(game, userId))
   })
-  c.on('TimeExpired', (gameId: unknown, userId: unknown) => {
+  c.on('playerLeft', (payload: unknown) => {
+    const { game, userId } = payload as PlayerEventPayload
+    notify((handler) => handler.onPlayerLeft?.(game, userId))
+  })
+  c.on('timeExpired', (payload: unknown) => {
+    const { game, userId } = payload as PlayerEventPayload
+    notify((handler) => handler.onTimeExpired?.(game, userId))
+  })
+  c.on('gameInvitationReceived', (invitation: unknown) => {
     notify((handler) =>
-      handler.onTimeExpired?.(gameId as Guid, userId as Guid),
+      handler.onGameInvitationReceived?.(invitation as GameInvitationDto),
+    )
+  })
+  c.on('gameInvitationSent', (invitation: unknown) => {
+    notify((handler) =>
+      handler.onGameInvitationSent?.(invitation as GameInvitationDto),
+    )
+  })
+  c.on('gameInvitationAccepted', (invitation: unknown) => {
+    notify((handler) =>
+      handler.onGameInvitationAccepted?.(invitation as GameInvitationDto),
+    )
+  })
+  c.on('gameInvitationRejected', (invitation: unknown) => {
+    notify((handler) =>
+      handler.onGameInvitationRejected?.(invitation as GameInvitationDto),
     )
   })
 }
@@ -79,7 +120,14 @@ export async function stopGameHub(): Promise<void> {
 }
 
 export interface SearchOpponentRequest {
-  isEnabled: boolean
+  timeControlIsEnabled: boolean
+  initialTimeSec: number
+  incrementPerMoveSec: number
+}
+
+export interface SendGameInvitationRequest {
+  receiverId: Guid
+  timeControlIsEnabled: boolean
   initialTimeSec: number
   incrementPerMoveSec: number
 }
@@ -93,13 +141,35 @@ export const gameHub = {
     const c = await ensureStarted()
     await c.invoke('CancelSearch')
   },
-  makeMove: async (move: MakeMoveRequest): Promise<MoveResultDto> => {
+  makeMove: async (move: MakeMoveRequest): Promise<void> => {
     const c = await ensureStarted()
-    return c.invoke<MoveResultDto>('MakeMove', move)
+    await c.invoke('MakeMove', move)
   },
   resign: async (): Promise<void> => {
     const c = await ensureStarted()
     await c.invoke('Resign')
+  },
+  leave: async (): Promise<void> => {
+    const c = await ensureStarted()
+    await c.invoke('Leave')
+  },
+  getPendingInvitations: async (): Promise<GameInvitationDto[]> => {
+    const c = await ensureStarted()
+    return c.invoke<GameInvitationDto[]>('GetPendingInvitations')
+  },
+  sendGameInvitation: async (
+    request: SendGameInvitationRequest,
+  ): Promise<void> => {
+    const c = await ensureStarted()
+    await c.invoke('SendGameInvitation', request)
+  },
+  acceptGameInvitation: async (invitationId: Guid): Promise<void> => {
+    const c = await ensureStarted()
+    await c.invoke('AcceptGameInvitation', invitationId)
+  },
+  rejectGameInvitation: async (invitationId: Guid): Promise<void> => {
+    const c = await ensureStarted()
+    await c.invoke('RejectGameInvitation', invitationId)
   },
 }
 
@@ -108,9 +178,14 @@ export interface GameHubEventHandlers {
   onSearchStopped?: () => void
   onGameStarted?: (game: GameDto) => void
   onMoveMade?: (move: MakeMoveRequest, result: MoveResultDto) => void
-  onUserDisconnected?: (userId: Guid) => void
-  onGameEnded?: () => void
-  onTimeExpired?: (gameId: Guid, userId: Guid) => void
+  onMoveRejected?: (move: MakeMoveRequest, result: MoveResultDto) => void
+  onPlayerResigned?: (game: GameDto, userId: Guid) => void
+  onPlayerLeft?: (game: GameDto, userId: Guid) => void
+  onTimeExpired?: (game: GameDto, userId: Guid) => void
+  onGameInvitationReceived?: (invitation: GameInvitationDto) => void
+  onGameInvitationSent?: (invitation: GameInvitationDto) => void
+  onGameInvitationAccepted?: (invitation: GameInvitationDto) => void
+  onGameInvitationRejected?: (invitation: GameInvitationDto) => void
 }
 
 export function subscribeGameHub(handlers: GameHubEventHandlers): () => void {

@@ -176,19 +176,21 @@ export function GamePage() {
           return
         }
       },
-      onUserDisconnected: (userId) => {
+      onMoveRejected: () => {
+        toast.error('move rejected')
+      },
+      onPlayerResigned: (_game, userId) => {
+        const outcome: Outcome = userId === user?.id ? 'loss' : 'win'
+        setEnded({ outcome, reason: GameTerminationReason.Resignation })
+        pause()
+      },
+      onPlayerLeft: (_game, userId) => {
         if (userId === user?.id) return
         toast.warning(t('pages.game.opponentDisconnected'))
         setEnded({ outcome: 'win', reason: GameTerminationReason.Disconnect })
         pause()
       },
-      onGameEnded: () => {
-        setEnded((prev) =>
-          prev ?? { outcome: 'win', reason: GameTerminationReason.Resignation },
-        )
-        pause()
-      },
-      onTimeExpired: (_gameId, userId) => {
+      onTimeExpired: (_game, userId) => {
         const outcome: Outcome = userId === user?.id ? 'loss' : 'win'
         setEnded({ outcome, reason: GameTerminationReason.Timeout })
         pause()
@@ -235,7 +237,7 @@ export function GamePage() {
     }
     const apiMove = squaresToApiMove(sourceSquare, targetSquare)
     gameHub.makeMove(apiMove).catch(() => {
-      toast.error('move rejected')
+      toast.error('move failed')
     })
     return false
   }
@@ -244,25 +246,24 @@ export function GamePage() {
     if (!confirm(t('pages.game.resignConfirm'))) return
     try {
       await gameHub.resign()
-      setEnded({ outcome: 'loss', reason: GameTerminationReason.Resignation })
-      pause()
     } catch {
       toast.error('resign failed')
     }
   }
 
-  const handleExit = () => {
+  const handleExit = async () => {
     if (ended) {
       navigate('/lobby')
       return
     }
     if (!gameHasStarted) {
       if (!confirm(t('pages.game.leaveMatchConfirm'))) return
+      try { await gameHub.leave() } catch { /* ignore */ }
       navigate('/lobby')
       return
     }
     if (!confirm(t('pages.game.exitConfirm'))) return
-    gameHub.resign().catch(() => {})
+    try { await gameHub.resign() } catch { /* ignore */ }
     navigate('/lobby')
   }
 

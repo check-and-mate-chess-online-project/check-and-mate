@@ -87,7 +87,7 @@ export function LobbyPage() {
     setSearching(true)
     try {
       await gameHub.findGame({
-        isEnabled: true,
+        timeControlIsEnabled: true,
         initialTimeSec: tcConfig.initialSec,
         incrementPerMoveSec: tcConfig.incSec,
       })
