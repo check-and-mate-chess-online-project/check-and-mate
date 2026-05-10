@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
@@ -128,7 +128,7 @@ export function GamePage() {
   const [fen, setFen] = useState(game.fen())
   const [turn, setTurn] = useState<Color>('white')
   const [ended, setEnded] = useState<ResultState | null>(null)
-  const clockKickedRef = useRef<string | null>(null)
+  const [gameHasStarted, setGameHasStarted] = useState(false)
 
   const cachedGame = qc.getQueryData<GameDto>(['game', gameId])
   const initialMs = (cachedGame?.initialTimeSec ?? 300) * 1000
@@ -147,13 +147,6 @@ export function GamePage() {
         : null
 
   useEffect(() => {
-    if (!cachedGame || ended) return
-    if (clockKickedRef.current === cachedGame.id) return
-    clockKickedRef.current = cachedGame.id
-    switchTo('white')
-  }, [cachedGame, ended, switchTo])
-
-  useEffect(() => {
     if (!cachedGame || !myColor) return
     return subscribeGameHub({
       onMoveMade: (move, result) => {
@@ -161,6 +154,7 @@ export function GamePage() {
         try {
           game.move({ from, to, promotion: 'q' })
           setFen(game.fen())
+          setGameHasStarted(true)
           if (result.isGameOver) {
             const moverColor: Color = game.turn() === 'w' ? 'black' : 'white'
             const reason = result.terminationReason
@@ -262,6 +256,11 @@ export function GamePage() {
       navigate('/lobby')
       return
     }
+    if (!gameHasStarted) {
+      if (!confirm(t('pages.game.leaveMatchConfirm'))) return
+      navigate('/lobby')
+      return
+    }
     if (!confirm(t('pages.game.exitConfirm'))) return
     gameHub.resign().catch(() => {})
     navigate('/lobby')
@@ -285,8 +284,9 @@ export function GamePage() {
         <button
           type="button"
           onClick={handleResign}
-          disabled={!!ended}
-          className="text-sm text-orange-400 hover:text-orange-300 disabled:opacity-40"
+          disabled={!!ended || !gameHasStarted}
+          title={!gameHasStarted ? t('pages.game.resignDisabledHint') : undefined}
+          className="text-sm text-orange-400 hover:text-orange-300 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {t('pages.game.resign')}
         </button>
