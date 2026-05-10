@@ -10,6 +10,7 @@ import {
   usePlanets,
 } from '../shared/api/hooks'
 import { skinImageSrc } from '../shared/lib/skinImage'
+import { useEquippedSkinsStore } from '../shared/lib/equippedSkins'
 import { Skeleton } from '../shared/ui/Skeleton'
 
 interface DisplaySkin extends SkinDto {
@@ -78,6 +79,7 @@ interface PlanetDetailProps {
 function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
   const { t } = useTranslation()
   const equip = useEquipSkin()
+  const setEquipped = useEquippedSkinsStore((s) => s.setEquipped)
   const [idx, setIdx] = useState(0)
   const skin = skins[idx]
 
@@ -207,7 +209,12 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
                 type="button"
                 disabled={equip.isPending}
                 onClick={() =>
-                  equip.mutate({ figure: skin.figure, skinId: skin.id })
+                  equip.mutate(
+                    { figure: skin.figure, skinId: skin.id },
+                    {
+                      onSuccess: () => setEquipped(skin.figure, skin.id),
+                    },
+                  )
                 }
                 className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 rounded-md text-sm self-start"
               >
