@@ -87,6 +87,13 @@ export const handlers = [
     return HttpResponse.json(PLANET_SKINS.filter((s) => OWNED_SKIN_IDS.has(s.id)))
   }),
 
+  // бэк проверяет Guid, моки используют строковые id — мокаем equip отдельно
+  http.post('/api/inventory/skins/equip', ({ request }) => {
+    const denied = requireAuth(request)
+    if (denied) return denied
+    return new HttpResponse(null, { status: 204 })
+  }),
+
   // бэк bugged: 500 без кейсов — пока мокаем
   http.post('/api/inventory/lootboxes/open', ({ request }) => {
     const denied = requireAuth(request)
