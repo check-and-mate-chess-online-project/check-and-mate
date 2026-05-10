@@ -16,6 +16,7 @@ import { InventoryPage } from '../pages/InventoryPage'
 import { CasesPage } from '../pages/CasesPage'
 import { ShopPage } from '../pages/ShopPage'
 import { FriendsPage } from '../pages/FriendsPage'
+import { DebugBoardPage } from '../pages/DebugBoardPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 
 export const router = createBrowserRouter([
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
           { path: '/history/:gameId', element: <ReplayPage /> },
           { path: '/profile', element: <MyProfilePage /> },
           { path: '/profile/:userId', element: <UserProfilePage /> },
+          { path: '/debug/board', element: <DebugBoardPage /> },
         ],
       },
       { path: '/game/:gameId', element: <GamePage /> },

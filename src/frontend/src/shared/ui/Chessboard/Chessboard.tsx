@@ -11,22 +11,22 @@ import { SkinPiece } from './SkinPiece'
 
 type Color = 'white' | 'black'
 
-const FEN_TO_FIGURE: Record<
+const PIECE_KEY_TO_FIGURE: Record<
   string,
   { figure: FigureTypeT; color: Color }
 > = {
-  K: { figure: FigureType.King, color: 'white' },
-  Q: { figure: FigureType.Queen, color: 'white' },
-  R: { figure: FigureType.Rook, color: 'white' },
-  B: { figure: FigureType.Bishop, color: 'white' },
-  N: { figure: FigureType.Knight, color: 'white' },
-  P: { figure: FigureType.Pawn, color: 'white' },
-  k: { figure: FigureType.King, color: 'black' },
-  q: { figure: FigureType.Queen, color: 'black' },
-  r: { figure: FigureType.Rook, color: 'black' },
-  b: { figure: FigureType.Bishop, color: 'black' },
-  n: { figure: FigureType.Knight, color: 'black' },
-  p: { figure: FigureType.Pawn, color: 'black' },
+  wK: { figure: FigureType.King, color: 'white' },
+  wQ: { figure: FigureType.Queen, color: 'white' },
+  wR: { figure: FigureType.Rook, color: 'white' },
+  wB: { figure: FigureType.Bishop, color: 'white' },
+  wN: { figure: FigureType.Knight, color: 'white' },
+  wP: { figure: FigureType.Pawn, color: 'white' },
+  bK: { figure: FigureType.King, color: 'black' },
+  bQ: { figure: FigureType.Queen, color: 'black' },
+  bR: { figure: FigureType.Rook, color: 'black' },
+  bB: { figure: FigureType.Bishop, color: 'black' },
+  bN: { figure: FigureType.Knight, color: 'black' },
+  bP: { figure: FigureType.Pawn, color: 'black' },
 }
 
 interface Props {
@@ -38,11 +38,11 @@ export function Chessboard({ options }: Props) {
 
   const pieces = useMemo(() => {
     const map: typeof defaultPieces = { ...defaultPieces }
-    for (const [fen, { figure, color }] of Object.entries(FEN_TO_FIGURE)) {
+    for (const [key, { figure, color }] of Object.entries(PIECE_KEY_TO_FIGURE)) {
       const skinId = equipped[figure]
       if (!skinId) continue
-      const Default = defaultPieces[fen]
-      map[fen] = (props) => (
+      const Default = defaultPieces[key]
+      map[key] = (props) => (
         <SkinPiece
           skinId={skinId}
           color={color}
