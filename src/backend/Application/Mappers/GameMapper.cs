@@ -14,6 +14,7 @@ public static class GameMapper
         TerminationReason = game.TerminationReason,
         StartTimeUtc = game.StartTimeUtc,
         EndTimeUtc = game.EndTimeUtc,
+        TimeControlIsEnabled = game.TimeControl.IsEnabled,
         InitialTimeSec = game.TimeControl.InitialTimeSec,
         IncrementPerMoveSec = game.TimeControl.IncrementPerMoveSec,
         Figures = [.. game.GetFigures().Select(FigureMapper.ToDto)]
