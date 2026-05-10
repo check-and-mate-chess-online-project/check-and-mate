@@ -2,6 +2,7 @@ using Application.Services.Interfaces;
 using Application.Abstractions.Security;
 using Application.Abstractions.Tokens;
 using Application.Mappers;
+using Application.Exceptions;
 using Application.Dtos;
 using Core.Models.Users;
 using Core.Repositories;
@@ -17,7 +18,9 @@ public class AuthService(ITokenGenerator tokenGenerator, IPasswordHasher hasher,
     public async Task<AuthResultDto> Authorize(string login, string password)
     {
         User? user = await _userRepos.GetAsync(login);
-        if (user == null || user.PasswordHash != _hasher.GetHash(password)) throw new UnauthorizedAccessException("incorrect login or password");
+        if (user == null || user.PasswordHash != _hasher.GetHash(password)) 
+            throw new UnauthorizedAccessException("incorrect login or password");
+        if (user.IsDeleted) throw new UserDeletedException($"user {user.Id} is deleted");
         string token = _tokenGenerator.GenerateToken(user.Id, login);
         UserDto userDto =  UserMapper.ToDto(user);
         AuthResultDto result = new() { User = userDto, Token = token };

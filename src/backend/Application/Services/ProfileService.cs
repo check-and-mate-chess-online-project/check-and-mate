@@ -25,8 +25,8 @@ public class ProfileService(IUserRepository userRepos, IPasswordHasher hasher, I
     {
         User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
         if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
-        if (login != null) await ChangeUserLoginAsync(user, login);
-        if (email != null) await ChangeUserEmailAsync(user, email);
+        if (!string.IsNullOrWhiteSpace(login)) await ChangeUserLoginAsync(user, login);
+        if (!string.IsNullOrWhiteSpace(email)) await ChangeUserEmailAsync(user, email);
     }
 
     public async Task ChangeUserPasswordAsync(Guid userId, string password, string newPassword)

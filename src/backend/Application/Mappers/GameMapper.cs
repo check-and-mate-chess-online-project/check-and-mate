@@ -16,6 +16,6 @@ public static class GameMapper
         EndTimeUtc = game.EndTimeUtc,
         InitialTimeSec = game.TimeControl.InitialTimeSec,
         IncrementPerMoveSec = game.TimeControl.IncrementPerMoveSec,
-        Figures = game.GetFigures()
+        Figures = [.. game.GetFigures().Select(FigureMapper.ToDto)]
     };
 }

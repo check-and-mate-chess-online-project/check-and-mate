@@ -44,6 +44,8 @@ public static class ChessMapper
         };
     }
 
+    public static Figure ToDomain(ChessLib.Figures.Figure figure) => new(figure.A, figure.B, ToDomain(figure.Title), ToDomain(figure.Color));
+
     public static FigureType ToDomain(ChessLib.Entities.FigureType type)
     {
         return type switch

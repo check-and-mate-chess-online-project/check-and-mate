@@ -30,13 +30,13 @@ public class ChessEngine : IChessEngine
         return ChessLib.Validation.MoveValidator.IsValidMove(move.A, move.B, move.X, move.Y, color, _gameHandler.Field);
     }
 
-    public List<(int A, int B, Core.Models.Chess.FigureType Figure, PlayerColor Color)> GetFigures()
+    public List<Figure> GetFigures()
     {
-        List<(int A, int B, Core.Models.Chess.FigureType Figure, PlayerColor Color)> figures = [];
-        foreach (var cell in _gameHandler.Field.GetCopyOfField())
+        List<Figure> figures = [];
+        foreach (var figure in _gameHandler.Field.GetCopyOfField())
         {
-            if (cell == null) continue;
-            figures.Add((cell.A, cell.B, ChessMapper.ToDomain(cell.Title), ChessMapper.ToDomain(cell.Color)));
+            if (figure == null) continue;
+            figures.Add(ChessMapper.ToDomain(figure));
         }
         return figures;
     }

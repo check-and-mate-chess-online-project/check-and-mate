@@ -3,10 +3,10 @@ using Application.Abstractions.UnitOfWork;
 using Application.Utils;
 using Application.Dtos;
 using Application.Exceptions;
+using Application.Mappers;
 using Core.Repositories;
 using Core.Models.Requests;
 using Core.Models.Users;
-using Application.Mappers;
 
 namespace Application.Services;
 

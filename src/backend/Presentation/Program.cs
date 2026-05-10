@@ -28,9 +28,11 @@ using Infrastructure.Security;
 using Infrastructure.Persistence.InMemory;
 using Infrastructure.Chess;
 using Infrastructure.Events;
+using Infrastructure.Connections;
 using Infrastructure.Background;
 using Core.Repositories;
 using Core.Exceptions;
+using Application.Abstractions.Connections;
 
 
 namespace Presentation;
@@ -51,6 +53,8 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddSignalR(hubOptions =>
         {
+            hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(10);
+            hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
             hubOptions.AddFilter<HubExceptionFilter>();
         });
 
@@ -92,6 +96,9 @@ public class Program
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<ISkinRepository, SkinRepository>();
         builder.Services.AddSingleton<IUserSkinRepository, UserSkinRepository>();
+        builder.Services.AddSingleton<IGameInvitationRepository, GameInvitationRepository>();
+        builder.Services.AddSingleton<IFriendRequestRepository, FriendRequestRepository>();
+        builder.Services.AddSingleton<IFriendshipRepository, FriendshipRepository>();
         builder.Services.AddSingleton<IUserCustomizationRepository, UserCustomizationRepository>();
 
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
@@ -101,6 +108,8 @@ public class Program
         builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
         builder.Services.AddSingleton<IPasswordHasher, SimplePasswordHasher>();
         builder.Services.AddSingleton<IGameSessionService, GameSessionService>();
+        builder.Services.AddSingleton<IConnectionGracePeriodTimer, ConnectionGracePeriodTimer>();
+        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IUserSkinService, UserSkinService>();
         builder.Services.AddScoped<ISkinDropService, SkinDropService>();
 
@@ -111,14 +120,17 @@ public class Program
         builder.Services.AddSingleton<INotifier, Notifier>();
 
         builder.Services.AddHostedService<TimeService>();
-        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         builder.Services.AddScoped<IAuthService, AuthService>();
-        builder.Services.AddScoped<IRegistrationService, RegistrationService>();
-        builder.Services.AddScoped<IProfileService, ProfileService>();
-        builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
+        builder.Services.AddScoped<IFriendshipService, FriendshipService>();
+        builder.Services.AddScoped<IGameInvitationService, GameInvitationService>();
         builder.Services.AddScoped<IGameplayService, GameplayService>();
         builder.Services.AddScoped<IInventoryService, InventoryService>();
         builder.Services.AddScoped<ILootBoxService, LootBoxService>();
+        builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
+        builder.Services.AddScoped<IProfileService, ProfileService>();
+        builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+        builder.Services.AddScoped<ISkinConfigurationService, SkinConfigurationService>();
 
         WebApplication app = builder.Build();
 

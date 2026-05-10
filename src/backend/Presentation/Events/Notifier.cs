@@ -15,6 +15,7 @@ public class Notifier(IHubContext<GameHub> context) : INotifier
 
     public async Task NotifyTimeExpiredAsync(GameDto game, Guid userId)
     {
-        await _context.Clients.Group(game.Id.ToString()).SendAsync("timeExpired", new { Game = game, UserId = userId });
+        await _context.Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString())
+            .SendAsync("timeExpired", new { Game = game, UserId = userId });
     }
 }
