@@ -11,16 +11,20 @@ interface Props {
 
 const cache = new Map<string, string | null>()
 
-function fitSvgToParent(svg: string): string {
-  return svg.replace(
-    /<svg\b([^>]*)>/,
-    (_, attrs: string) => {
-      const cleaned = attrs
-        .replace(/\swidth="[^"]*"/i, '')
-        .replace(/\sheight="[^"]*"/i, '')
-      return `<svg${cleaned} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">`
-    },
-  )
+function fitSvgToParent(svg: string): string | null {
+  const doc = new DOMParser().parseFromString(svg, 'image/svg+xml')
+  if (doc.querySelector('parsererror')) return null
+
+  const svgElement = doc.documentElement
+  if (svgElement.localName.toLowerCase() !== 'svg') return null
+
+  svgElement.removeAttribute('width')
+  svgElement.removeAttribute('height')
+  svgElement.setAttribute('width', '100%')
+  svgElement.setAttribute('height', '100%')
+  svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
+
+  return new XMLSerializer().serializeToString(svgElement)
 }
 
 async function loadSvg(url: string): Promise<string | null> {
@@ -32,11 +36,11 @@ async function loadSvg(url: string): Promise<string | null> {
       return null
     }
     const text = await res.text()
-    if (!text.trim().startsWith('<svg')) {
+    const fitted = fitSvgToParent(text)
+    if (!fitted) {
       cache.set(url, null)
       return null
     }
-    const fitted = fitSvgToParent(text)
     cache.set(url, fitted)
     return fitted
   } catch {
