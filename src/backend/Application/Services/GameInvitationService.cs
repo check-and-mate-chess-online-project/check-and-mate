@@ -40,8 +40,32 @@ public class GameInvitationService(
     {
         User sender = await _userRepos.GetAsync(senderId) ?? throw new NotFoundException($"user {senderId} not found");
         if (sender.IsDeleted) throw new UserDeletedException($"user {senderId} is deleted");
-        User user = await _userRepos.GetAsync(receiverId) ?? throw new NotFoundException($"user {senderId} not found");
-        if (user.IsDeleted) throw new UserDeletedException($"user {senderId} is deleted");
+        User user = await _userRepos.GetAsync(receiverId) ?? throw new NotFoundException($"user {receiverId} not found");
+        if (user.IsDeleted) throw new UserDeletedException($"user {receiverId} is deleted");
+        return await Send(senderId, receiverId, timeControlIsEnabled, initialTimeSec, incrementPerMoveSec);
+    }
+
+    public async Task<GameInvitationDto> SendGameInvitationAsync(
+        Guid senderId,
+        string receiverLogin,
+        bool timeControlIsEnabled, 
+        int initialTimeSec, 
+        int incrementPerMoveSec)
+    {
+        User sender = await _userRepos.GetAsync(senderId) ?? throw new NotFoundException($"user {senderId} not found");
+        if (sender.IsDeleted) throw new UserDeletedException($"user {senderId} is deleted");
+        User receiver = await _userRepos.GetAsync(receiverLogin) ?? throw new NotFoundException($"user {receiverLogin} not found");
+        if (receiver.IsDeleted) throw new UserDeletedException($"user {receiverLogin} is deleted");
+        return await Send(senderId, receiver.Id, timeControlIsEnabled, initialTimeSec, incrementPerMoveSec);
+    }
+
+    private async Task<GameInvitationDto> Send(
+        Guid senderId, 
+        Guid receiverId, 
+        bool timeControlIsEnabled, 
+        int initialTimeSec, 
+        int incrementPerMoveSec)
+    {
         if (await _invitationRepos.GetPendingAsync(senderId, receiverId) != null) 
             throw new ConflictException($"game invitation from {senderId} to {receiverId} already exist");
         if (_sessionService.GetByPlayers(senderId, receiverId) != null) 

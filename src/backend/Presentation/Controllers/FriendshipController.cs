@@ -17,6 +17,7 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
 
     [HttpGet("requests")]
     [ProducesResponseType(typeof(List<FriendRequestDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<List<FriendRequestDto>>> GetFriendRequests()
     {
         Guid userId = GetUserId();
@@ -26,6 +27,7 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
 
     [HttpGet]
     [ProducesResponseType(typeof(List<Guid>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<List<Guid>>> GetFriends()
     {
         Guid userId = GetUserId();
@@ -35,6 +37,7 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
 
     [HttpPost("requests")]
     [ProducesResponseType(typeof(FriendRequestDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
@@ -42,7 +45,16 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
     public async Task<ActionResult<FriendRequestDto>> SendFriendRequest([FromBody]FriendRequest request)
     {
         Guid userId = GetUserId();
-        FriendRequestDto friendRequest = await _friendship.SendFriendRequestAsync(userId, request.ReceiverId);
+        FriendRequestDto friendRequest;
+        if (request.ReceiverId != null)
+        {
+            friendRequest = await _friendship.SendFriendRequestAsync(userId, request.ReceiverId.Value);
+        }
+        else if (request.ReceiverLogin != null)
+        {
+            friendRequest = await _friendship.SendFriendRequestAsync(userId, request.ReceiverLogin);
+        }
+        else throw new ArgumentException("id or login must be specified");
         return friendRequest;
     }
 

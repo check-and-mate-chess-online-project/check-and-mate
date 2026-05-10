@@ -8,6 +8,7 @@ public interface IChessEngine
     ChessMoveResult MakeMove(Move move);
     bool IsValidMove(Move move, PlayerColor playerColor);
     List<Figure> GetFigures();
+    List<Ply> GetMoves();
     PlayerColor GetCurrentPlayer();
     PlayerColor GetDefendingPlayer();
 }

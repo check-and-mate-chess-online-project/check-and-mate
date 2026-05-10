@@ -14,9 +14,18 @@ public static class ChessMapper
         };
     }
 
-    public static ChessGameTerminationReason ToDomain(ChessLib.Entities.TerminalPositionType type)
+    public static IMoveOption ToDomain(ChessLib.MoveOptions.MoveOption option)
     {
-        return type switch
+        return option switch
+        {
+            ChessLib.MoveOptions.ReplacementOption => new ReplacementOption(ToDomain(((ChessLib.MoveOptions.ReplacementOption)option).SelectedFigure)),
+            _ => throw new ArgumentException("invalid option type")
+        };
+    }
+
+    public static ChessGameTerminationReason ToDomain(ChessLib.Entities.TerminalPositionType position)
+    {
+        return position switch
         {
             ChessLib.Entities.TerminalPositionType.CheckMate => ChessGameTerminationReason.CheckMate,
             ChessLib.Entities.TerminalPositionType.StaleMate => ChessGameTerminationReason.StaleMate,
@@ -72,5 +81,41 @@ public static class ChessMapper
             FigureType.Pawn => ChessLib.Entities.FigureType.Pawn,
             _ => throw new ArgumentException("invalid figure type")
         };
+    }
+
+    public static Move ToDomain((int A, int B, int X, int Y) coords, IMoveOption[] options) 
+        => new(coords.A, coords.B, coords.X, coords.Y, options);
+
+    public static List<Ply> ToDomain(ChessLib.Entities.ChessMove move, int moveNumber)
+    {
+        List<Ply> plies = [];
+        IList<(int, int, int, int)>  whiteMovesCoords = [.. move.GetWhiteMoves()];
+        if (whiteMovesCoords.Count > 0)
+        {
+            IMoveOption[] whiteOptions = [.. move.GetWhiteMoveOptions().Select(ToDomain)];
+            List<Move> whiteMoveCoordinates = [.. whiteMovesCoords.Select(c => ToDomain(c, whiteOptions))];
+            plies.Add(new Ply(moveNumber, PlayerColor.White, whiteMoveCoordinates));
+        }
+        IList<(int, int, int, int)> blackMovesCoords = [.. move.GetBlackMoves()];
+        if (blackMovesCoords.Count > 0)
+        {
+            IMoveOption[] blackOptions = [.. move.GetBlackMoveOptions().Select(ToDomain)];
+            List<Move> blackMoveCoordinates = [.. blackMovesCoords.Select(c => ToDomain(c, blackOptions))];
+            plies.Add(new Ply(moveNumber, PlayerColor.Black, blackMoveCoordinates));
+        }
+        return plies;
+    }
+
+    public static List<Ply> ToDomain(IReadOnlyDictionary<int, ChessLib.Entities.ChessMove> libraryMoves)
+    {
+        List<Ply> allPlies = [];
+        foreach (var kvp in libraryMoves.OrderBy(kvp => kvp.Key))
+        {
+            int moveNumber = kvp.Key;
+            ChessLib.Entities.ChessMove libMove = kvp.Value;
+            List<Ply> plies = ToDomain(libMove, moveNumber);
+            allPlies.AddRange(plies);
+        }
+        return allPlies;
     }
 }

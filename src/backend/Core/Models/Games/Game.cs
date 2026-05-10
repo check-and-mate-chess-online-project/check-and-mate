@@ -42,6 +42,8 @@ public class Game
 
     public List<Figure> GetFigures() => _engine.GetFigures();
 
+    public List<Ply> GetMoves() => _engine.GetMoves();
+
     public Guid GetCurrentPlayerId() => _engine.GetCurrentPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
 
     public Guid GetDefendingPlayerId() => _engine.GetDefendingPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;

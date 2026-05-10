@@ -4,8 +4,8 @@ namespace Application.Dtos;
 
 public class FigureDto
 {
-    public int A { get; init; }
-    public int B { get; init; }
-    public FigureType Type { get; init; }
-    public PlayerColor Color { get; init; }
+    public int A { get; set; }
+    public int B { get; set; }
+    public FigureType Type { get; set; }
+    public PlayerColor Color { get; set; }
 }

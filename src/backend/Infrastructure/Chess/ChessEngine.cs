@@ -41,6 +41,8 @@ public class ChessEngine : IChessEngine
         return figures;
     }
 
+    public List<Ply> GetMoves() => ChessMapper.ToDomain(_gameHandler.Field.GetMoves());
+
     public PlayerColor GetCurrentPlayer() => ChessMapper.ToDomain(_gameHandler.GetMovingPlayer().Color);
 
     public PlayerColor GetDefendingPlayer() => ChessMapper.ToDomain(_gameHandler.GetDefendingPlayer().Color);
