@@ -23,7 +23,8 @@
     }
   },
   "invitations": {
-    "received": "Game invitation received",
+    "received": "{{sender}} invites you to a game ({{tc}})",
+    "untimed": "untimed",
     "sent": "Invitation sent",
     "rejected": "Invitation was rejected",
     "accept": "Accept",

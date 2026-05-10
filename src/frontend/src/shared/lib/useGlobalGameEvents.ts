@@ -21,8 +21,12 @@ export function useGlobalGameEvents() {
         navigate(`/game/${game.id}`)
       },
       onGameInvitationReceived: (invitation) => {
-        toast.info(t('invitations.received'), {
-          duration: 15000,
+        const sender = invitation.senderId.slice(0, 8)
+        const tc = invitation.timeControlIsEnabled
+          ? `${(invitation.initialTimeSec ?? 0) / 60}+${invitation.incrementPerMoveSec ?? 0}`
+          : t('invitations.untimed')
+        toast.info(t('invitations.received', { sender, tc }), {
+          duration: Infinity,
           action: {
             label: t('invitations.accept'),
             onClick: () => {
@@ -38,6 +42,7 @@ export function useGlobalGameEvents() {
             },
           },
         })
+        qc.invalidateQueries({ queryKey: ['game-invitations'] })
       },
       onGameInvitationAccepted: () => {
         qc.invalidateQueries({ queryKey: ['game-invitations'] })
