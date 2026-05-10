@@ -90,7 +90,7 @@ export const handlers = [
     if (denied) return denied
     const random = PLANET_SKINS[Math.floor(Math.random() * PLANET_SKINS.length)]
     return HttpResponse.json({
-      skinId: random.id,
+      skin: random,
       isDuplicate: Math.random() > 0.4,
     })
   }),
@@ -120,15 +120,4 @@ export const handlers = [
     return new HttpResponse(null, { status: 404 })
   }),
 
-  // нет на бэке: друзья + приглашения
-  http.get('/api/users/me/friends', ({ request }) => {
-    const denied = requireAuth(request)
-    if (denied) return denied
-    return HttpResponse.json({
-      friends: [],
-      incomingRequests: [],
-      outgoingRequests: [],
-      gameInvitations: [],
-    })
-  }),
 ]
