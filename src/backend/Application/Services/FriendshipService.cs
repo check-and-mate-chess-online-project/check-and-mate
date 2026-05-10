@@ -33,6 +33,20 @@ public class FriendshipService(
         if (sender.IsDeleted) throw new UserDeletedException($"user {senderId} is deleted");
         User receiver = await _userRepos.GetAsync(receiverId) ?? throw new NotFoundException($"user {receiverId} not found");
         if (receiver.IsDeleted) throw new UserDeletedException($"user {receiverId} is deleted");
+        return await Send(senderId, receiverId);
+    }
+
+    public async Task<FriendRequestDto> SendFriendRequestAsync(Guid senderId, string receiverLogin)
+    {
+        User sender = await _userRepos.GetAsync(senderId) ?? throw new NotFoundException($"user {senderId} not found");
+        if (sender.IsDeleted) throw new UserDeletedException($"user {senderId} is deleted");
+        User receiver = await _userRepos.GetAsync(receiverLogin) ?? throw new NotFoundException($"user {receiverLogin} not found");
+        if (receiver.IsDeleted) throw new UserDeletedException($"user {receiverLogin} is deleted");
+        return await Send(senderId, receiver.Id);
+    }
+
+    private async Task<FriendRequestDto> Send(Guid senderId, Guid receiverId)
+    {
         if (await _requestRepos.GetPendingAsync(senderId, receiverId) != null) 
             throw new ConflictException($"friend request from {senderId} to {receiverId} already exist");
         FriendRequest? reverseRequest = await _requestRepos.GetPendingAsync(receiverId, senderId);

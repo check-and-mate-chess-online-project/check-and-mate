@@ -1,3 +1,3 @@
 namespace Presentation.Requests;
 
-public record SendGameInvitationRequest(Guid ReceiverId, bool TimeControlIsEnabled, int InitialTimeSec, int IncrementPerMoveSec);
+public record SendGameInvitationRequest(Guid? ReceiverId, string? ReceiverLogin, bool TimeControlIsEnabled, int InitialTimeSec, int IncrementPerMoveSec);

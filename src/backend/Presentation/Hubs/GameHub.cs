@@ -55,12 +55,26 @@ public class GameHub(
     {
         Guid userId = GetUserId();
         _timer.CancelGracePeriod(userId);
-        GameInvitationDto invitation = await _invitation.SendGameInvitationAsync(
-            userId, 
-            request.ReceiverId, 
-            request.TimeControlIsEnabled, 
-            request.InitialTimeSec, 
-            request.IncrementPerMoveSec);
+        GameInvitationDto invitation;
+        if (request.ReceiverId != null)
+        {
+            invitation = await _invitation.SendGameInvitationAsync(
+                userId, 
+                request.ReceiverId.Value,
+                request.TimeControlIsEnabled, 
+                request.InitialTimeSec, 
+                request.IncrementPerMoveSec);
+        }
+        else if (request.ReceiverLogin != null)
+        {
+            invitation = await _invitation.SendGameInvitationAsync(
+                userId, 
+                request.ReceiverLogin,
+                request.TimeControlIsEnabled, 
+                request.InitialTimeSec, 
+                request.IncrementPerMoveSec);
+        }
+        else throw new HubException("id or login must be specified");
         await Clients.User(invitation.ReceiverId.ToString()).SendAsync("gameInvitationReceived", invitation);
         await Clients.Caller.SendAsync("gameInvitationSent", invitation);
     }
