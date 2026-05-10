@@ -24,7 +24,8 @@ const PLANET_SKINS: SkinDto[] = [
     setId: 'earth',
     figure: FigureType.King,
     rarity: SkinRarity.Legendary,
-    image: '/skins/gagarin-king-idle.webp',
+    whiteImage: '/skins/gagarin-king-idle.webp',
+    blackImage: '/skins/gagarin-king-idle.webp',
     isDefault: false,
   },
   ...(['queen', 'rook', 'bishop', 'knight', 'pawn'] as const).map((f, i) => ({
@@ -32,7 +33,8 @@ const PLANET_SKINS: SkinDto[] = [
     setId: 'earth',
     figure: (i + 2) as FigureType,
     rarity: (i % 2 === 0 ? SkinRarity.Rare : SkinRarity.Common) as SkinRarity,
-    image: '',
+    whiteImage: '',
+    blackImage: '',
     isDefault: false,
   })),
   ...(['king', 'queen', 'rook', 'bishop', 'knight', 'pawn'] as const).map(
@@ -45,7 +47,8 @@ const PLANET_SKINS: SkinDto[] = [
         : i % 2 === 0
           ? SkinRarity.Rare
           : SkinRarity.Common) as SkinRarity,
-      image: '',
+      whiteImage: '',
+      blackImage: '',
       isDefault: false,
     }),
   ),

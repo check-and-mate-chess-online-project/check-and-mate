@@ -42,6 +42,7 @@ export interface GameDto {
   terminationReason: GameTerminationReason | null
   startTimeUtc: IsoDateTime | null
   endTimeUtc: IsoDateTime | null
+  timeControlIsEnabled: boolean
   initialTimeSec: number | null
   incrementPerMoveSec: number | null
   figures: FigureDto[]
@@ -82,7 +83,8 @@ export interface SkinDto {
   setId: Guid
   figure: FigureType
   rarity: SkinRarity
-  image: string
+  whiteImage: string
+  blackImage: string
   isDefault: boolean
 }
 
