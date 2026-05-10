@@ -29,7 +29,7 @@ async function bootstrapAuth() {
     setUser(user)
     queryClient.setQueryData(['me'], user)
   } catch (e) {
-    if (e instanceof ApiError && e.status === 401) {
+    if (e instanceof ApiError && e.status >= 400 && e.status < 500) {
       clearSession()
     }
   }

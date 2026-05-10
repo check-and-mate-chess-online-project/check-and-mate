@@ -33,7 +33,11 @@ async function request<T>(
   })
 
   if (!res.ok) {
-    if (res.status === 401 && path !== '/api/auth/login') {
+    const isAuthFailure =
+      (res.status === 401 && path !== '/api/auth/login') ||
+      ((res.status === 404 || res.status === 410) &&
+        path.startsWith('/api/profile/me'))
+    if (isAuthFailure) {
       useAuthStore.getState().clearSession()
     }
     let message = res.statusText
