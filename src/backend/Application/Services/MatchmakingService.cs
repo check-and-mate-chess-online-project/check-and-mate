@@ -36,6 +36,7 @@ public class MatchmakingService(
         User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
         if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
         if (_pool.ContainsUser(user.Id)) throw new ConflictException("already searching for an opponent");
+        if (_sessionService.GetByUserId(userId) != null) throw new ConflictException($"user {userId} already in game");
         ITimeControl timeControl;
         if (timeControlEnabled)
         {
