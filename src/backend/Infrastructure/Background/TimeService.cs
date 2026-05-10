@@ -2,6 +2,7 @@ using Microsoft.Extensions.Hosting;
 using Application.Abstractions.GameSessions;
 using Application.Abstractions.Events;
 using Application.Events;
+using Application.Mappers;
 
 namespace Infrastructure.Background;
 
@@ -17,7 +18,7 @@ public class TimeService(IGameSessionStore games, IEventDispatcher eventDispatch
             foreach (var game in _games.GetAll())
             {
                 if (game.IsTimeExpired(out Guid userId)) 
-                    await _eventDispatcher.PublishAsync(new TimeExpired(game.Id, userId));
+                    await _eventDispatcher.PublishAsync(new TimeExpired(GameMapper.ToDto(game), userId));
             }
             await Task.Delay(1000, stoppingToken);
         }

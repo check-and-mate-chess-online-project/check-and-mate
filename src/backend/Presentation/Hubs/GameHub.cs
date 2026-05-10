@@ -1,74 +1,122 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using System.Security.Claims;
 using Presentation.Requests;
 using Application.Services.Interfaces;
+using Application.Abstractions.Connections;
 using Application.Dtos;
-using Infrastructure.Connections;
-using Core.Models.Chess;
+using Core.Models.Games;
 
 namespace Presentation.Hubs;
 
 [Authorize]
-public class GameHub(ConnectionManager connections, IMatchmakingService matchmaking, IGameplayService gameplay) : Hub
+public class GameHub(
+    IMatchmakingService matchmaking, 
+    IGameplayService gameplay, 
+    IGameInvitationService invitation,
+    IConnectionGracePeriodTimer timer) : Hub
 {
-    private readonly ConnectionManager _connections = connections;
     private readonly IMatchmakingService _matchmaking = matchmaking;
     private readonly IGameplayService _gameplay = gameplay;
-
-    public override Task OnConnectedAsync()
-    {
-        Guid userId = GetUserId();
-        _connections.Add(userId, Context.ConnectionId);
-        return base.OnConnectedAsync();
-    }
+    private readonly IGameInvitationService _invitation = invitation;
+    private readonly IConnectionGracePeriodTimer _timer = timer;
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         Guid userId = GetUserId();
         await _matchmaking.StopOpponentSearchAsync(userId);
-        GameDto? game = _gameplay.GetActiveGameByUser(userId);
-        if (game != null)
-        {
-            await _gameplay.HandleDisconnectAsync(userId);
-            await Clients.Group(game.Id.ToString()).SendAsync("UserDisconnected", userId);
-        }
-        _connections.Remove(Context.ConnectionId);
+        _timer.StartGracePeriod(userId, Leave);
         await base.OnDisconnectedAsync(exception);
+    }
+
+    public async Task<List<GameInvitationDto>> GetPendingInvitations()
+    {
+        Guid userId = GetUserId();
+        _timer.CancelGracePeriod(userId);
+        return await _invitation.GetAllGameInvitationsAsync(userId);
     }
 
     public async Task FindGame(SearchOpponentRequest request)
     {
         Guid userId = GetUserId();
-        await _matchmaking.StartOpponentSearchAsync(userId, request.IsEnabled, request.InitialTimeSec, request.IncrementPerMoveSec);
-        await Clients.Caller.SendAsync("StartOpponentSearch");
+        _timer.CancelGracePeriod(userId);
+        await _matchmaking.StartOpponentSearchAsync(userId, request.TimeControlIsEnabled, request.InitialTimeSec, request.IncrementPerMoveSec);
+        await Clients.Caller.SendAsync("startOpponentSearch");
     }
 
     public async Task CancelSearch()
     {
         Guid userId = GetUserId();
+        _timer.CancelGracePeriod(userId);
         await _matchmaking.StopOpponentSearchAsync(userId);
-        await Clients.Caller.SendAsync("StopOpponentSearch");
+        await Clients.Caller.SendAsync("stopOpponentSearch");
     }
 
-    public async Task<MoveResultDto> MakeMove(Move move)
+    public async Task SendGameInvitation(SendGameInvitationRequest request)
     {
         Guid userId = GetUserId();
+        _timer.CancelGracePeriod(userId);
+        GameInvitationDto invitation = await _invitation.SendGameInvitationAsync(
+            userId, 
+            request.ReceiverId, 
+            request.TimeControlIsEnabled, 
+            request.InitialTimeSec, 
+            request.IncrementPerMoveSec);
+        await Clients.User(invitation.ReceiverId.ToString()).SendAsync("gameInvitationReceived", invitation);
+        await Clients.Caller.SendAsync("gameInvitationSent", invitation);
+    }
+
+    public async Task AcceptGameInvitation(Guid invitationId)
+    {
+        _timer.CancelGracePeriod(GetUserId());
+        GameInvitationDto invitation = await _invitation.AcceptGameInvitationAsync(invitationId);
+        await Clients.Users(invitation.SenderId.ToString(), invitation.ReceiverId.ToString()).SendAsync("gameInvitationAccepted", invitation);
+    }
+
+    public async Task RejectGameInvitation(Guid invitationId)
+    {
+        _timer.CancelGracePeriod(GetUserId());
+        GameInvitationDto invitation = await _invitation.RejectGameInvitationAsync(invitationId);
+        await Clients.Users(invitation.SenderId.ToString(), invitation.ReceiverId.ToString()).SendAsync("gameInvitationRejected", invitation);
+    }
+
+    public async Task MakeMove(MakeMoveRequest request)
+    {
+        Guid userId = GetUserId();
+        _timer.CancelGracePeriod(userId);
         GameDto game = _gameplay.GetActiveGameByUser(userId) ?? throw new HubException($"user {userId} not in game");
-        MoveResultDto result = await _gameplay.MakeMoveAsync(userId, move);
-        await Clients.Group(game.Id.ToString()).SendAsync("MoveMade", move, result);
-        return result;
+        MoveResultDto result = await _gameplay.MakeMoveAsync(userId, request.A, request.B, request.X, request.Y, request.Options);
+        switch (result.Status)
+        {
+            case MoveAttemptStatus.Success: 
+                await Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString())
+                    .SendAsync("moveMade", new { Request = request, Result = result });
+                break;
+            case MoveAttemptStatus.Timeout:
+            case MoveAttemptStatus.Invalid:
+                await Clients.Caller.SendAsync("moveRejected", new { Request = request, Result = result }); 
+                break;
+        }
     }
 
     public async Task Resign()
     {
         Guid userId = GetUserId();
-        GameDto game = _gameplay.GetActiveGameByUser(userId) ?? throw new HubException($"user {userId} not in game");
-        await _gameplay.HandleResignAsync(userId);
-        await Clients.Group(game.Id.ToString()).SendAsync("GameEnded");
+        _timer.CancelGracePeriod(userId);
+        GameDto game = await _gameplay.HandleResignAsync(userId);
+        await Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString())
+            .SendAsync("playerResigned", new { Game = game, UserId = userId });
     }
 
-    private Guid GetUserId() => Guid.TryParse(Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) 
+    public async Task Leave()
+    {
+        Guid userId = GetUserId();
+        _timer.CancelGracePeriod(userId);
+        GameDto? game = await _gameplay.HandleDisconnectAsync(userId);
+        if (game != null) await Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString())
+            .SendAsync("playerLeft",  new { Game = game, UserId = userId });
+    }
+
+    private Guid GetUserId() => Guid.TryParse(Context.UserIdentifier, out Guid userId) 
         ? userId 
         : throw new HubException($"invalid user identity");
 }

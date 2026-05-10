@@ -10,11 +10,11 @@ using Core.Models.Users;
 
 namespace Application.Services;
 
-public class UserRegistrationService(
+public class RegistrationService(
     ITokenGenerator tokenGenerator, 
     IPasswordHasher hasher, 
     IUserRepository userRepos, 
-    IUnitOfWork uow) : IUserRegistrationService
+    IUnitOfWork uow) : IRegistrationService
 {
     private readonly ITokenGenerator _tokenGenerator = tokenGenerator;
     private readonly IPasswordHasher _hasher = hasher;
@@ -32,7 +32,7 @@ public class UserRegistrationService(
         _userRepos.Add(user);
         await _uow.CommitChangesAsync();
         string token = _tokenGenerator.GenerateToken(user.Id, login);
-        UserDto userDto = UserMapper.GetDto(user);
+        UserDto userDto = UserMapper.ToDto(user);
         AuthResultDto result = new() { User = userDto, Token = token };
         return result;
     }

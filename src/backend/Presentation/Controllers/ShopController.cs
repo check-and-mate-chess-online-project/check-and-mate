@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Presentation.Requests;
+using Presentation.Responces;
 using Application.Services.Interfaces;
 
 namespace Presentation.Controllers;
@@ -14,6 +15,11 @@ public class ShopController(ILootBoxService loot) : ControllerBase
     private readonly ILootBoxService _loot = loot;
 
     [HttpPost("lootboxes/buy")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
     public async Task<ActionResult> BuyLootBoxes([FromBody]BuyLootBoxesRequest request)
     {
         Guid userId = GetUserId();
@@ -21,7 +27,7 @@ public class ShopController(ILootBoxService loot) : ControllerBase
         return Ok();
     }
 
-    private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) 
+    private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Guid userId) 
         ? userId 
         : throw new UnauthorizedAccessException($"invalid user identity");
 }

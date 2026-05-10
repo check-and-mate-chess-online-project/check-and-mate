@@ -43,7 +43,7 @@ public class LootBoxService(
         }
         _userRepos.Update(user);
         await _uow.CommitChangesAsync();
-        LootBoxDropResultDto dropResult = new() { Skin = SkinMapper.GetDto(skin), IsDuplicate = isDuplicate };
+        LootBoxDropResultDto dropResult = new() { Skin = SkinMapper.ToDto(skin), IsDuplicate = isDuplicate };
         return dropResult;
     }
 

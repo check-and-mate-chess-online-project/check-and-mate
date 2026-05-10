@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Presentation.Requests;
+using Presentation.Responces;
 using Application.Dtos;
 using Application.Services.Interfaces;
 
@@ -10,11 +11,14 @@ namespace Presentation.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/profile")]
-public class ProfileController(IUserProfileService profile) : ControllerBase
+public class ProfileController(IProfileService profile) : ControllerBase
 {
-    private readonly IUserProfileService _profile = profile;
+    private readonly IProfileService _profile = profile;
 
     [HttpGet("me")]
+    [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserDto>> GetUserProfile()
     {
         Guid userId = GetUserId();
@@ -22,17 +26,25 @@ public class ProfileController(IUserProfileService profile) : ControllerBase
         return user;
     }
 
-    [HttpPatch("login")]
-    [ProducesResponseType(204)]
-    public async Task<ActionResult> ChangeLogin([FromBody]ChangeLoginRequest request)
+    [HttpPatch("me")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
+    public async Task<ActionResult> UpdateProfile([FromBody]UpdateProfileRequest request)
     {
         Guid userId = GetUserId();
-        await _profile.ChangeUserLoginAsync(userId, request.Login);
+        await _profile.UpdateUserAsync(userId, request.Login, request.Email);
         return NoContent();
     }
 
-    [HttpPatch("password")]
-    [ProducesResponseType(204)]
+    [HttpPost("change-password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
     public async Task<ActionResult> ChangePassword([FromBody]ChangePasswordRequest request)
     {
         Guid userId = GetUserId();
@@ -40,17 +52,11 @@ public class ProfileController(IUserProfileService profile) : ControllerBase
         return NoContent();
     }
 
-    [HttpPatch("email")]
-    [ProducesResponseType(204)]
-    public async Task<ActionResult> ChangeEmail([FromBody]ChangeEmailRequest request)
-    {
-        Guid userId = GetUserId();
-        await _profile.ChangeUserEmailAsync(userId, request.Email);
-        return NoContent();
-    }
-
     [HttpDelete("me")]
-    [ProducesResponseType(204)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
     public async Task<ActionResult> DeleteAccount([FromBody]DeleteAccountRequest request)
     {
         Guid userId = GetUserId();
@@ -58,7 +64,7 @@ public class ProfileController(IUserProfileService profile) : ControllerBase
         return NoContent();
     }
 
-    private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) 
+    private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Guid userId) 
         ? userId 
         : throw new UnauthorizedAccessException($"invalid user identity");
 }

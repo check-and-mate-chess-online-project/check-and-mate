@@ -5,7 +5,7 @@ namespace Application.Mappers;
 
 public static class GameMapper
 {
-    public static GameDto GetDto(Game game) => new()
+    public static GameDto ToDto(Game game) => new()
     {
         Id = game.Id,
         WhitePlayerId = game.WhitePlayerId,
@@ -16,6 +16,6 @@ public static class GameMapper
         EndTimeUtc = game.EndTimeUtc,
         InitialTimeSec = game.TimeControl.InitialTimeSec,
         IncrementPerMoveSec = game.TimeControl.IncrementPerMoveSec,
-        Figures = game.GetFigures()
+        Figures = [.. game.GetFigures().Select(FigureMapper.ToDto)]
     };
 }

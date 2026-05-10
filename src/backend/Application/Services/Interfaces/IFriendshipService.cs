@@ -1,9 +1,13 @@
+using Application.Dtos;
+
 namespace Application.Services.Interfaces;
 
 public interface IFriendshipService
 {
-    Task SendFriendRequestAsync(Guid senderId, Guid userId);
+    Task<List<FriendRequestDto>> GetAllFriendRequestsAsync(Guid userId);
+    Task<List<Guid>> GetAllFriendsAsync(Guid userId);
+    Task<FriendRequestDto> SendFriendRequestAsync(Guid senderId, Guid receiverId);
     Task AcceptFriendRequestAsync(Guid requestId);
     Task RejectFriendRequestAsync(Guid requestId);
-    Task RemoveFriendshipAsync(Guid friendAId, Guid friendBId);
+    Task RemoveFriendAsync(Guid friendAId, Guid friendBId);
 }

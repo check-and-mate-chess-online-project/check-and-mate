@@ -5,7 +5,7 @@ namespace Application.Mappers;
 
 public static class UserMapper
 {
-    public static UserDto GetDto(User user) => new()
+    public static UserDto ToDto(User user) => new()
     {
         Id = user.Id,
         Login = user.Login,

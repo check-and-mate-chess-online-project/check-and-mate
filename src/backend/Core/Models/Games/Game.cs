@@ -40,7 +40,7 @@ public class Game
 
     public bool IsValidMove(Move move, PlayerColor color) => _engine.IsValidMove(move, color);
 
-    public List<(int A, int B, FigureType Figure, PlayerColor Color)> GetFigures() => _engine.GetFigures();
+    public List<Figure> GetFigures() => _engine.GetFigures();
 
     public Guid GetCurrentPlayerId() => _engine.GetCurrentPlayer() == PlayerColor.White ? WhitePlayerId : BlackPlayerId;
 
@@ -48,6 +48,8 @@ public class Game
 
     public bool IsTimeExpired(out Guid userId)
     {
+        userId = default;
+        if (!TimeControl.IsEnabled || State is PendingGameState || State is FinishedGameState) return false;
         PlayerColor color;
         if (_engine.GetCurrentPlayer() == PlayerColor.White)
         {
@@ -59,7 +61,7 @@ public class Game
             color = PlayerColor.Black;
             userId = BlackPlayerId;
         }
-        return TimeControl.CheckLeftTime(color, DateTime.UtcNow);
+        return !TimeControl.CheckLeftTime(color, DateTime.UtcNow);
     }
 
     public GameResult GetGameResultByTerminationReason(GameTerminationReason terminationReason, Guid? playerId = null)

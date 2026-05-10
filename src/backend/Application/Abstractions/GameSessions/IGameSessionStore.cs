@@ -10,5 +10,5 @@ public interface IGameSessionStore
     List<Game> GetAll();
     void Add(Game game);
     void Update(Game game);
-    void Remove(Game game);
+    void Remove(Guid gameId);
 }

@@ -5,10 +5,10 @@ namespace Application.Mappers;
 
 public static class MoveResultMapper
 {
-    public static MoveResultDto GetDto(MoveResult result) => new()
+    public static MoveResultDto ToDto(MoveResult result, GameDto game) => new()
     {
-        IsApply = result.IsApply,
-        IsValid = result.Outcome?.IsValid,
+        Status = result.Status,
+        Game = game,
         IsGameOver = result.IsGameOver,
         TerminationReason = result.TerminationReason
     };

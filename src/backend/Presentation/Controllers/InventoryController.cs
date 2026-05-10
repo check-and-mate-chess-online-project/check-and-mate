@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Presentation.Requests;
+using Presentation.Responces;
 using Application.Services.Interfaces;
 using Application.Dtos;
 
@@ -10,13 +11,15 @@ namespace Presentation.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/inventory")]
-public class InventoryController(IUserInventoryService inventory, ILootBoxService loot, IUserSkinConfigurationService configuration) : ControllerBase
+public class InventoryController(IInventoryService inventory, ILootBoxService loot, ISkinConfigurationService configuration) : ControllerBase
 {
-    private readonly IUserInventoryService _inventory = inventory;
+    private readonly IInventoryService _inventory = inventory;
     private readonly ILootBoxService _loot = loot;
-    private readonly IUserSkinConfigurationService _configuration = configuration;
+    private readonly ISkinConfigurationService _configuration = configuration;
 
     [HttpGet("skins")]
+    [ProducesResponseType(typeof(List<SkinDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<SkinDto>>> GetUserSkins()
     {
         Guid userId = GetUserId();
@@ -25,6 +28,12 @@ public class InventoryController(IUserInventoryService inventory, ILootBoxServic
     }
 
     [HttpPost("lootboxes/open")]
+    [ProducesResponseType(typeof(LootBoxDropResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<LootBoxDropResultDto>> OpenLootBox()
     {
         Guid userId = GetUserId();
@@ -33,7 +42,10 @@ public class InventoryController(IUserInventoryService inventory, ILootBoxServic
     }
 
     [HttpPost("skins/equip")]
-    [ProducesResponseType(204)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
     public async Task<ActionResult> EquipSkin([FromBody]EquipSkinRequest request)
     {
         Guid userId = GetUserId();
@@ -41,7 +53,7 @@ public class InventoryController(IUserInventoryService inventory, ILootBoxServic
         return NoContent();
     }
 
-    private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId) 
+    private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Guid userId) 
         ? userId 
         : throw new UnauthorizedAccessException($"invalid user identity");
 }

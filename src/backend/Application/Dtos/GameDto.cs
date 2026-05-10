@@ -1,4 +1,3 @@
-using Core.Models.Chess;
 using Core.Models.Games;
 
 namespace Application.Dtos;
@@ -14,5 +13,5 @@ public class GameDto
     public DateTime? EndTimeUtc { get; init; }
     public int? InitialTimeSec { get; init; }
     public int? IncrementPerMoveSec { get; init; }
-    public List<(int A, int B, FigureType Figure, PlayerColor Color)> Figures { get; init; } = null!;
+    public List<FigureDto> Figures { get; init; } = null!;
 }

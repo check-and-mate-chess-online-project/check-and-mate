@@ -9,6 +9,6 @@ public class TimeExpiredSignalRHandler(INotifier notifier) : IEventHandler<TimeE
 
     public async Task Handle(TimeExpired e)
     {
-        await _notifier.NotifyTimeExpiredAsync(e.GameId, e.UserId);
+        await _notifier.NotifyTimeExpiredAsync(e.Game, e.UserId);
     }
 }

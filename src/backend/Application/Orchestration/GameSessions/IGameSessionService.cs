@@ -9,5 +9,5 @@ public interface IGameSessionService
     Game? GetByPlayers(Guid playerAId, Guid playerBId);
     Game? GetByUserId(Guid userId);
     Game Create(Guid whitePlayerId, Guid blackPlayerId, ITimeControl timeControl);
-    void Remove(Game game);
+    void Remove(Guid gameId);
 }

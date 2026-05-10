@@ -6,7 +6,7 @@ using Core.Models.Skins;
 
 namespace Application.Services;
 
-public class UserInventoryService(IUserSkinService userSkinService) : IUserInventoryService
+public class InventoryService(IUserSkinService userSkinService) : IInventoryService
 {
     private readonly IUserSkinService _userSkinService = userSkinService;
 
@@ -14,7 +14,7 @@ public class UserInventoryService(IUserSkinService userSkinService) : IUserInven
     {
         List<Skin> skins = await _userSkinService.GetUserSkinsAsync(userId);
         List<SkinDto> skinDtos = [];
-        foreach (var skin in skins) skinDtos.Add(SkinMapper.GetDto(skin));
+        foreach (var skin in skins) skinDtos.Add(SkinMapper.ToDto(skin));
         return skinDtos;
     }
 }

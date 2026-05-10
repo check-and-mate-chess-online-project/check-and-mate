@@ -7,11 +7,11 @@ using Core.Models.Users;
 
 namespace Application.Services;
 
-public class UserSkinConfigurationService(
+public class SkinConfigurationService(
     IUserCustomizationRepository customizationRepos, 
     ISkinRepository skinRepos, 
     IUserRepository userRepos, 
-    IUnitOfWork uow) : IUserSkinConfigurationService
+    IUnitOfWork uow) : ISkinConfigurationService
 {
     private readonly IUserCustomizationRepository _customizationRepos = customizationRepos;
     private readonly ISkinRepository _skinRepos = skinRepos;

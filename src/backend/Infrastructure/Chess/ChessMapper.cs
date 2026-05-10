@@ -9,12 +9,12 @@ public static class ChessMapper
     {
         return option switch
         {
-            ReplacementOption => new ChessLib.MoveOptions.ReplacementOption(((ChessLib.MoveOptions.ReplacementOption)option).SelectedFigure),
+            ReplacementOption => new ChessLib.MoveOptions.ReplacementOption(ToEngine(((ReplacementOption)option).SelectedFigure)),
             _ => throw new ArgumentException("invalid option type")
         };
     }
 
-    public static ChessGameTerminationReason FromEngine(ChessLib.Entities.TerminalPositionType type)
+    public static ChessGameTerminationReason ToDomain(ChessLib.Entities.TerminalPositionType type)
     {
         return type switch
         {
@@ -34,7 +34,7 @@ public static class ChessMapper
         };
     }
 
-    public static PlayerColor FromEngine(ChessLib.Entities.Color color)
+    public static PlayerColor ToDomain(ChessLib.Entities.Color color)
     {
         return color switch
         {
@@ -44,7 +44,9 @@ public static class ChessMapper
         };
     }
 
-    public static FigureType FromEngine(ChessLib.Entities.FigureType type)
+    public static Figure ToDomain(ChessLib.Figures.Figure figure) => new(figure.A, figure.B, ToDomain(figure.Title), ToDomain(figure.Color));
+
+    public static FigureType ToDomain(ChessLib.Entities.FigureType type)
     {
         return type switch
         {
@@ -54,6 +56,20 @@ public static class ChessMapper
             ChessLib.Entities.FigureType.Bishop => FigureType.Bishop,
             ChessLib.Entities.FigureType.Knight => FigureType.Knight,
             ChessLib.Entities.FigureType.Pawn => FigureType.Pawn,
+            _ => throw new ArgumentException("invalid figure type")
+        };
+    }
+
+    public static ChessLib.Entities.FigureType ToEngine(FigureType type) 
+    {
+        return type switch
+        {
+            FigureType.King => ChessLib.Entities.FigureType.King,
+            FigureType.Queen => ChessLib.Entities.FigureType.Queen,
+            FigureType.Rook => ChessLib.Entities.FigureType.Rook,
+            FigureType.Bishop => ChessLib.Entities.FigureType.Bishop,
+            FigureType.Knight => ChessLib.Entities.FigureType.Knight,
+            FigureType.Pawn => ChessLib.Entities.FigureType.Pawn,
             _ => throw new ArgumentException("invalid figure type")
         };
     }

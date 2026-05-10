@@ -6,31 +6,33 @@ using System.Text;
 using Presentation.Hubs;
 using Presentation.Events.Handlers;
 using Presentation.Events;
+using Presentation.Responces;
 using Application.Services.Interfaces;
 using Application.Services;
-using Application.Abstractions.Settings;
-using Application.Orchestration.GameSessions;
 using Application.Abstractions.GameSessions;
 using Application.Abstractions.Matchmaking;
 using Application.Abstractions.Security;
+using Application.Abstractions.Settings;
+using Application.Abstractions.Chess;
+using Application.Abstractions.Tokens;
 using Application.Abstractions.UnitOfWork;
-using Application.Orchestration.EventHandlers;
 using Application.Abstractions.Events;
+using Application.Orchestration.EventHandlers;
 using Application.Orchestration.UserSkins;
 using Application.Orchestration.SkinDrops;
-using Application.Abstractions.Tokens;
+using Application.Orchestration.GameSessions;
 using Application.Events;
 using Application.Exceptions;
 using Infrastructure.Settings;
-using Infrastructure.Connections;
 using Infrastructure.Security;
 using Infrastructure.Persistence.InMemory;
 using Infrastructure.Chess;
 using Infrastructure.Events;
+using Infrastructure.Connections;
 using Infrastructure.Background;
 using Core.Repositories;
-using Core.Models.Interfaces;
 using Core.Exceptions;
+using Application.Abstractions.Connections;
 
 
 namespace Presentation;
@@ -51,6 +53,8 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddSignalR(hubOptions =>
         {
+            hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(10);
+            hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
             hubOptions.AddFilter<HubExceptionFilter>();
         });
 
@@ -86,39 +90,47 @@ public class Program
 
         builder.Services.Configure<JwtTokenSettings>(builder.Configuration.GetSection("JwtSettings"));
         builder.Services.Configure<GameSettings>(builder.Configuration.GetSection("GameSettings"));
-        builder.Services.AddScoped<IGameSettingsProvider, GameSettingsProvider>();
+        builder.Services.AddSingleton<IGameSettingsProvider, GameSettingsProvider>();
 
         builder.Services.AddSingleton<IGameRepository, GameRepository>();
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<ISkinRepository, SkinRepository>();
         builder.Services.AddSingleton<IUserSkinRepository, UserSkinRepository>();
+        builder.Services.AddSingleton<IGameInvitationRepository, GameInvitationRepository>();
+        builder.Services.AddSingleton<IFriendRequestRepository, FriendRequestRepository>();
+        builder.Services.AddSingleton<IFriendshipRepository, FriendshipRepository>();
         builder.Services.AddSingleton<IUserCustomizationRepository, UserCustomizationRepository>();
 
-        builder.Services.AddSingleton<IChessEngine, ChessEngine>();
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
         builder.Services.AddSingleton<IMatchmakingPool, MatchmakingPool>();
-        builder.Services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
-        builder.Services.AddScoped<IPasswordHasher, SimplePasswordHasher>();
-        builder.Services.AddScoped<IGameSessionService, GameSessionService>();
+
+        builder.Services.AddSingleton<IChessEngineFactory, ChessEngineFactory>();
+        builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
+        builder.Services.AddSingleton<IPasswordHasher, SimplePasswordHasher>();
+        builder.Services.AddSingleton<IGameSessionService, GameSessionService>();
+        builder.Services.AddSingleton<IConnectionGracePeriodTimer, ConnectionGracePeriodTimer>();
+        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IUserSkinService, UserSkinService>();
         builder.Services.AddScoped<ISkinDropService, SkinDropService>();
 
         builder.Services.AddSingleton<IEventDispatcher, EventDispatcher>();
-        builder.Services.AddScoped<IEventHandler<TimeExpired>, TimeExpiredHandler>();
-        builder.Services.AddScoped<IEventHandler<TimeExpired>, TimeExpiredSignalRHandler>();
+        builder.Services.AddTransient<IEventHandler<TimeExpired>, TimeExpiredHandler>();
+        builder.Services.AddTransient<IEventHandler<TimeExpired>, TimeExpiredSignalRHandler>();
+        builder.Services.AddTransient<IEventHandler<GameStarted>, GameStartedHandler>();
         builder.Services.AddSingleton<INotifier, Notifier>();
 
         builder.Services.AddHostedService<TimeService>();
-        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-        builder.Services.AddScoped<IUserAuthService, UserAuthService>();
-        builder.Services.AddScoped<IUserRegistrationService, UserRegistrationService>();
-        builder.Services.AddScoped<IUserProfileService, UserProfileService>();
-        builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
-        builder.Services.AddScoped<IGameplayService, GameplayService>();
-        builder.Services.AddScoped<IUserInventoryService, UserInventoryService>();
-        builder.Services.AddScoped<ILootBoxService, LootBoxService>();
 
-        builder.Services.AddSingleton<ConnectionManager>();
+        builder.Services.AddScoped<IAuthService, AuthService>();
+        builder.Services.AddScoped<IFriendshipService, FriendshipService>();
+        builder.Services.AddScoped<IGameInvitationService, GameInvitationService>();
+        builder.Services.AddScoped<IGameplayService, GameplayService>();
+        builder.Services.AddScoped<IInventoryService, InventoryService>();
+        builder.Services.AddScoped<ILootBoxService, LootBoxService>();
+        builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
+        builder.Services.AddScoped<IProfileService, ProfileService>();
+        builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+        builder.Services.AddScoped<ISkinConfigurationService, SkinConfigurationService>();
 
         WebApplication app = builder.Build();
 
@@ -155,13 +167,14 @@ public class Program
                     InvalidOperationException => StatusCodes.Status500InternalServerError,
                     _ => StatusCodes.Status500InternalServerError
                 };
-                var errorResponse = new
-                {
-                    message = context.Response.StatusCode == StatusCodes.Status500InternalServerError
+                ErrorResponse errorResponse = new
+                (
+                    context.Response.StatusCode, 
+                    context.Response.StatusCode == StatusCodes.Status500InternalServerError
                         ? "an unexpected error occurred"
-                        : exception.Message,
-                    statusCode = context.Response.StatusCode
-                };
+                        : exception.Message
+                );
+
                 await context.Response.WriteAsJsonAsync(errorResponse);
             });
         });
