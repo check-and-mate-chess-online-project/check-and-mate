@@ -28,7 +28,16 @@ const PLANET_SKINS: SkinDto[] = [
     blackImage: '/skins/gagarin-king-idle.webp',
     isDefault: false,
   },
-  ...(['queen', 'rook', 'bishop', 'knight', 'pawn'] as const).map((f, i) => ({
+  {
+    id: 'magnus-pawn',
+    setId: 'earth',
+    figure: FigureType.Pawn,
+    rarity: SkinRarity.Common,
+    whiteImage: '/skins/magnus-pawn/idle.webp',
+    blackImage: '/skins/magnus-pawn/idle.webp',
+    isDefault: false,
+  },
+  ...(['queen', 'rook', 'bishop', 'knight'] as const).map((f, i) => ({
     id: `earth-${f}-locked`,
     setId: 'earth',
     figure: (i + 2) as FigureType,
@@ -54,7 +63,7 @@ const PLANET_SKINS: SkinDto[] = [
   ),
 ]
 
-const OWNED_SKIN_IDS = new Set<string>(['gagarin-king'])
+const OWNED_SKIN_IDS = new Set<string>(['gagarin-king', 'magnus-pawn'])
 
 function requireAuth(request: Request): HttpResponse<null> | null {
   const auth = request.headers.get('Authorization')
