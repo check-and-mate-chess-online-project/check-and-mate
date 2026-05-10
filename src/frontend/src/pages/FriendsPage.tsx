@@ -1,25 +1,30 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useFriends } from '../shared/api/hooks'
+import { useAuth } from '../shared/auth/useAuth'
+import { useFriendRequests, useFriendsList } from '../shared/api/hooks'
 
 type Tab = 'friends' | 'incoming' | 'outgoing' | 'invitations'
 
 export function FriendsPage() {
   const { t } = useTranslation()
-  const { data } = useFriends()
+  const { user } = useAuth()
+  const friendsQuery = useFriendsList()
+  const requestsQuery = useFriendRequests()
   const [tab, setTab] = useState<Tab>('friends')
   const [search, setSearch] = useState('')
 
   const tabs: Tab[] = ['friends', 'incoming', 'outgoing', 'invitations']
 
+  const incoming = requestsQuery.data?.filter((r) => r.receiverId === user?.id) ?? []
+  const outgoing = requestsQuery.data?.filter((r) => r.senderId === user?.id) ?? []
   const list =
     tab === 'friends'
-      ? data?.friends
+      ? friendsQuery.data
       : tab === 'incoming'
-        ? data?.incomingRequests
+        ? incoming
         : tab === 'outgoing'
-          ? data?.outgoingRequests
-          : data?.gameInvitations
+          ? outgoing
+          : []
   const empty = !list || list.length === 0
 
   return (

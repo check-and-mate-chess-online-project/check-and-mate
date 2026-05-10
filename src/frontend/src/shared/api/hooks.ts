@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './http'
 import type {
+  FriendRequestDto,
   GameDto,
   Guid,
   LootBoxDropResultDto,
@@ -14,6 +15,29 @@ export function useMe() {
   return useQuery({
     queryKey: ['me'],
     queryFn: () => api.get<UserDto>('/api/profile/me'),
+  })
+}
+
+export function useUpdateProfile() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { login?: string; email?: string }) =>
+      api.patch<void>('/api/profile/me', body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['me'] }),
+  })
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (body: { oldPassword: string; newPassword: string }) =>
+      api.post<void>('/api/profile/change-password', body),
+  })
+}
+
+export function useDeleteAccount() {
+  return useMutation({
+    mutationFn: (body: { password: string }) =>
+      api.delete<void>('/api/profile/me', body),
   })
 }
 
@@ -92,16 +116,54 @@ export function useGame(id: Guid) {
   })
 }
 
-interface FriendsResponse {
-  friends: UserDto[]
-  incomingRequests: UserDto[]
-  outgoingRequests: UserDto[]
-  gameInvitations: unknown[]
+export function useFriendsList() {
+  return useQuery({
+    queryKey: ['friends', 'list'],
+    queryFn: () => api.get<Guid[]>('/api/friends'),
+  })
 }
 
-export function useFriends() {
+export function useFriendRequests() {
   return useQuery({
-    queryKey: ['friends'],
-    queryFn: () => api.get<FriendsResponse>('/api/users/me/friends'),
+    queryKey: ['friends', 'requests'],
+    queryFn: () => api.get<FriendRequestDto[]>('/api/friends/requests'),
+  })
+}
+
+export function useSendFriendRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { receiverId: Guid }) =>
+      api.post<FriendRequestDto>('/api/friends/requests', body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['friends', 'requests'] }),
+  })
+}
+
+export function useAcceptFriendRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (friendRequestId: Guid) =>
+      api.patch<void>(`/api/friends/requests/${friendRequestId}/accept`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['friends'] })
+    },
+  })
+}
+
+export function useRejectFriendRequest() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (friendRequestId: Guid) =>
+      api.patch<void>(`/api/friends/requests/${friendRequestId}/reject`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['friends', 'requests'] }),
+  })
+}
+
+export function useDeleteFriend() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (friendId: Guid) =>
+      api.delete<void>(`/api/friends/${friendId}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['friends', 'list'] }),
   })
 }
