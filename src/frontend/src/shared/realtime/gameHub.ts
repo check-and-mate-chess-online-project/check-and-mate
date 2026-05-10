@@ -191,6 +191,7 @@ export interface GameHubEventHandlers {
 
 export function subscribeGameHub(handlers: GameHubEventHandlers): () => void {
   getGameHub()
+  ensureStarted().catch(() => {})
   subscribers.add(handlers)
 
   if (handlers.onMoveMade) {

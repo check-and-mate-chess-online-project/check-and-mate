@@ -22,6 +22,14 @@
       "reload": "Reload"
     }
   },
+  "invitations": {
+    "received": "Game invitation received",
+    "sent": "Invitation sent",
+    "rejected": "Invitation was rejected",
+    "accept": "Accept",
+    "reject": "Reject",
+    "acceptFailed": "Couldn't accept invitation"
+  },
   "forms": {
     "login": {
       "loginPlaceholder": "Login",

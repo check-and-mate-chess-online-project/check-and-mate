@@ -6,6 +6,7 @@ import { LanguageToggle } from '../shared/ui/LanguageToggle'
 import { PageTransition } from '../shared/ui/PageTransition'
 import { useAuthStore } from '../shared/auth/authStore'
 import { useAuth } from '../shared/auth/useAuth'
+import { useGlobalGameEvents } from '../shared/lib/useGlobalGameEvents'
 import { stopGameHub } from '../shared/realtime/gameHub'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -15,6 +16,7 @@ export function RootLayout() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
+  useGlobalGameEvents()
 
   const handleLogout = () => {
     stopGameHub().catch(() => {})
