@@ -126,7 +126,8 @@ export interface SearchOpponentRequest {
 }
 
 export interface SendGameInvitationRequest {
-  receiverId: Guid
+  receiverId?: Guid
+  receiverLogin?: string
   timeControlIsEnabled: boolean
   initialTimeSec: number
   incrementPerMoveSec: number

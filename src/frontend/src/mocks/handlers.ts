@@ -125,13 +125,6 @@ export const handlers = [
     })
   }),
 
-  // нет на бэке: история партий
-  http.get('/api/users/me/games', ({ request }) => {
-    const denied = requireAuth(request)
-    if (denied) return denied
-    return HttpResponse.json([])
-  }),
-
   // нет на бэке: партия по id
   http.get('/api/games/:gameId', ({ request }) => {
     const denied = requireAuth(request)

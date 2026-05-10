@@ -46,6 +46,21 @@ export interface GameDto {
   initialTimeSec: number | null
   incrementPerMoveSec: number | null
   figures: FigureDto[]
+  moves: PlyDto[]
+}
+
+export interface MoveDto {
+  a: number
+  b: number
+  x: number
+  y: number
+  options: MoveOptionsDto
+}
+
+export interface PlyDto {
+  moveNumber: number
+  color: PlayerColor
+  coordinates: MoveDto[]
 }
 
 export interface MoveOptionsDto {

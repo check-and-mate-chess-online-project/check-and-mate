@@ -104,7 +104,7 @@ export function useBuyLootbox() {
 export function useGameHistory() {
   return useQuery({
     queryKey: ['games', 'history'],
-    queryFn: () => api.get<GameDto[]>('/api/users/me/games'),
+    queryFn: () => api.get<GameDto[]>('/api/archive/games'),
   })
 }
 
@@ -133,7 +133,7 @@ export function useFriendRequests() {
 export function useSendFriendRequest() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (body: { receiverId: Guid }) =>
+    mutationFn: (body: { receiverId?: Guid; receiverLogin?: string }) =>
       api.post<FriendRequestDto>('/api/friends/requests', body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['friends', 'requests'] }),
   })
