@@ -33,6 +33,7 @@ using Infrastructure.Background;
 using Core.Repositories;
 using Core.Exceptions;
 using Application.Abstractions.Connections;
+using Core.Models.Games;
 
 
 namespace Presentation;
@@ -131,6 +132,7 @@ public class Program
         builder.Services.AddScoped<IProfileService, ProfileService>();
         builder.Services.AddScoped<IRegistrationService, RegistrationService>();
         builder.Services.AddScoped<ISkinConfigurationService, SkinConfigurationService>();
+        builder.Services.AddScoped<IArchiveService, ArchiveService>();
 
         WebApplication app = builder.Build();
 

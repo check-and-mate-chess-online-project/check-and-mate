@@ -2,6 +2,6 @@ namespace Application.Dtos;
 
 public class AuthResultDto
 {
-    public UserDto User { get; init; } = null!;
-    public string Token { get; init; } = null!;
+    public UserDto User { get; set; } = null!;
+    public string Token { get; set; } = null!;
 }

@@ -4,5 +4,5 @@ namespace Application.Dtos;
 
 public class MoveOptionsDto
 {
-    public FigureType? SelectedFigure { get; init; }
+    public FigureType? SelectedFigure { get; set; }
 }

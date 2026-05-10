@@ -74,6 +74,7 @@ public class GameplayService(
         game.EndByDisconnect(userId);
         await HandleGameCompletion(game, userId, GameTerminationReason.Disconnect);
         await _uow.CommitChangesAsync();
+        Console.WriteLine($"{game.StartTimeUtc} \n {game.EndTimeUtc} \n {game.TerminationReason}");
         return GameMapper.ToDto(game);
     }
 

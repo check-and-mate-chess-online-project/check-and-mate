@@ -4,15 +4,16 @@ namespace Application.Dtos;
 
 public class GameDto
 {
-    public Guid Id { get; init; }
-    public Guid WhitePlayerId { get; init; }
-    public Guid BlackPlayerId { get; init; }
-    public GameResult? Result { get; init; }
-    public GameTerminationReason? TerminationReason { get; init; }
-    public DateTime? StartTimeUtc { get; init; }
-    public DateTime? EndTimeUtc { get; init; }
-    public bool TimeControlIsEnabled { get; init; }
-    public int? InitialTimeSec { get; init; }
-    public int? IncrementPerMoveSec { get; init; }
-    public List<FigureDto> Figures { get; init; } = null!;
+    public Guid Id { get; set; }
+    public Guid WhitePlayerId { get; set; }
+    public Guid BlackPlayerId { get; set; }
+    public GameResult? Result { get; set; }
+    public GameTerminationReason? TerminationReason { get; set; }
+    public DateTime? StartTimeUtc { get; set; }
+    public DateTime? EndTimeUtc { get; set; }
+    public bool TimeControlIsEnabled { get; set; }
+    public int? InitialTimeSec { get; set; }
+    public int? IncrementPerMoveSec { get; set; }
+    public List<FigureDto> Figures { get; set; } = null!;
+    public List<PlyDto> Moves { get; set; } = null!;
 }

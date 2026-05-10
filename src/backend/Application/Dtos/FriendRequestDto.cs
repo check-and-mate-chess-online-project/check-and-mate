@@ -4,8 +4,8 @@ namespace Application.Dtos;
 
 public class FriendRequestDto
 {
-    public Guid Id { get; init; }
-    public Guid ReceiverId { get; init; }
-    public Guid SenderId { get; init; }
-    public FriendRequestState State { get; init; } 
+    public Guid Id { get; set; }
+    public Guid ReceiverId { get; set; }
+    public Guid SenderId { get; set; }
+    public FriendRequestState State { get; set; } 
 }

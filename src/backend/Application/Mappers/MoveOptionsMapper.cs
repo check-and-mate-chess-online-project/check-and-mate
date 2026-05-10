@@ -12,4 +12,19 @@ public static class MoveOptionsMapper
         if (optionsDto.SelectedFigure != null) options.Add(new ReplacementOption((FigureType)optionsDto.SelectedFigure));
         return options;
     }
+
+    public static MoveOptionsDto ToDto(List<IMoveOption> options)
+    {
+        MoveOptionsDto optionsDto = new();
+        foreach (var option in options)
+        {
+            switch (option)
+            {
+                case ReplacementOption: 
+                    optionsDto.SelectedFigure = ((ReplacementOption)option).SelectedFigure;
+                    break;
+            }
+        }
+        return optionsDto;
+    }
 }
