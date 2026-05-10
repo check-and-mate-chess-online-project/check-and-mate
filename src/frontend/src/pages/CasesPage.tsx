@@ -40,7 +40,7 @@ export function CasesPage() {
         <div className="mt-4 p-4 bg-slate-900/60 border border-violet-900 rounded-lg">
           {open.data.isDuplicate
             ? t('pages.cases.duplicate')
-            : t('pages.cases.dropped', { id: open.data.skinId })}
+            : t('pages.cases.dropped', { id: open.data.skin.id })}
         </div>
       )}
     </div>

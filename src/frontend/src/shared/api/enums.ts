@@ -46,3 +46,27 @@ export const UserRole = {
   Admin: 2,
 } as const
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+export const MoveAttemptStatus = {
+  Success: 1,
+  Invalid: 2,
+  Timeout: 3,
+} as const
+export type MoveAttemptStatus =
+  (typeof MoveAttemptStatus)[keyof typeof MoveAttemptStatus]
+
+export const FriendRequestState = {
+  Pending: 1,
+  Accepted: 2,
+  Rejected: 3,
+} as const
+export type FriendRequestState =
+  (typeof FriendRequestState)[keyof typeof FriendRequestState]
+
+export const GameInvitationState = {
+  Pending: 1,
+  Accepted: 2,
+  Rejected: 3,
+} as const
+export type GameInvitationState =
+  (typeof GameInvitationState)[keyof typeof GameInvitationState]

@@ -1,8 +1,11 @@
 import type { Guid, IsoDateTime } from './common'
 import type {
   FigureType,
+  FriendRequestState,
+  GameInvitationState,
   GameResult,
   GameTerminationReason,
+  MoveAttemptStatus,
   PlayerColor,
   SkinRarity,
   UserRole,
@@ -24,11 +27,10 @@ export interface AuthResultDto {
   token: string
 }
 
-// у бэка пока named tuple — приходит как {Item1..Item4}, см. api-needs.md #6
-export interface FigurePosition {
+export interface FigureDto {
   a: number
   b: number
-  figure: FigureType
+  type: FigureType
   color: PlayerColor
 }
 
@@ -42,22 +44,33 @@ export interface GameDto {
   endTimeUtc: IsoDateTime | null
   initialTimeSec: number | null
   incrementPerMoveSec: number | null
-  figures: FigurePosition[]
+  figures: FigureDto[]
+}
+
+export interface MoveOptionsDto {
+  selectedFigure: FigureType | null
+}
+
+export interface MakeMoveRequest {
+  a: number
+  b: number
+  x: number
+  y: number
+  options: MoveOptionsDto
 }
 
 export interface MoveResultDto {
-  isApply: boolean
-  isValid: boolean | null
+  status: MoveAttemptStatus
+  game: GameDto
   isGameOver: boolean
   terminationReason: GameTerminationReason | null
 }
 
 export interface LootBoxDropResultDto {
-  skinId: Guid
+  skin: SkinDto
   isDuplicate: boolean
 }
 
-// shape пока придумали мы, бэк не отдаёт планеты как entity
 export interface PlanetDto {
   id: Guid
   name: string
@@ -73,11 +86,20 @@ export interface SkinDto {
   isDefault: boolean
 }
 
-// формат options — TODO, см. api-needs.md #7
-export interface Move {
-  a: number
-  b: number
-  x: number
-  y: number
-  options: unknown[]
+export interface GameInvitationDto {
+  id: Guid
+  receiverId: Guid
+  senderId: Guid
+  timeControlIsEnabled: boolean
+  initialTimeSec: number | null
+  incrementPerMoveSec: number | null
+  expiresAt: IsoDateTime
+  state: GameInvitationState
+}
+
+export interface FriendRequestDto {
+  id: Guid
+  receiverId: Guid
+  senderId: Guid
+  state: FriendRequestState
 }

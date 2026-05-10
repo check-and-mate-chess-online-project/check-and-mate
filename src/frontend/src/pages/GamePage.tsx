@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Chess } from 'chess.js'
 import { Chessboard } from 'react-chessboard'
 import { toast } from 'sonner'
-import type { GameDto, Move as ApiMove } from '../shared/api'
+import type { GameDto, MakeMoveRequest } from '../shared/api'
 import { GameTerminationReason } from '../shared/api/enums'
 import { useAuth } from '../shared/auth/useAuth'
 import { gameHub, subscribeGameHub } from '../shared/realtime/gameHub'
@@ -62,17 +62,23 @@ function squareToCoord(sq: string): { col: number; row: number } {
   return { col: sq.charCodeAt(0) - 97, row: parseInt(sq[1], 10) - 1 }
 }
 
-function apiMoveToSquares(move: ApiMove): { from: string; to: string } {
+function apiMoveToSquares(move: MakeMoveRequest): { from: string; to: string } {
   return {
     from: coordToSquare(move.a, move.b),
     to: coordToSquare(move.x, move.y),
   }
 }
 
-function squaresToApiMove(from: string, to: string): ApiMove {
+function squaresToApiMove(from: string, to: string): MakeMoveRequest {
   const f = squareToCoord(from)
   const t = squareToCoord(to)
-  return { a: f.col, b: f.row, x: t.col, y: t.row, options: [] }
+  return {
+    a: f.col,
+    b: f.row,
+    x: t.col,
+    y: t.row,
+    options: { selectedFigure: null },
+  }
 }
 
 interface ResultModalProps {

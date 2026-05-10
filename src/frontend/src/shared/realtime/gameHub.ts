@@ -5,11 +5,11 @@ import {
   LogLevel,
 } from '@microsoft/signalr'
 import { getToken } from '../auth/token'
-import type { GameDto, Guid, Move, MoveResultDto } from '../api'
+import type { GameDto, Guid, MakeMoveRequest, MoveResultDto } from '../api'
 
 let conn: HubConnection | null = null
 const subscribers = new Set<GameHubEventHandlers>()
-const moveHistory: Array<{ move: Move; result: MoveResultDto }> = []
+const moveHistory: Array<{ move: MakeMoveRequest; result: MoveResultDto }> = []
 let listenersAttached = false
 
 export function getGameHub(): HubConnection {
@@ -43,7 +43,7 @@ function attachGameHubListeners(c: HubConnection): void {
     notify((handler) => handler.onGameStarted?.(game as GameDto))
   })
   c.on('MoveMade', (move: unknown, result: unknown) => {
-    const event = { move: move as Move, result: result as MoveResultDto }
+    const event = { move: move as MakeMoveRequest, result: result as MoveResultDto }
     moveHistory.push(event)
     notify((handler) => handler.onMoveMade?.(event.move, event.result))
   })
@@ -93,7 +93,7 @@ export const gameHub = {
     const c = await ensureStarted()
     await c.invoke('CancelSearch')
   },
-  makeMove: async (move: Move): Promise<MoveResultDto> => {
+  makeMove: async (move: MakeMoveRequest): Promise<MoveResultDto> => {
     const c = await ensureStarted()
     return c.invoke<MoveResultDto>('MakeMove', move)
   },
@@ -107,7 +107,7 @@ export interface GameHubEventHandlers {
   onSearchStarted?: () => void
   onSearchStopped?: () => void
   onGameStarted?: (game: GameDto) => void
-  onMoveMade?: (move: Move, result: MoveResultDto) => void
+  onMoveMade?: (move: MakeMoveRequest, result: MoveResultDto) => void
   onUserDisconnected?: (userId: Guid) => void
   onGameEnded?: () => void
   onTimeExpired?: (gameId: Guid, userId: Guid) => void
