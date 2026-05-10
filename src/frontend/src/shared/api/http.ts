@@ -36,8 +36,14 @@ async function request<T>(
     if (res.status === 401 && path !== '/api/auth/login') {
       useAuthStore.getState().clearSession()
     }
-    const text = await res.text().catch(() => '')
-    throw new ApiError(res.status, text || res.statusText)
+    let message = res.statusText
+    try {
+      const body = (await res.json()) as { message?: string; statusCode?: number }
+      if (body && typeof body.message === 'string' && body.message) message = body.message
+    } catch {
+      // body wasn't JSON, keep statusText
+    }
+    throw new ApiError(res.status, message)
   }
 
   if (res.status === 204) return undefined as T
