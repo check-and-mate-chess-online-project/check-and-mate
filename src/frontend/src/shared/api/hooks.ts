@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './http'
+import { gameHub } from '../realtime/gameHub'
 import type {
   FriendRequestDto,
   GameDto,
@@ -165,5 +166,12 @@ export function useDeleteFriend() {
     mutationFn: (friendId: Guid) =>
       api.delete<void>(`/api/friends/${friendId}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['friends', 'list'] }),
+  })
+}
+
+export function useGameInvitations() {
+  return useQuery({
+    queryKey: ['game-invitations'],
+    queryFn: () => gameHub.getPendingInvitations(),
   })
 }

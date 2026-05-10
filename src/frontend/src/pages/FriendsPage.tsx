@@ -1,31 +1,64 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
+import type { Guid } from '../shared/api'
 import { useAuth } from '../shared/auth/useAuth'
-import { useFriendRequests, useFriendsList } from '../shared/api/hooks'
+import {
+  useAcceptFriendRequest,
+  useDeleteFriend,
+  useFriendRequests,
+  useFriendsList,
+  useGameInvitations,
+  useRejectFriendRequest,
+  useSendFriendRequest,
+} from '../shared/api/hooks'
+import { gameHub } from '../shared/realtime/gameHub'
+import { InviteToGameModal } from '../shared/ui/InviteToGameModal'
 
 type Tab = 'friends' | 'incoming' | 'outgoing' | 'invitations'
+
+function shortId(id: string): string {
+  return id.slice(0, 8)
+}
 
 export function FriendsPage() {
   const { t } = useTranslation()
   const { user } = useAuth()
   const friendsQuery = useFriendsList()
   const requestsQuery = useFriendRequests()
+  const invitationsQuery = useGameInvitations()
+  const sendFriendRequest = useSendFriendRequest()
+  const acceptRequest = useAcceptFriendRequest()
+  const rejectRequest = useRejectFriendRequest()
+  const deleteFriend = useDeleteFriend()
   const [tab, setTab] = useState<Tab>('friends')
   const [search, setSearch] = useState('')
+  const [inviteTarget, setInviteTarget] = useState<{
+    login?: string
+    id?: Guid
+  } | null>(null)
 
   const tabs: Tab[] = ['friends', 'incoming', 'outgoing', 'invitations']
 
-  const incoming = requestsQuery.data?.filter((r) => r.receiverId === user?.id) ?? []
-  const outgoing = requestsQuery.data?.filter((r) => r.senderId === user?.id) ?? []
-  const list =
-    tab === 'friends'
-      ? friendsQuery.data
-      : tab === 'incoming'
-        ? incoming
-        : tab === 'outgoing'
-          ? outgoing
-          : []
-  const empty = !list || list.length === 0
+  const incoming =
+    requestsQuery.data?.filter((r) => r.receiverId === user?.id) ?? []
+  const outgoing =
+    requestsQuery.data?.filter((r) => r.senderId === user?.id) ?? []
+
+  const handleAddFriend = () => {
+    const login = search.trim()
+    if (!login) return
+    sendFriendRequest.mutate(
+      { receiverLogin: login },
+      {
+        onSuccess: () => {
+          toast.success(t('pages.friends.requestSent'))
+          setSearch('')
+        },
+        onError: () => toast.error(t('pages.friends.requestFailed')),
+      },
+    )
+  }
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -36,12 +69,14 @@ export function FriendsPage() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleAddFriend()}
           placeholder={t('pages.friends.searchPlaceholder')}
           className="flex-1 bg-slate-800 border border-slate-700 text-slate-100 px-3 py-2 rounded-md focus:outline-none focus:border-violet-500"
         />
         <button
           type="button"
-          disabled={!search.trim()}
+          disabled={!search.trim() || sendFriendRequest.isPending}
+          onClick={handleAddFriend}
           className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 rounded-md"
         >
           {t('pages.friends.addButton')}
@@ -65,16 +100,229 @@ export function FriendsPage() {
         ))}
       </div>
 
-      {empty ? (
-        <p className="text-slate-500 text-center py-12">
-          {t('pages.friends.empty')}
-        </p>
-      ) : (
-        <ul className="space-y-2">
-          {/* placeholder rendering */}
-          <li className="text-slate-400 text-sm">{list?.length} items</li>
-        </ul>
+      {tab === 'friends' && (
+        <FriendsList
+          friends={friendsQuery.data ?? []}
+          onInvite={(id) => setInviteTarget({ id })}
+          onRemove={(id) =>
+            deleteFriend.mutate(id, {
+              onError: () => toast.error(t('pages.friends.removeFailed')),
+            })
+          }
+          emptyText={t('pages.friends.empty')}
+        />
+      )}
+
+      {tab === 'incoming' && (
+        <RequestsList
+          requests={incoming}
+          mode="incoming"
+          onAccept={(id) =>
+            acceptRequest.mutate(id, {
+              onError: () => toast.error(t('pages.friends.acceptFailed')),
+            })
+          }
+          onReject={(id) =>
+            rejectRequest.mutate(id, {
+              onError: () => toast.error(t('pages.friends.rejectFailed')),
+            })
+          }
+          emptyText={t('pages.friends.empty')}
+        />
+      )}
+
+      {tab === 'outgoing' && (
+        <RequestsList
+          requests={outgoing}
+          mode="outgoing"
+          emptyText={t('pages.friends.empty')}
+        />
+      )}
+
+      {tab === 'invitations' && (
+        <InvitationsList
+          invitations={invitationsQuery.data ?? []}
+          onAccept={(id) =>
+            gameHub
+              .acceptGameInvitation(id)
+              .catch(() => toast.error(t('invitations.acceptFailed')))
+          }
+          onReject={(id) =>
+            gameHub
+              .rejectGameInvitation(id)
+              .catch(() => toast.error(t('pages.friends.rejectFailed')))
+          }
+          emptyText={t('pages.friends.empty')}
+        />
+      )}
+
+      {inviteTarget && (
+        <InviteToGameModal
+          target={inviteTarget}
+          onClose={() => setInviteTarget(null)}
+        />
       )}
     </div>
+  )
+}
+
+interface FriendsListProps {
+  friends: Guid[]
+  onInvite: (id: Guid) => void
+  onRemove: (id: Guid) => void
+  emptyText: string
+}
+
+function FriendsList({ friends, onInvite, onRemove, emptyText }: FriendsListProps) {
+  if (friends.length === 0) {
+    return <p className="text-slate-500 text-center py-12">{emptyText}</p>
+  }
+  return (
+    <ul className="space-y-2">
+      {friends.map((id) => (
+        <li
+          key={id}
+          className="flex items-center justify-between bg-slate-900/60 border border-violet-900 rounded-md px-4 py-3"
+        >
+          <span className="font-mono text-sm text-slate-300">
+            {shortId(id)}
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => onInvite(id)}
+              className="px-3 py-1 text-sm bg-violet-600 hover:bg-violet-500 rounded-md"
+            >
+              Invite
+            </button>
+            <button
+              type="button"
+              onClick={() => onRemove(id)}
+              className="px-3 py-1 text-sm text-orange-400 hover:text-orange-300"
+            >
+              ✕
+            </button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+interface Request {
+  id: Guid
+  senderId: Guid
+  receiverId: Guid
+}
+
+interface RequestsListProps {
+  requests: Request[]
+  mode: 'incoming' | 'outgoing'
+  onAccept?: (id: Guid) => void
+  onReject?: (id: Guid) => void
+  emptyText: string
+}
+
+function RequestsList({
+  requests,
+  mode,
+  onAccept,
+  onReject,
+  emptyText,
+}: RequestsListProps) {
+  if (requests.length === 0) {
+    return <p className="text-slate-500 text-center py-12">{emptyText}</p>
+  }
+  return (
+    <ul className="space-y-2">
+      {requests.map((r) => {
+        const otherId = mode === 'incoming' ? r.senderId : r.receiverId
+        return (
+          <li
+            key={r.id}
+            className="flex items-center justify-between bg-slate-900/60 border border-violet-900 rounded-md px-4 py-3"
+          >
+            <span className="font-mono text-sm text-slate-300">
+              {shortId(otherId)}
+            </span>
+            {mode === 'incoming' && (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => onAccept?.(r.id)}
+                  className="px-3 py-1 text-sm bg-violet-600 hover:bg-violet-500 rounded-md"
+                >
+                  ✓
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onReject?.(r.id)}
+                  className="px-3 py-1 text-sm text-orange-400 hover:text-orange-300"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            {mode === 'outgoing' && (
+              <span className="text-xs text-slate-500">pending</span>
+            )}
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+interface Invitation {
+  id: Guid
+  senderId: Guid
+  receiverId: Guid
+}
+
+interface InvitationsListProps {
+  invitations: Invitation[]
+  onAccept: (id: Guid) => void
+  onReject: (id: Guid) => void
+  emptyText: string
+}
+
+function InvitationsList({
+  invitations,
+  onAccept,
+  onReject,
+  emptyText,
+}: InvitationsListProps) {
+  if (invitations.length === 0) {
+    return <p className="text-slate-500 text-center py-12">{emptyText}</p>
+  }
+  return (
+    <ul className="space-y-2">
+      {invitations.map((inv) => (
+        <li
+          key={inv.id}
+          className="flex items-center justify-between bg-slate-900/60 border border-violet-900 rounded-md px-4 py-3"
+        >
+          <span className="font-mono text-sm text-slate-300">
+            {shortId(inv.senderId)}
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => onAccept(inv.id)}
+              className="px-3 py-1 text-sm bg-violet-600 hover:bg-violet-500 rounded-md"
+            >
+              ✓
+            </button>
+            <button
+              type="button"
+              onClick={() => onReject(inv.id)}
+              className="px-3 py-1 text-sm text-orange-400 hover:text-orange-300"
+            >
+              ✕
+            </button>
+          </div>
+        </li>
+      ))}
+    </ul>
   )
 }

@@ -221,7 +221,16 @@
       "addButton": "Add",
       "accept": "Accept",
       "reject": "Reject",
-      "remove": "Remove"
+      "remove": "Remove",
+      "requestSent": "Friend request sent",
+      "requestFailed": "Couldn't send request",
+      "acceptFailed": "Couldn't accept request",
+      "rejectFailed": "Couldn't reject request",
+      "removeFailed": "Couldn't remove friend",
+      "inviteTitle": "Invite to game",
+      "inviteFailed": "Couldn't send invitation",
+      "sendInvite": "Send",
+      "cancel": "Cancel"
     },
     "notFound": {
       "title": "404",

@@ -221,7 +221,16 @@
       "addButton": "Добавить",
       "accept": "Принять",
       "reject": "Отклонить",
-      "remove": "Удалить"
+      "remove": "Удалить",
+      "requestSent": "Заявка отправлена",
+      "requestFailed": "Не удалось отправить заявку",
+      "acceptFailed": "Не удалось принять заявку",
+      "rejectFailed": "Не удалось отклонить заявку",
+      "removeFailed": "Не удалось удалить друга",
+      "inviteTitle": "Пригласить в игру",
+      "inviteFailed": "Не удалось отправить приглашение",
+      "sendInvite": "Отправить",
+      "cancel": "Отмена"
     },
     "notFound": {
       "title": "404",
