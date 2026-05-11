@@ -21,7 +21,7 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
     public async Task<ActionResult<List<FriendRequestDto>>> GetFriendRequests()
     {
         Guid userId = GetUserId();
-        List<FriendRequestDto> requests = await _friendship.GetAllFriendRequestsAsync(userId);
+        List<FriendRequestDto> requests = await _friendship.GetPendingFriendRequestsAsync(userId);
         return requests;
     }
 

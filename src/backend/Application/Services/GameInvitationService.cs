@@ -3,6 +3,7 @@ using Application.Orchestration.GameSessions;
 using Application.Abstractions.UnitOfWork;
 using Application.Exceptions;
 using Application.Dtos;
+using Application.Events;
 using Application.Mappers;
 using Application.Abstractions.Events;
 using Core.Repositories;
@@ -10,7 +11,6 @@ using Core.Models.Requests;
 using Core.Models.Games;
 using Core.Models.Interfaces;
 using Core.Models.Users;
-using Application.Events;
 
 namespace Application.Services;
 
@@ -27,8 +27,8 @@ public class GameInvitationService(
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
 
-    public async Task<List<GameInvitationDto>> GetAllGameInvitationsAsync(Guid userId) 
-        => [.. (await _invitationRepos.GetByUserAsync(userId))
+    public async Task<List<GameInvitationDto>> GetPendingGameInvitationsAsync(Guid userId) 
+        => [.. (await _invitationRepos.GetPendingByUserAsync(userId))
             .Select(GameInvitationMapper.ToDto)];
 
     public async Task<GameInvitationDto> SendGameInvitationAsync(

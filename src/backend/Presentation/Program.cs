@@ -21,6 +21,7 @@ using Application.Orchestration.EventHandlers;
 using Application.Orchestration.UserSkins;
 using Application.Orchestration.SkinDrops;
 using Application.Orchestration.GameSessions;
+using Application.Abstractions.Connections;
 using Application.Events;
 using Application.Exceptions;
 using Infrastructure.Settings;
@@ -32,8 +33,6 @@ using Infrastructure.Connections;
 using Infrastructure.Background;
 using Core.Repositories;
 using Core.Exceptions;
-using Application.Abstractions.Connections;
-using Core.Models.Games;
 
 
 namespace Presentation;

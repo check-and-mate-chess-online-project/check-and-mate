@@ -4,7 +4,7 @@ namespace Application.Services.Interfaces;
 
 public interface IFriendshipService
 {
-    Task<List<FriendRequestDto>> GetAllFriendRequestsAsync(Guid userId);
+    Task<List<FriendRequestDto>> GetPendingFriendRequestsAsync(Guid userId);
     Task<List<Guid>> GetAllFriendsAsync(Guid userId);
     Task<FriendRequestDto> SendFriendRequestAsync(Guid senderId, Guid receiverId);
     Task<FriendRequestDto> SendFriendRequestAsync(Guid senderId, string receiverLogin);

@@ -6,7 +6,7 @@ namespace Infrastructure.Persistence.InMemory;
 public class GameInvitationRepository : IGameInvitationRepository
 {
     private readonly List<GameInvitation> _invitations = new();
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     public Task<GameInvitation?> GetAsync(Guid invitationId)
     {
@@ -28,6 +28,14 @@ public class GameInvitationRepository : IGameInvitationRepository
         lock (_lock)
             return Task.FromResult(_invitations
                 .Where(i => i.SenderId == userId || i.ReceiverId == userId)
+                .ToList());
+    }
+
+    public Task<List<GameInvitation>> GetPendingByUserAsync(Guid userId)
+    {
+        lock (_lock)
+            return Task.FromResult(_invitations
+                .Where(i => i.State == GameInvitationState.Pending && (i.SenderId == userId || i.ReceiverId == userId))
                 .ToList());
     }
 

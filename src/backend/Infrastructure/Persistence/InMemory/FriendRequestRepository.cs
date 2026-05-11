@@ -31,6 +31,14 @@ public class FriendRequestRepository : IFriendRequestRepository
                 .ToList());
     }
 
+    public Task<List<FriendRequest>> GetPendingByUserAsync(Guid userId)
+    {
+        lock (_lock)
+            return Task.FromResult(_requests
+                .Where(r => r.State == FriendRequestState.Pending && (r.SenderId == userId || r.ReceiverId == userId))
+                .ToList());
+    }
+
     public void Add(FriendRequest request)
     {
         lock (_lock) _requests.Add(request);
