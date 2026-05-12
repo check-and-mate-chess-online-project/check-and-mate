@@ -16,7 +16,7 @@ public class ArchiveController(IArchiveService archive) : ControllerBase
 
     [HttpGet("games")]
     [ProducesResponseType(typeof(List<GameDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> GetGames()
     {
         Guid userId = GetUserId();
@@ -26,5 +26,5 @@ public class ArchiveController(IArchiveService archive) : ControllerBase
 
     private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Guid userId) 
         ? userId 
-        : throw new UnauthorizedAccessException($"invalid user identity");
+        : throw new InvalidOperationException($"invalid user identity");
 }
