@@ -18,7 +18,7 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
     [HttpGet("requests")]
     [ProducesResponseType(typeof(List<FriendRequestDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<List<FriendRequestDto>>> GetFriendRequests()
+    public async Task<ActionResult<List<FriendRequestDto>>> GetPendingFriendRequests()
     {
         Guid userId = GetUserId();
         List<FriendRequestDto> requests = await _friendship.GetPendingFriendRequestsAsync(userId);

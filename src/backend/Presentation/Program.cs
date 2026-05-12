@@ -106,7 +106,7 @@ public class Program
 
         builder.Services.AddSingleton<IChessEngineFactory, ChessEngineFactory>();
         builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
-        builder.Services.AddSingleton<IPasswordHasher, SimplePasswordHasher>();
+        builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
         builder.Services.AddSingleton<IGameSessionService, GameSessionService>();
         builder.Services.AddSingleton<IConnectionGracePeriodTimer, ConnectionGracePeriodTimer>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

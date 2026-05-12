@@ -18,7 +18,7 @@ public class AuthService(ITokenGenerator tokenGenerator, IPasswordHasher hasher,
     public async Task<AuthResultDto> Authorize(string login, string password)
     {
         User? user = await _userRepos.GetAsync(login);
-        if (user == null || user.PasswordHash != _hasher.GetHash(password)) 
+        if (user == null || !_hasher.VerifyPassword(password, user.PasswordHash))
             throw new UnauthorizedAccessException("incorrect login or password");
         if (user.IsDeleted) throw new UserDeletedException($"user {user.Id} is deleted");
         string token = _tokenGenerator.GenerateToken(user.Id, login);
