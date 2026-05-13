@@ -22,6 +22,15 @@ export interface UserDto {
   isDeleted: boolean
 }
 
+export interface UserPublicDto {
+  id: Guid
+  login: string
+  rating: number
+  balance: number
+  lootBoxCount: number
+  isDeleted: boolean
+}
+
 export interface AuthResultDto {
   user: UserDto
   token: string
