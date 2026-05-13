@@ -100,7 +100,7 @@ public class Program
         builder.Services.AddSingleton<IGameInvitationRepository, GameInvitationRepository>();
         builder.Services.AddSingleton<IFriendRequestRepository, FriendRequestRepository>();
         builder.Services.AddSingleton<IFriendshipRepository, FriendshipRepository>();
-        builder.Services.AddSingleton<IUserCustomizationRepository, UserCustomizationRepository>();
+        builder.Services.AddSingleton<IUserConfigurationRepository, UserConfigurationRepository>();
 
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
         builder.Services.AddSingleton<IMatchmakingPool, MatchmakingPool>();

@@ -2,7 +2,7 @@ using Core.Models.Chess;
 
 namespace Core.Models.Users;
 
-public class UserCustomization(Guid userId, Dictionary<FigureType, Guid> figureSkinIds)
+public class UserConfiguration(Guid userId, Dictionary<FigureType, Guid> figureSkinIds)
 {
     public Guid UserId { get; } = userId;
     public IReadOnlyDictionary<FigureType, Guid> UserFigureSkinIds => _figureSkinIds;

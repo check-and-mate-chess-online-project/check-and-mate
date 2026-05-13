@@ -11,8 +11,13 @@ public static class SkinMapper
         SetId = skin.SetId,
         Figure = skin.Figure,
         Rarity = skin.Rarity,
-        WhiteImage = skin.WhiteImage,
-        BlackImage = skin.BlackImage,
+        WhiteBoardImage = skin.WhiteBoardImage,
+        BlackBoardImage = skin.BlackBoardImage,
+        IdleImage = skin.IdleImage,
+        StartFightWinImage = skin.StartFightWinImage,
+        StartFightLoseImage = skin.StartFightLoseImage,
+        EndFightWinImage = skin.EndFightWinImage,
+        EndFightLoseImage = skin.EndFightLoseImage,
         IsDefault = skin.IsDefault
     };
 }

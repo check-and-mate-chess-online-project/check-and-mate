@@ -27,6 +27,27 @@ public class InventoryController(IInventoryService inventory, ILootBoxService lo
         return skins;
     }
 
+    [HttpGet("skins/{login}")]
+    [ProducesResponseType(typeof(List<SkinDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<List<SkinDto>>> GetUserSkins([FromRoute]string login)
+    {
+        List<SkinDto> skins = await _inventory.GetUserSkinsAsync(login);
+        return skins;
+    }
+
+    [HttpGet("skins/current")]
+    [ProducesResponseType(typeof(UserConfigurationDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<UserConfigurationDto>> GetConfiguration()
+    {
+        Guid userId = GetUserId();
+        UserConfigurationDto configuration = await _configuration.GetConfigurationAsync(userId);
+        return configuration;
+    }
+
     [HttpPost("lootboxes/open")]
     [ProducesResponseType(typeof(LootBoxDropResultDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
