@@ -183,15 +183,15 @@ export function ReplayPage() {
         </h2>
         <p className="text-sm text-slate-400">
           {reasonText}
-          <span className="text-slate-600"> · vs </span>
+          <span className="text-slate-600"> · {t('pages.replay.enemy')} </span>
           <span className="font-mono text-slate-300">
             {opponentId.slice(0, 8)}
           </span>
         </p>
       </div>
 
-      <div className="flex gap-6 items-start justify-center">
-        <div className="w-full max-w-xl">
+      <div className="relative max-w-6xl mx-auto">
+        <div className="mx-auto w-full max-w-xl">
           <Chessboard
             options={{
               position: fen,
@@ -242,28 +242,22 @@ export function ReplayPage() {
           </div>
         </div>
 
-        <aside className="w-72 max-h-[80vh] overflow-y-auto bg-slate-900/40 border border-slate-800 rounded-md p-3">
-          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 mb-2 text-xs uppercase tracking-wider text-slate-500">
-            <span></span>
+        <aside className="absolute top-0 right-0 w-72 max-h-[80vh] overflow-y-auto bg-slate-900/40 border border-slate-800 rounded-md p-3">
+          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-xs uppercase tracking-wider">
+            <span />
             <span className={sideColor(game.result, 'white')}>
-              {t('pages.replay.white')}{' '}
-              <span className="font-mono normal-case tracking-normal">
-                {game.whitePlayerId.slice(0, 6)}
-              </span>
-              {myColor === 'white' && (
-                <span className="text-slate-500"> · {t('pages.replay.you')}</span>
-              )}
+              {t('pages.replay.white')}
             </span>
             <span className={sideColor(game.result, 'black')}>
-              {t('pages.replay.black')}{' '}
-              <span className="font-mono normal-case tracking-normal">
-                {game.blackPlayerId.slice(0, 6)}
-              </span>
-              {myColor === 'black' && (
-                <span className="text-slate-500"> · {t('pages.replay.you')}</span>
-              )}
+              {t('pages.replay.black')}
             </span>
           </div>
+          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-sm font-mono text-slate-300 mt-1">
+            <span />
+            <span>{game.whitePlayerId.slice(0, 6)}</span>
+            <span>{game.blackPlayerId.slice(0, 6)}</span>
+          </div>
+          <div className="my-3 border-t border-slate-800" />
           <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-1 text-sm font-mono">
             {rounds.map((round) => {
               const whiteIdx = applied.findIndex(

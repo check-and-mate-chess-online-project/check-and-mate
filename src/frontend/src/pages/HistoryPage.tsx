@@ -136,7 +136,7 @@ export function HistoryPage() {
                     </span>
                   </div>
                   <div className="flex-1 text-sm text-slate-300">
-                    <span className="text-slate-500">vs </span>
+                    <span className="text-slate-500">{t('pages.history.enemy')} </span>
                     <span className="font-mono">{shortId(opponentId)}</span>
                     <span className="text-slate-500"> · {myColor}</span>
                   </div>

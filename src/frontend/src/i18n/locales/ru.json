@@ -125,13 +125,14 @@
         "stalemate": "пат",
         "resignation": "сдача",
         "timeout": "время вышло",
-        "drawAgreement": "соглашение о ничьей",
+        "drawAgreement": "соглашение о ничье",
         "disconnect": "оппонент отключился"
       }
     },
     "history": {
       "title": "История",
       "empty": "Партий пока нет",
+      "enemy": "противник",
       "result": {
         "win": "Победа",
         "loss": "Поражение",
@@ -149,7 +150,8 @@
       "notFound": "Партия не найдена",
       "white": "Белые",
       "black": "Чёрные",
-      "you": "вы"
+      "you": "вы",
+      "enemy": "противник"
     },
     "myProfile": {
       "title": "Мой профиль",

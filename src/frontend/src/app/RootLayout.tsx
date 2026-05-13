@@ -48,7 +48,7 @@ export function RootLayout() {
           </div>
           <div className="flex items-center gap-4">
             <LanguageToggle />
-            <span className="text-violet-300 text-sm tabular-nums">
+            <span className="text-sky-300 text-sm tabular-nums">
               {user?.rating ?? 0} ★
             </span>
             <span className="text-yellow-400 text-sm tabular-nums">

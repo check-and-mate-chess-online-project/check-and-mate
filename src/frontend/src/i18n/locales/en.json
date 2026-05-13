@@ -132,6 +132,7 @@
     "history": {
       "title": "History",
       "empty": "No games yet",
+      "enemy": "enemy",
       "result": {
         "win": "Win",
         "loss": "Loss",
@@ -149,7 +150,8 @@
       "notFound": "Game not found",
       "white": "White",
       "black": "Black",
-      "you": "you"
+      "you": "you",
+      "enemy": "enemy"
     },
     "myProfile": {
       "title": "My profile",
