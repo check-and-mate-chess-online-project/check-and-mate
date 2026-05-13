@@ -224,6 +224,7 @@
       "reject": "Reject",
       "remove": "Remove",
       "requestSent": "Friend request sent",
+      "cantAddSelf": "You can't add yourself",
       "requestFailed": "Couldn't send request",
       "acceptFailed": "Couldn't accept request",
       "rejectFailed": "Couldn't reject request",

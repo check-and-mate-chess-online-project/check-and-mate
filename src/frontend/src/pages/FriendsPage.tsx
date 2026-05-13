@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import type { Guid } from '../shared/api'
+import { ApiError } from '../shared/api/http'
 import { useAuth } from '../shared/auth/useAuth'
 import {
   useAcceptFriendRequest,
@@ -19,6 +20,14 @@ type Tab = 'friends' | 'incoming' | 'outgoing' | 'invitations'
 
 function shortId(id: string): string {
   return id.slice(0, 8)
+}
+
+function errorMessage(e: unknown, fallback: string): string {
+  if (e instanceof ApiError && e.message) return e.message
+  if (e instanceof Error && e.message && !/failed to fetch/i.test(e.message)) {
+    return e.message
+  }
+  return fallback
 }
 
 export function FriendsPage() {
@@ -48,6 +57,10 @@ export function FriendsPage() {
   const handleAddFriend = () => {
     const login = search.trim()
     if (!login) return
+    if (user && login.toLowerCase() === user.login.toLowerCase()) {
+      toast.error(t('pages.friends.cantAddSelf'))
+      return
+    }
     sendFriendRequest.mutate(
       { receiverLogin: login },
       {
@@ -55,7 +68,7 @@ export function FriendsPage() {
           toast.success(t('pages.friends.requestSent'))
           setSearch('')
         },
-        onError: () => toast.error(t('pages.friends.requestFailed')),
+        onError: (e) => toast.error(errorMessage(e, t('pages.friends.requestFailed'))),
       },
     )
   }
@@ -106,7 +119,8 @@ export function FriendsPage() {
           onInvite={(id) => setInviteTarget({ id })}
           onRemove={(id) =>
             deleteFriend.mutate(id, {
-              onError: () => toast.error(t('pages.friends.removeFailed')),
+              onError: (e) =>
+                toast.error(errorMessage(e, t('pages.friends.removeFailed'))),
             })
           }
           emptyText={t('pages.friends.empty')}
@@ -119,12 +133,14 @@ export function FriendsPage() {
           mode="incoming"
           onAccept={(id) =>
             acceptRequest.mutate(id, {
-              onError: () => toast.error(t('pages.friends.acceptFailed')),
+              onError: (e) =>
+                toast.error(errorMessage(e, t('pages.friends.acceptFailed'))),
             })
           }
           onReject={(id) =>
             rejectRequest.mutate(id, {
-              onError: () => toast.error(t('pages.friends.rejectFailed')),
+              onError: (e) =>
+                toast.error(errorMessage(e, t('pages.friends.rejectFailed'))),
             })
           }
           emptyText={t('pages.friends.empty')}
@@ -145,12 +161,16 @@ export function FriendsPage() {
           onAccept={(id) =>
             gameHub
               .acceptGameInvitation(id)
-              .catch(() => toast.error(t('invitations.acceptFailed')))
+              .catch((e) =>
+                toast.error(errorMessage(e, t('invitations.acceptFailed'))),
+              )
           }
           onReject={(id) =>
             gameHub
               .rejectGameInvitation(id)
-              .catch(() => toast.error(t('pages.friends.rejectFailed')))
+              .catch((e) =>
+                toast.error(errorMessage(e, t('pages.friends.rejectFailed'))),
+              )
           }
           emptyText={t('pages.friends.empty')}
         />

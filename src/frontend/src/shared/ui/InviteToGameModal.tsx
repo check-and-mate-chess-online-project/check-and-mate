@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import type { Guid } from '../api'
+import { ApiError } from '../api/http'
 import { gameHub } from '../realtime/gameHub'
 
 type TimeControlId = 'bullet' | 'blitz' | 'rapid'
@@ -41,8 +42,9 @@ export function InviteToGameModal({ target, onClose }: Props) {
         incrementPerMoveSec: config.incSec,
       })
       onClose()
-    } catch {
-      toast.error(t('pages.friends.inviteFailed'))
+    } catch (e) {
+      const msg = e instanceof ApiError && e.message ? e.message : (e as Error).message
+      toast.error(msg || t('pages.friends.inviteFailed'))
       setSending(false)
     }
   }
