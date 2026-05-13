@@ -4,7 +4,7 @@ namespace Application.Services.Interfaces;
 
 public interface IGameInvitationService
 {
-    Task<List<GameInvitationDto>> GetAllGameInvitationsAsync(Guid userId);
+    Task<List<GameInvitationDto>> GetPendingGameInvitationsAsync(Guid userId);
     Task<GameInvitationDto> SendGameInvitationAsync(
         Guid senderId, 
         Guid receiverId, 

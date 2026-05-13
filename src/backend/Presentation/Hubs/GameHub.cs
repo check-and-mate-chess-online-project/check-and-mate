@@ -32,7 +32,7 @@ public class GameHub(
     {
         Guid userId = GetUserId();
         _timer.CancelGracePeriod(userId);
-        return await _invitation.GetAllGameInvitationsAsync(userId);
+        return await _invitation.GetPendingGameInvitationsAsync(userId);
     }
 
     public async Task FindGame(SearchOpponentRequest request)

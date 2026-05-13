@@ -17,17 +17,17 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
 
     [HttpGet("requests")]
     [ProducesResponseType(typeof(List<FriendRequestDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<List<FriendRequestDto>>> GetFriendRequests()
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<List<FriendRequestDto>>> GetPendingFriendRequests()
     {
         Guid userId = GetUserId();
-        List<FriendRequestDto> requests = await _friendship.GetAllFriendRequestsAsync(userId);
+        List<FriendRequestDto> requests = await _friendship.GetPendingFriendRequestsAsync(userId);
         return requests;
     }
 
     [HttpGet]
     [ProducesResponseType(typeof(List<Guid>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<Guid>>> GetFriends()
     {
         Guid userId = GetUserId();
@@ -38,10 +38,10 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
     [HttpPost("requests")]
     [ProducesResponseType(typeof(FriendRequestDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<FriendRequestDto>> SendFriendRequest([FromBody]FriendRequest request)
     {
         Guid userId = GetUserId();
@@ -79,7 +79,7 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
     [HttpDelete("{friendId}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> DeleteFriend([FromRoute]Guid friendId)
     {
         Guid userId = GetUserId();
@@ -89,5 +89,5 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
 
     private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Guid userId) 
         ? userId 
-        : throw new UnauthorizedAccessException($"invalid user identity");
+        : throw new InvalidOperationException($"invalid user identity");
 }

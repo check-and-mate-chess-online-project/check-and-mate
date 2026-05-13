@@ -21,6 +21,12 @@ public class ProfileService(IUserRepository userRepos, IPasswordHasher hasher, I
         return UserMapper.ToDto(user);
     }
 
+    public async Task<UserPublicDto> GetPublicUserProfile(string login)
+    {
+        User user = await _userRepos.GetAsync(login) ?? throw new NotFoundException($"user {login} not found");
+        return UserPublicMapper.ToDto(user);
+    }
+
     public async Task UpdateUserAsync(Guid userId, string? login, string? email)
     {
         User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");

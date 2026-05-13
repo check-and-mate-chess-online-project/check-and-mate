@@ -21,8 +21,8 @@ public class FriendshipService(
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
 
-    public async Task<List<FriendRequestDto>> GetAllFriendRequestsAsync(Guid userId) 
-        => [.. (await _requestRepos.GetByUserAsync(userId))
+    public async Task<List<FriendRequestDto>> GetPendingFriendRequestsAsync(Guid userId) 
+        => [.. (await _requestRepos.GetPendingByUserAsync(userId))
             .Select(FriendRequestMapper.ToDto)];
         
     public async Task<List<Guid>> GetAllFriendsAsync(Guid userId) => await _friendshipRepos.GetByUserAsync(userId);

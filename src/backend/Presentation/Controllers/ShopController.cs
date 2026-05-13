@@ -17,9 +17,9 @@ public class ShopController(ILootBoxService loot) : ControllerBase
     [HttpPost("lootboxes/buy")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> BuyLootBoxes([FromBody]BuyLootBoxesRequest request)
     {
         Guid userId = GetUserId();
@@ -29,5 +29,5 @@ public class ShopController(ILootBoxService loot) : ControllerBase
 
     private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Guid userId) 
         ? userId 
-        : throw new UnauthorizedAccessException($"invalid user identity");
+        : throw new InvalidOperationException($"invalid user identity");
 }

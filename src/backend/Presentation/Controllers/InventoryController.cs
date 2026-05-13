@@ -30,7 +30,6 @@ public class InventoryController(IInventoryService inventory, ILootBoxService lo
     [HttpPost("lootboxes/open")]
     [ProducesResponseType(typeof(LootBoxDropResultDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -43,9 +42,9 @@ public class InventoryController(IInventoryService inventory, ILootBoxService lo
 
     [HttpPost("skins/equip")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> EquipSkin([FromBody]EquipSkinRequest request)
     {
         Guid userId = GetUserId();
@@ -55,5 +54,5 @@ public class InventoryController(IInventoryService inventory, ILootBoxService lo
 
     private Guid GetUserId() => Guid.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out Guid userId) 
         ? userId 
-        : throw new UnauthorizedAccessException($"invalid user identity");
+        : throw new InvalidOperationException($"invalid user identity");
 }
