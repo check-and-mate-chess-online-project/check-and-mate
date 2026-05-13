@@ -180,7 +180,7 @@ export function ReplayPage() {
         </p>
       </div>
 
-      <div className="flex gap-6 items-start justify-center max-w-6xl mx-auto">
+      <div className="flex gap-6 items-start justify-center max-w-7xl mx-auto">
         <div className="w-72 flex-shrink-0 hidden xl:block" aria-hidden />
         <div className="w-full max-w-xl">
           <Chessboard
