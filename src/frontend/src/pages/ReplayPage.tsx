@@ -26,16 +26,6 @@ function coordToSquare(col: number, row: number): string {
   return String.fromCharCode(97 + col) + (row + 1)
 }
 
-function sideColor(
-  result: GameResult | null,
-  side: 'white' | 'black',
-): string {
-  if (result === null || result === GameResult.Draw) return 'text-slate-200'
-  const wonByWhite = result === GameResult.WhiteVictory
-  const won = (side === 'white') === wonByWhite
-  return won ? 'text-orange-400' : 'text-violet-300'
-}
-
 const PROMOTION_CHAR: Record<number, 'q' | 'r' | 'b' | 'n'> = {
   [FigureType.Queen]: 'q',
   [FigureType.Rook]: 'r',
@@ -190,8 +180,9 @@ export function ReplayPage() {
         </p>
       </div>
 
-      <div className="relative max-w-6xl mx-auto">
-        <div className="mx-auto w-full max-w-xl">
+      <div className="flex gap-6 items-start justify-center max-w-6xl mx-auto">
+        <div className="w-72 flex-shrink-0 hidden xl:block" aria-hidden />
+        <div className="w-full max-w-xl">
           <Chessboard
             options={{
               position: fen,
@@ -242,20 +233,16 @@ export function ReplayPage() {
           </div>
         </div>
 
-        <aside className="absolute top-0 right-0 w-72 max-h-[80vh] overflow-y-auto bg-slate-900/40 border border-slate-800 rounded-md p-3">
-          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-xs uppercase tracking-wider">
+        <aside className="w-72 flex-shrink-0 max-h-[80vh] overflow-y-auto bg-slate-900/40 border border-slate-800 rounded-md p-3">
+          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-xs uppercase tracking-wider text-slate-500">
             <span />
-            <span className={sideColor(game.result, 'white')}>
-              {t('pages.replay.white')}
-            </span>
-            <span className={sideColor(game.result, 'black')}>
-              {t('pages.replay.black')}
-            </span>
+            <span>{t('pages.replay.white')}</span>
+            <span>{t('pages.replay.black')}</span>
           </div>
-          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-sm font-mono text-slate-300 mt-1">
+          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-sm font-mono mt-1">
             <span />
-            <span>{game.whitePlayerId.slice(0, 6)}</span>
-            <span>{game.blackPlayerId.slice(0, 6)}</span>
+            <span className="text-slate-50">{game.whitePlayerId.slice(0, 6)}</span>
+            <span className="text-slate-500">{game.blackPlayerId.slice(0, 6)}</span>
           </div>
           <div className="my-3 border-t border-slate-800" />
           <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-1 text-sm font-mono">
