@@ -145,7 +145,8 @@
     },
     "replay": {
       "title": "Replay",
-      "label": "Game replay"
+      "label": "Game replay",
+      "notFound": "Game not found"
     },
     "myProfile": {
       "title": "My profile",
