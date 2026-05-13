@@ -121,11 +121,11 @@
         "draw": "Ничья"
       },
       "reason": {
-        "checkmate": "матом",
+        "checkmate": "мат",
         "stalemate": "пат",
-        "resignation": "сдачей",
-        "timeout": "по времени",
-        "drawAgreement": "по соглашению",
+        "resignation": "сдача",
+        "timeout": "время вышло",
+        "drawAgreement": "соглашение о ничьей",
         "disconnect": "оппонент отключился"
       }
     },

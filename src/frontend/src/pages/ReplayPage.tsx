@@ -161,32 +161,36 @@ export function ReplayPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <Link to="/history" className="text-slate-400 hover:text-slate-100 text-sm">
-          ← {t('nav.profileItems.history')}
-        </Link>
-        <div className="text-sm text-slate-400">
-          <span
-            className={
-              outcome === 'win'
-                ? 'text-orange-400'
-                : outcome === 'loss'
-                  ? 'text-violet-300'
-                  : 'text-slate-200'
-            }
-          >
-            {t(`pages.game.result.${outcome}`)}
-          </span>
-          <span className="text-slate-500"> · {reasonText}</span>
-          <span className="text-slate-500"> · vs </span>
+    <div className="max-w-4xl mx-auto">
+      <Link
+        to="/history"
+        className="inline-block text-slate-400 hover:text-slate-100 text-sm mb-3"
+      >
+        ← {t('nav.profileItems.history')}
+      </Link>
+
+      <div className="text-center mb-4">
+        <h2
+          className={`text-2xl ${
+            outcome === 'win'
+              ? 'text-orange-400'
+              : outcome === 'loss'
+                ? 'text-violet-300'
+                : 'text-slate-200'
+          }`}
+        >
+          {t(`pages.game.result.${outcome}`)}
+        </h2>
+        <p className="text-sm text-slate-400">
+          {reasonText}
+          <span className="text-slate-600"> · vs </span>
           <span className="font-mono text-slate-300">
             {opponentId.slice(0, 8)}
           </span>
-        </div>
+        </p>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex gap-6 items-start justify-center">
         <div className="w-full max-w-xl">
           <Chessboard
             options={{
