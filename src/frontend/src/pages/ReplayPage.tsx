@@ -26,6 +26,16 @@ function coordToSquare(col: number, row: number): string {
   return String.fromCharCode(97 + col) + (row + 1)
 }
 
+function sideColor(
+  result: GameResult | null,
+  side: 'white' | 'black',
+): string {
+  if (result === null || result === GameResult.Draw) return 'text-slate-200'
+  const wonByWhite = result === GameResult.WhiteVictory
+  const won = (side === 'white') === wonByWhite
+  return won ? 'text-orange-400' : 'text-violet-300'
+}
+
 const PROMOTION_CHAR: Record<number, 'q' | 'r' | 'b' | 'n'> = {
   [FigureType.Queen]: 'q',
   [FigureType.Rook]: 'r',
@@ -183,8 +193,6 @@ export function ReplayPage() {
               position: fen,
               boardOrientation: myColor,
               allowDragging: false,
-              showAnimations: false,
-              animationDurationInMs: 0,
               boardStyle: { borderRadius: '12px' },
               darkSquareStyle: { backgroundColor: '#4c1d95' },
               lightSquareStyle: { backgroundColor: '#e5e7eb' },
@@ -233,19 +241,23 @@ export function ReplayPage() {
         <aside className="w-72 max-h-[80vh] overflow-y-auto bg-slate-900/40 border border-slate-800 rounded-md p-3">
           <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 mb-2 text-xs uppercase tracking-wider text-slate-500">
             <span></span>
-            <span className={myColor === 'white' ? 'text-orange-400' : 'text-violet-300'}>
+            <span className={sideColor(game.result, 'white')}>
               {t('pages.replay.white')}{' '}
               <span className="font-mono normal-case tracking-normal">
                 {game.whitePlayerId.slice(0, 6)}
               </span>
-              {myColor === 'white' && <span> · {t('pages.replay.you')}</span>}
+              {myColor === 'white' && (
+                <span className="text-slate-500"> · {t('pages.replay.you')}</span>
+              )}
             </span>
-            <span className={myColor === 'black' ? 'text-orange-400' : 'text-violet-300'}>
+            <span className={sideColor(game.result, 'black')}>
               {t('pages.replay.black')}{' '}
               <span className="font-mono normal-case tracking-normal">
                 {game.blackPlayerId.slice(0, 6)}
               </span>
-              {myColor === 'black' && <span> · {t('pages.replay.you')}</span>}
+              {myColor === 'black' && (
+                <span className="text-slate-500"> · {t('pages.replay.you')}</span>
+              )}
             </span>
           </div>
           <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-1 text-sm font-mono">
