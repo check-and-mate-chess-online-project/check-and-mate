@@ -9,18 +9,22 @@ using Core.Repositories;
 using Core.Models.Chess;
 using Core.Models.Games;
 using Core.Models.Users;
+using Application.Models;
+using Application.Orchestration.RatingCalculation;
 
 namespace Application.Services;
 
 public class GameplayService(
     IGameSettingsProvider settings, 
-    IGameSessionService sessionService, 
+    IGameSessionService sessionService,
+    IRatingCalculator calculator,
     IGameRepository gameRepos, 
     IUserRepository userRepos, 
     IUnitOfWork uow) : IGameplayService
 {
     private readonly IGameSettingsProvider _settings = settings;
     private readonly IGameSessionService _sessionService = sessionService;
+    private readonly IRatingCalculator _calculator = calculator;
     private readonly IGameRepository _gameRepos = gameRepos;
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
@@ -106,22 +110,10 @@ public class GameplayService(
 
     private async Task ChangePlayerRatings(User whitePlayer, User blackPlayer, GameResult gameResult)
     {
-        (int whiteRatingDelta, int blackRatingDelta) = CalculateRating(gameResult);
-        whitePlayer.ChangeRating(whiteRatingDelta);
-        blackPlayer.ChangeRating(blackRatingDelta);
+        RatingResult result = _calculator.CalculateRating(whitePlayer.Rating, blackPlayer.Rating, gameResult);
+        whitePlayer.ChangeRating(result.WhiteRatingDelta);
+        blackPlayer.ChangeRating(result.BlackRatingDelta);
         _userRepos.Update(whitePlayer);
         _userRepos.Update(blackPlayer);
-    }
-
-    private (int whiteRatingDelta, int blackRatingDelta) CalculateRating(GameResult result)
-    {
-        int delta = 10;
-        return result switch
-        {
-            GameResult.WhiteVictory => (delta, -delta),
-            GameResult.BlackVictory => (-delta, delta),
-            GameResult.Draw => (0, 0),
-            _ => throw new ArgumentException("invalid game result")
-        };
     }
 }

@@ -15,6 +15,15 @@ public class ProfileController(IProfileService profile) : ControllerBase
 {
     private readonly IProfileService _profile = profile;
 
+    [HttpGet("{login}")]
+    [ProducesResponseType(typeof(UserPublicDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserPublicDto>> GetUserProfile([FromRoute]string login)
+    {
+        UserPublicDto user = await _profile.GetPublicUserProfile(login);
+        return user;
+    }
+
     [HttpGet("me")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

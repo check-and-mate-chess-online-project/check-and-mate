@@ -33,6 +33,7 @@ using Infrastructure.Connections;
 using Infrastructure.Background;
 using Core.Repositories;
 using Core.Exceptions;
+using Application.Orchestration.RatingCalculation;
 
 
 namespace Presentation;
@@ -107,6 +108,7 @@ public class Program
         builder.Services.AddSingleton<IChessEngineFactory, ChessEngineFactory>();
         builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
         builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        builder.Services.AddSingleton<IRatingCalculator, RatingCalculator>();
         builder.Services.AddSingleton<IGameSessionService, GameSessionService>();
         builder.Services.AddSingleton<IConnectionGracePeriodTimer, ConnectionGracePeriodTimer>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
