@@ -146,7 +146,10 @@
     "replay": {
       "title": "Replay",
       "label": "Game replay",
-      "notFound": "Game not found"
+      "notFound": "Game not found",
+      "white": "White",
+      "black": "Black",
+      "you": "you"
     },
     "myProfile": {
       "title": "My profile",
