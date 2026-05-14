@@ -75,7 +75,7 @@ public class GameHub(
                 request.IncrementPerMoveSec);
         }
         else throw new HubException("id or login must be specified");
-        await Clients.User(invitation.ReceiverId.ToString()).SendAsync("gameInvitationReceived", invitation);
+        await Clients.User(invitation.Receiver.Id.ToString()).SendAsync("gameInvitationReceived", invitation);
         await Clients.Caller.SendAsync("gameInvitationSent", invitation);
     }
 
@@ -83,14 +83,14 @@ public class GameHub(
     {
         _timer.CancelGracePeriod(GetUserId());
         GameInvitationDto invitation = await _invitation.AcceptGameInvitationAsync(invitationId);
-        await Clients.Users(invitation.SenderId.ToString(), invitation.ReceiverId.ToString()).SendAsync("gameInvitationAccepted", invitation);
+        await Clients.Users(invitation.Sender.Id.ToString(), invitation.Receiver.Id.ToString()).SendAsync("gameInvitationAccepted", invitation);
     }
 
     public async Task RejectGameInvitation(Guid invitationId)
     {
         _timer.CancelGracePeriod(GetUserId());
         GameInvitationDto invitation = await _invitation.RejectGameInvitationAsync(invitationId);
-        await Clients.Users(invitation.SenderId.ToString(), invitation.ReceiverId.ToString()).SendAsync("gameInvitationRejected", invitation);
+        await Clients.Users(invitation.Sender.Id.ToString(), invitation.Receiver.Id.ToString()).SendAsync("gameInvitationRejected", invitation);
     }
 
     public async Task MakeMove(MakeMoveRequest request)

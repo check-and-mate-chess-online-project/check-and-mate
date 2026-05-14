@@ -5,8 +5,8 @@ namespace Application.Dtos;
 public class GameInvitationDto
 {
     public Guid Id { get; set; }
-    public Guid ReceiverId { get; set; }
-    public Guid SenderId { get; set; }
+    public UserPublicDto Receiver { get; set; } = null!;
+    public UserPublicDto Sender { get; set; } = null!;
     public bool TimeControlIsEnabled { get; set; }
     public int? InitialTimeSec { get; set; }
     public int? IncrementPerMoveSec { get; set; }
