@@ -11,11 +11,10 @@ namespace Presentation.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/inventory")]
-public class InventoryController(IInventoryService inventory, ILootBoxService loot, ISkinConfigurationService configuration) : ControllerBase
+public class InventoryController(IInventoryService inventory, ILootBoxService loot) : ControllerBase
 {
     private readonly IInventoryService _inventory = inventory;
     private readonly ILootBoxService _loot = loot;
-    private readonly ISkinConfigurationService _configuration = configuration;
 
     [HttpGet("skins")]
     [ProducesResponseType(typeof(List<SkinDto>), StatusCodes.Status200OK)]
@@ -37,14 +36,14 @@ public class InventoryController(IInventoryService inventory, ILootBoxService lo
     }
 
     [HttpGet("skins/current")]
-    [ProducesResponseType(typeof(UserConfigurationDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(SkinConfigurationDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status410Gone)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<UserConfigurationDto>> GetConfiguration()
+    public async Task<ActionResult<SkinConfigurationDto>> GetConfiguration()
     {
         Guid userId = GetUserId();
-        UserConfigurationDto configuration = await _configuration.GetConfigurationAsync(userId);
+        SkinConfigurationDto configuration = await _inventory.GetConfigurationAsync(userId);
         return configuration;
     }
 
@@ -69,7 +68,7 @@ public class InventoryController(IInventoryService inventory, ILootBoxService lo
     public async Task<ActionResult> EquipSkin([FromBody]EquipSkinRequest request)
     {
         Guid userId = GetUserId();
-        await _configuration.ChangeFigureSkinAsync(userId, request.Figure, request.SkinId);
+        await _inventory.ChangeFigureSkinAsync(userId, request.Figure, request.SkinId);
         return NoContent();
     }
 

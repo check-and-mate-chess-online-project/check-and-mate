@@ -1,8 +1,8 @@
 using Core.Models.Chess;
 
-namespace Core.Models.Users;
+namespace Core.Models.Skins;
 
-public class UserConfiguration(Guid userId, Dictionary<FigureType, Guid> figureSkinIds)
+public class SkinConfiguration(Guid userId, Dictionary<FigureType, Guid> figureSkinIds)
 {
     public Guid UserId { get; } = userId;
     public IReadOnlyDictionary<FigureType, Guid> UserFigureSkinIds => _figureSkinIds;

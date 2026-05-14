@@ -1,16 +1,15 @@
 using Application.Dtos;
 using Core.Models.Chess;
 using Core.Models.Skins;
-using Core.Models.Users;
 using Core.Repositories;
 
 namespace Application.Mappers;
 
-public static class UserConfigurationMapper
+public static class SkinConfigurationMapper
 {
-    public static async Task<UserConfigurationDto> ToDto(UserConfiguration configuration, ISkinRepository repos)
+    public static async Task<SkinConfigurationDto> ToDto(SkinConfiguration configuration, ISkinRepository repos)
     {
-        UserConfigurationDto configurationDto = new();
+        SkinConfigurationDto configurationDto = new();
         IReadOnlyDictionary<FigureType, Guid> skinIds = configuration.UserFigureSkinIds;
         foreach (var kvp in skinIds)
         {

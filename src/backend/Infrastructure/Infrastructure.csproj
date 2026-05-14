@@ -16,6 +16,10 @@
     <ProjectReference Include="..\..\..\..\ChessLib\src\ChessLib\ChessLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\DefaultSkins\**\*.png" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

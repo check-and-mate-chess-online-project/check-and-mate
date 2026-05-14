@@ -1,12 +1,11 @@
 using Application.Dtos;
 using Core.Models.Chess;
 
-namespace Application.Services.Interfaces;
+namespace Application.Orchestration.SkinConfigurations;
 
-public interface IInventoryService
+public interface ISkinConfigurationService
 {
-    Task<List<SkinDto>> GetUserSkinsAsync(Guid userId);
-    Task<List<SkinDto>> GetUserSkinsAsync(string login);
     Task<SkinConfigurationDto> GetConfigurationAsync(Guid userId);
+    Task AddDefaultConfigurationAsync(Guid userId);
     Task ChangeFigureSkinAsync(Guid userId, FigureType figure, Guid skinId);
 }
