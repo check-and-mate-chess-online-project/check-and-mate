@@ -6,10 +6,12 @@ import { Chess } from 'chess.js'
 import { Chessboard } from '../shared/ui/Chessboard/Chessboard'
 import { toast } from 'sonner'
 import type { GameDto, MakeMoveRequest } from '../shared/api'
-import { GameTerminationReason } from '../shared/api/enums'
+import { FigureType, GameTerminationReason } from '../shared/api/enums'
 import { useAuth } from '../shared/auth/useAuth'
 import { gameHub, subscribeGameHub } from '../shared/realtime/gameHub'
 import { formatClock, useChessClock } from '../shared/lib/useChessClock'
+import { useEquippedSkinsStore } from '../shared/lib/equippedSkins'
+import { FightAnimation, type FightPiece } from '../shared/ui/FightAnimation'
 
 type Color = 'white' | 'black'
 type Outcome = 'win' | 'loss' | 'draw'
@@ -17,6 +19,15 @@ type Outcome = 'win' | 'loss' | 'draw'
 interface ResultState {
   outcome: Outcome
   reason: GameTerminationReason | null
+}
+
+const CHESS_TO_FIGURE: Record<string, FigureType> = {
+  k: FigureType.King,
+  q: FigureType.Queen,
+  r: FigureType.Rook,
+  b: FigureType.Bishop,
+  n: FigureType.Knight,
+  p: FigureType.Pawn,
 }
 
 const REASON_KEY: Record<GameTerminationReason, string> = {
@@ -129,6 +140,15 @@ export function GamePage() {
   const [turn, setTurn] = useState<Color>('white')
   const [ended, setEnded] = useState<ResultState | null>(null)
   const [gameHasStarted, setGameHasStarted] = useState(false)
+  const [activeFight, setActiveFight] = useState<
+    | {
+        attacker: FightPiece
+        victim: FightPiece
+        key: number
+      }
+    | null
+  >(null)
+  const equipped = useEquippedSkinsStore((s) => s.equipped)
 
   const cachedGame = qc.getQueryData<GameDto>(['game', gameId])
   const initialMs = (cachedGame?.initialTimeSec ?? 300) * 1000
@@ -152,9 +172,24 @@ export function GamePage() {
       onMoveMade: (move, result) => {
         const { from, to } = apiMoveToSquares(move)
         try {
-          game.move({ from, to, promotion: 'q' })
+          const applied = game.move({ from, to, promotion: 'q' })
           setFen(game.fen())
           setGameHasStarted(true)
+          if (applied.captured) {
+            const attackerColor: Color =
+              applied.color === 'w' ? 'white' : 'black'
+            const victimColor: Color =
+              attackerColor === 'white' ? 'black' : 'white'
+            const attackerFigure = CHESS_TO_FIGURE[applied.piece]
+            const victimFigure = CHESS_TO_FIGURE[applied.captured]
+            if (attackerFigure && victimFigure) {
+              setActiveFight({
+                attacker: { figure: attackerFigure, color: attackerColor },
+                victim: { figure: victimFigure, color: victimColor },
+                key: Date.now(),
+              })
+            }
+          }
           if (result.isGameOver) {
             const moverColor: Color = game.turn() === 'w' ? 'black' : 'white'
             const reason = result.terminationReason
@@ -323,6 +358,17 @@ export function GamePage() {
 
       {ended && (
         <ResultModal result={ended} onClose={() => navigate('/lobby')} />
+      )}
+
+      {activeFight && (
+        <FightAnimation
+          key={activeFight.key}
+          attacker={activeFight.attacker}
+          victim={activeFight.victim}
+          attackerSkinId={equipped[activeFight.attacker.figure]}
+          victimSkinId={equipped[activeFight.victim.figure]}
+          onComplete={() => setActiveFight(null)}
+        />
       )}
     </div>
   )
