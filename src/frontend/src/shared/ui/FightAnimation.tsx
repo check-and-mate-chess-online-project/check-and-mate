@@ -94,8 +94,8 @@ export function FightAnimation({
       initial={{ opacity: 0, x: 40, scale: 0.9 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.3 } }}
-      className="fixed right-6 top-28 z-30 w-72 bg-slate-950/90 border border-violet-900 rounded-lg overflow-hidden shadow-2xl"
-      style={{ aspectRatio: '3 / 4' }}
+      className="fixed right-6 top-28 z-30 bg-slate-950/90 border border-violet-900 rounded-lg overflow-hidden shadow-2xl"
+      style={{ width: '800px', height: '600px' }}
     >
       <motion.div
         animate={
