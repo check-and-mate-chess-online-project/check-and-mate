@@ -97,12 +97,12 @@ public class GameHub(
     {
         Guid userId = GetUserId();
         _timer.CancelGracePeriod(userId);
-        GameDto game = _gameplay.GetActiveGameByUser(userId) ?? throw new HubException($"user {userId} not in game");
+        GameDto game = await _gameplay.GetActiveGameByUser(userId) ?? throw new HubException($"user {userId} not in game");
         MoveResultDto result = await _gameplay.MakeMoveAsync(userId, request.A, request.B, request.X, request.Y, request.Options);
         switch (result.Status)
         {
             case MoveAttemptStatus.Success: 
-                await Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString())
+                await Clients.Users(game.WhitePlayer.Id.ToString(), game.BlackPlayer.Id.ToString())
                     .SendAsync("moveMade", new { Request = request, Result = result });
                 break;
             case MoveAttemptStatus.Timeout:
@@ -117,7 +117,7 @@ public class GameHub(
         Guid userId = GetUserId();
         _timer.CancelGracePeriod(userId);
         GameDto game = await _gameplay.HandleResignAsync(userId);
-        await Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString())
+        await Clients.Users(game.WhitePlayer.Id.ToString(), game.BlackPlayer.Id.ToString())
             .SendAsync("playerResigned", new { Game = game, UserId = userId });
     }
 
@@ -126,7 +126,7 @@ public class GameHub(
         Guid userId = GetUserId();
         _timer.CancelGracePeriod(userId);
         GameDto? game = await _gameplay.HandleDisconnectAsync(userId);
-        if (game != null) await Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString())
+        if (game != null) await Clients.Users(game.WhitePlayer.Id.ToString(), game.BlackPlayer.Id.ToString())
             .SendAsync("playerLeft",  new { Game = game, UserId = userId });
     }
 

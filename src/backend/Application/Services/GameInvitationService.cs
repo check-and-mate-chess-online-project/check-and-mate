@@ -76,7 +76,7 @@ public class GameInvitationService(
         invitation.ChangeState(GameInvitationState.Accepted);
         _invitationRepos.Update(invitation);
         Game game = _sessionService.Create(invitation.SenderId, invitation.ReceiverId, invitation.TimeControl);
-        await _eventDispatcher.PublishAsync(new GameStarted(GameMapper.ToDto(game)));
+        await _eventDispatcher.PublishAsync(new GameStarted(await GameMapper.ToDto(game, _userRepos)));
         await _uow.CommitChangesAsync();
         return await GameInvitationMapper.ToDto(invitation, _userRepos);
     }

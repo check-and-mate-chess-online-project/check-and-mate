@@ -10,12 +10,12 @@ public class Notifier(IHubContext<GameHub> context) : INotifier
 
     public async Task NotifyGameStartedAsync(GameDto game)
     {
-        await _context.Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString()).SendAsync("gameStarted", game);
+        await _context.Clients.Users(game.WhitePlayer.Id.ToString(), game.BlackPlayer.Id.ToString()).SendAsync("gameStarted", game);
     }
 
     public async Task NotifyTimeExpiredAsync(GameDto game, Guid userId)
     {
-        await _context.Clients.Users(game.WhitePlayerId.ToString(), game.BlackPlayerId.ToString())
+        await _context.Clients.Users(game.WhitePlayer.Id.ToString(), game.BlackPlayer.Id.ToString())
             .SendAsync("timeExpired", new { Game = game, UserId = userId });
     }
 }

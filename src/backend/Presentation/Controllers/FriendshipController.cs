@@ -26,12 +26,12 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(List<Guid>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<UserPublicDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<List<Guid>>> GetFriends()
+    public async Task<ActionResult<List<UserPublicDto>>> GetFriends()
     {
         Guid userId = GetUserId();
-        List<Guid> friendIds = await _friendship.GetAllFriendsAsync(userId);
+        List<UserPublicDto> friendIds = await _friendship.GetAllFriendsAsync(userId);
         return friendIds;
     }
 

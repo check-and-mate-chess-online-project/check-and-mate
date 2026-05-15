@@ -34,7 +34,18 @@ public class FriendshipService(
         return requestDtos;
     }
         
-    public async Task<List<Guid>> GetAllFriendsAsync(Guid userId) => await _friendshipRepos.GetByUserAsync(userId);
+    public async Task<List<UserPublicDto>> GetAllFriendsAsync(Guid userId)
+    {
+        List<Guid> friendIds = await _friendshipRepos.GetByUserAsync(userId);
+        List<UserPublicDto> friends = [];
+        foreach (var friendId in friendIds)
+        {
+            User friend = await _userRepos.GetAsync(friendId) ?? throw new InvalidOperationException($"friend {friendId} not exist");
+            UserPublicDto friendDto = UserPublicMapper.ToDto(friend);
+            friends.Add(friendDto);
+        }
+        return friends;
+    }
 
     public async Task<FriendRequestDto> SendFriendRequestAsync(Guid senderId, Guid receiverId)
     {
