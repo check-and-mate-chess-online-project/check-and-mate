@@ -45,8 +45,8 @@ export interface FigureDto {
 
 export interface GameDto {
   id: Guid
-  whitePlayerId: Guid
-  blackPlayerId: Guid
+  whitePlayer: UserPublicDto
+  blackPlayer: UserPublicDto
   result: GameResult | null
   terminationReason: GameTerminationReason | null
   startTimeUtc: IsoDateTime | null

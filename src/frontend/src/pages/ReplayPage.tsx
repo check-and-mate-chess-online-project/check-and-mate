@@ -135,9 +135,9 @@ export function ReplayPage() {
     )
   }
 
-  const myColor = game.whitePlayerId === user.id ? 'white' : 'black'
-  const opponentId =
-    game.whitePlayerId === user.id ? game.blackPlayerId : game.whitePlayerId
+  const myColor = game.whitePlayer.id === user.id ? 'white' : 'black'
+  const opponent =
+    game.whitePlayer.id === user.id ? game.blackPlayer : game.whitePlayer
   const outcome =
     game.result === GameResult.Draw
       ? 'draw'
@@ -184,9 +184,7 @@ export function ReplayPage() {
         <p className="text-sm text-slate-400">
           {reasonText}
           <span className="text-slate-600"> · {t('pages.replay.enemy')} </span>
-          <span className="font-mono text-slate-300">
-            {opponentId.slice(0, 8)}
-          </span>
+          <span className="text-slate-200">{opponent.login}</span>
         </p>
       </div>
 
@@ -249,13 +247,13 @@ export function ReplayPage() {
             <span>{t('pages.replay.white')}</span>
             <span>{t('pages.replay.black')}</span>
           </div>
-          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-sm font-mono mt-1">
+          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-sm mt-1">
             <span />
             <span className={sideColor(game.result, 'white')}>
-              {game.whitePlayerId.slice(0, 6)}
+              {game.whitePlayer.login}
             </span>
             <span className={sideColor(game.result, 'black')}>
-              {game.blackPlayerId.slice(0, 6)}
+              {game.blackPlayer.login}
             </span>
           </div>
           <div className="my-3 border-t border-slate-800" />

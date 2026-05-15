@@ -19,13 +19,9 @@ const REASON_KEY: Record<GameTerminationReason, string> = {
   [GameTerminationReason.Disconnect]: 'disconnect',
 }
 
-function shortId(id: Guid): string {
-  return id.slice(0, 8)
-}
-
 function gameOutcome(game: GameDto, userId: Guid): Outcome {
   if (game.result === GameResult.Draw) return 'draw'
-  const userIsWhite = game.whitePlayerId === userId
+  const userIsWhite = game.whitePlayer.id === userId
   if (game.result === GameResult.WhiteVictory) return userIsWhite ? 'win' : 'loss'
   if (game.result === GameResult.BlackVictory) return userIsWhite ? 'loss' : 'win'
   return 'draw'
@@ -109,9 +105,9 @@ export function HistoryPage() {
           {filtered.map((g) => {
             if (!user) return null
             const outcome = gameOutcome(g, user.id)
-            const opponentId =
-              g.whitePlayerId === user.id ? g.blackPlayerId : g.whitePlayerId
-            const myColor = g.whitePlayerId === user.id ? 'white' : 'black'
+            const opponent =
+              g.whitePlayer.id === user.id ? g.blackPlayer : g.whitePlayer
+            const myColor = g.whitePlayer.id === user.id ? 'white' : 'black'
             const reasonText = g.terminationReason !== null
               ? t(`pages.game.reason.${REASON_KEY[g.terminationReason]}`)
               : ''
@@ -137,7 +133,7 @@ export function HistoryPage() {
                   </div>
                   <div className="flex-1 text-sm text-slate-300">
                     <span className="text-slate-500">{t('pages.history.enemy')} </span>
-                    <span className="font-mono">{shortId(opponentId)}</span>
+                    <span>{opponent.login}</span>
                     <span className="text-slate-500"> · {myColor}</span>
                   </div>
                   <div className="flex flex-col items-end text-right">

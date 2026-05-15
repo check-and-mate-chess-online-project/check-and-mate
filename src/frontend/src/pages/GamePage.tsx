@@ -160,9 +160,9 @@ export function GamePage() {
 
   const myColor: Color | null = !user || !cachedGame
     ? null
-    : user.id === cachedGame.whitePlayerId
+    : user.id === cachedGame.whitePlayer.id
       ? 'white'
-      : user.id === cachedGame.blackPlayerId
+      : user.id === cachedGame.blackPlayer.id
         ? 'black'
         : null
 
