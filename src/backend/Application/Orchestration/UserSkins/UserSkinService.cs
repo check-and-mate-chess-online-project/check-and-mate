@@ -1,4 +1,5 @@
 using Core.Models.Skins;
+using Core.Models.Chess;
 using Core.Repositories;
 
 namespace Application.Orchestration.UserSkins;
@@ -18,6 +19,15 @@ public class UserSkinService(ISkinRepository skinRepos, IUserSkinRepository user
             skins.Add(skin);
         }
         return skins;
+    }
+
+    public async Task AddDefaultSkinsAsync(Guid userId)
+    {
+        Dictionary<FigureType, Skin> defaultSkins = await _skinRepos.GetDefaultsAsync();
+        foreach (var kvp in defaultSkins)
+        {
+            await TryAddSkinAsync(userId, kvp.Value.Id);
+        }
     }
 
     public async Task<bool> TryAddSkinAsync(Guid userId, Guid skinId)

@@ -5,5 +5,6 @@ namespace Application.Orchestration.UserSkins;
 public interface IUserSkinService
 {
     Task<List<Skin>> GetUserSkinsAsync(Guid userId);
+    Task AddDefaultSkinsAsync(Guid userId);
     Task<bool> TryAddSkinAsync(Guid userId, Guid skinId);
 }

@@ -17,11 +17,13 @@ using Application.Abstractions.Chess;
 using Application.Abstractions.Tokens;
 using Application.Abstractions.UnitOfWork;
 using Application.Abstractions.Events;
+using Application.Abstractions.Connections;
 using Application.Orchestration.EventHandlers;
 using Application.Orchestration.UserSkins;
 using Application.Orchestration.SkinDrops;
 using Application.Orchestration.GameSessions;
-using Application.Abstractions.Connections;
+using Application.Orchestration.RatingCalculation;
+using Application.Orchestration.SkinConfigurations;
 using Application.Events;
 using Application.Exceptions;
 using Infrastructure.Settings;
@@ -31,9 +33,9 @@ using Infrastructure.Chess;
 using Infrastructure.Events;
 using Infrastructure.Connections;
 using Infrastructure.Background;
+using Infrastructure.Assets.Loaders;
 using Core.Repositories;
 using Core.Exceptions;
-using Application.Orchestration.RatingCalculation;
 
 
 namespace Presentation;
@@ -96,16 +98,18 @@ public class Program
         builder.Services.AddSingleton<IGameRepository, GameRepository>();
         builder.Services.AddSingleton<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<ISkinRepository, SkinRepository>();
+        builder.Services.AddSingleton<ISkinSetRepository, SkinSetRepository>();
         builder.Services.AddSingleton<IUserSkinRepository, UserSkinRepository>();
         builder.Services.AddSingleton<IGameInvitationRepository, GameInvitationRepository>();
         builder.Services.AddSingleton<IFriendRequestRepository, FriendRequestRepository>();
         builder.Services.AddSingleton<IFriendshipRepository, FriendshipRepository>();
-        builder.Services.AddSingleton<IUserCustomizationRepository, UserCustomizationRepository>();
+        builder.Services.AddSingleton<ISkinConfigurationRepository, SkinConfigurationRepository>();
 
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
         builder.Services.AddSingleton<IMatchmakingPool, MatchmakingPool>();
 
         builder.Services.AddSingleton<IChessEngineFactory, ChessEngineFactory>();
+        builder.Services.AddSingleton<IDefaultSkinAssetsLoader, DefaultSkinAssetsLoader>();
         builder.Services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
         builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
         builder.Services.AddSingleton<IRatingCalculator, RatingCalculator>();
@@ -114,6 +118,7 @@ public class Program
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IUserSkinService, UserSkinService>();
         builder.Services.AddScoped<ISkinDropService, SkinDropService>();
+        builder.Services.AddScoped<ISkinConfigurationService, SkinConfigurationService>();
 
         builder.Services.AddSingleton<IEventDispatcher, EventDispatcher>();
         builder.Services.AddTransient<IEventHandler<TimeExpired>, TimeExpiredHandler>();
@@ -122,6 +127,7 @@ public class Program
         builder.Services.AddSingleton<INotifier, Notifier>();
 
         builder.Services.AddHostedService<TimeService>();
+        builder.Services.AddHostedService<DatabaseSeeder>();
 
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IFriendshipService, FriendshipService>();
@@ -132,7 +138,6 @@ public class Program
         builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
         builder.Services.AddScoped<IProfileService, ProfileService>();
         builder.Services.AddScoped<IRegistrationService, RegistrationService>();
-        builder.Services.AddScoped<ISkinConfigurationService, SkinConfigurationService>();
         builder.Services.AddScoped<IArchiveService, ArchiveService>();
 
         WebApplication app = builder.Build();
