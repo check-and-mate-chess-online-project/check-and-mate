@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import type { Guid } from '../shared/api'
+import type { FriendRequestDto, GameInvitationDto, Guid } from '../shared/api'
 import { ApiError } from '../shared/api/http'
 import { useAuth } from '../shared/auth/useAuth'
 import {
@@ -50,9 +50,9 @@ export function FriendsPage() {
   const tabs: Tab[] = ['friends', 'incoming', 'outgoing', 'invitations']
 
   const incoming =
-    requestsQuery.data?.filter((r) => r.receiverId === user?.id) ?? []
+    requestsQuery.data?.filter((r) => r.receiver.id === user?.id) ?? []
   const outgoing =
-    requestsQuery.data?.filter((r) => r.senderId === user?.id) ?? []
+    requestsQuery.data?.filter((r) => r.sender.id === user?.id) ?? []
 
   const handleAddFriend = () => {
     const login = search.trim()
@@ -229,14 +229,8 @@ function FriendsList({ friends, onInvite, onRemove, emptyText }: FriendsListProp
   )
 }
 
-interface Request {
-  id: Guid
-  senderId: Guid
-  receiverId: Guid
-}
-
 interface RequestsListProps {
-  requests: Request[]
+  requests: FriendRequestDto[]
   mode: 'incoming' | 'outgoing'
   onAccept?: (id: Guid) => void
   onReject?: (id: Guid) => void
@@ -256,15 +250,13 @@ function RequestsList({
   return (
     <ul className="space-y-2">
       {requests.map((r) => {
-        const otherId = mode === 'incoming' ? r.senderId : r.receiverId
+        const other = mode === 'incoming' ? r.sender : r.receiver
         return (
           <li
             key={r.id}
             className="flex items-center justify-between bg-slate-900/60 border border-violet-900 rounded-md px-4 py-3"
           >
-            <span className="font-mono text-sm text-slate-300">
-              {shortId(otherId)}
-            </span>
+            <span className="text-sm text-slate-200">{other.login}</span>
             {mode === 'incoming' && (
               <div className="flex gap-2">
                 <button
@@ -293,14 +285,8 @@ function RequestsList({
   )
 }
 
-interface Invitation {
-  id: Guid
-  senderId: Guid
-  receiverId: Guid
-}
-
 interface InvitationsListProps {
-  invitations: Invitation[]
+  invitations: GameInvitationDto[]
   onAccept: (id: Guid) => void
   onReject: (id: Guid) => void
   emptyText: string
@@ -322,9 +308,7 @@ function InvitationsList({
           key={inv.id}
           className="flex items-center justify-between bg-slate-900/60 border border-violet-900 rounded-md px-4 py-3"
         >
-          <span className="font-mono text-sm text-slate-300">
-            {shortId(inv.senderId)}
-          </span>
+          <span className="text-sm text-slate-200">{inv.sender.login}</span>
           <div className="flex gap-2">
             <button
               type="button"

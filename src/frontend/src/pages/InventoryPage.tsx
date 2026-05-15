@@ -152,9 +152,9 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
                 aspectRatio: '832 / 1216',
               }}
             >
-              {skin.isOwned && skin.whiteImage ? (
+              {skin.isOwned && skin.idleImage ? (
                 <img
-                  src={skinImageSrc(skin.whiteImage)}
+                  src={skinImageSrc(skin.idleImage)}
                   alt={skinName}
                   className="h-full w-full object-contain"
                 />

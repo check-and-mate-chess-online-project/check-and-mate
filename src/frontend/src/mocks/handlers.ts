@@ -18,14 +18,24 @@ const PLANETS = [
   { id: 'mars', name: 'Mars', imageUrl: '/planets/mars_big.webp' },
 ]
 
+const EMPTY_SKIN_ASSETS = {
+  whiteBoardImage: '',
+  blackBoardImage: '',
+  idleImage: '',
+  startFightWinImage: '',
+  startFightLoseImage: '',
+  endFightWinImage: '',
+  endFightLoseImage: '',
+}
+
 const PLANET_SKINS: SkinDto[] = [
   {
     id: 'gagarin-king',
     setId: 'earth',
     figure: FigureType.King,
     rarity: SkinRarity.Legendary,
-    whiteImage: '/skins/gagarin-king-idle.webp',
-    blackImage: '/skins/gagarin-king-idle.webp',
+    ...EMPTY_SKIN_ASSETS,
+    idleImage: '/skins/gagarin-king-idle.webp',
     isDefault: false,
   },
   {
@@ -33,8 +43,8 @@ const PLANET_SKINS: SkinDto[] = [
     setId: 'earth',
     figure: FigureType.Pawn,
     rarity: SkinRarity.Common,
-    whiteImage: '/skins/magnus-pawn/idle.webp',
-    blackImage: '/skins/magnus-pawn/idle.webp',
+    ...EMPTY_SKIN_ASSETS,
+    idleImage: '/skins/magnus-pawn/idle.webp',
     isDefault: false,
   },
   ...(['queen', 'rook', 'bishop', 'knight'] as const).map((f, i) => ({
@@ -42,8 +52,7 @@ const PLANET_SKINS: SkinDto[] = [
     setId: 'earth',
     figure: (i + 2) as FigureType,
     rarity: (i % 2 === 0 ? SkinRarity.Rare : SkinRarity.Common) as SkinRarity,
-    whiteImage: '',
-    blackImage: '',
+    ...EMPTY_SKIN_ASSETS,
     isDefault: false,
   })),
   ...(['king', 'queen', 'rook', 'bishop', 'knight', 'pawn'] as const).map(
@@ -56,8 +65,7 @@ const PLANET_SKINS: SkinDto[] = [
         : i % 2 === 0
           ? SkinRarity.Rare
           : SkinRarity.Common) as SkinRarity,
-      whiteImage: '',
-      blackImage: '',
+      ...EMPTY_SKIN_ASSETS,
       isDefault: false,
     }),
   ),

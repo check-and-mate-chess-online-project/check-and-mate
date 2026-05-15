@@ -21,7 +21,7 @@ export function useGlobalGameEvents() {
         navigate(`/game/${game.id}`)
       },
       onGameInvitationReceived: (invitation) => {
-        const sender = invitation.senderId.slice(0, 8)
+        const sender = invitation.sender.login
         const tc = invitation.timeControlIsEnabled
           ? `${(invitation.initialTimeSec ?? 0) / 60}+${invitation.incrementPerMoveSec ?? 0}`
           : t('invitations.untimed')

@@ -107,15 +107,20 @@ export interface SkinDto {
   setId: Guid
   figure: FigureType
   rarity: SkinRarity
-  whiteImage: string
-  blackImage: string
+  whiteBoardImage: string
+  blackBoardImage: string
+  idleImage: string
+  startFightWinImage: string
+  startFightLoseImage: string
+  endFightWinImage: string
+  endFightLoseImage: string
   isDefault: boolean
 }
 
 export interface GameInvitationDto {
   id: Guid
-  receiverId: Guid
-  senderId: Guid
+  receiver: UserPublicDto
+  sender: UserPublicDto
   timeControlIsEnabled: boolean
   initialTimeSec: number | null
   incrementPerMoveSec: number | null
@@ -125,7 +130,7 @@ export interface GameInvitationDto {
 
 export interface FriendRequestDto {
   id: Guid
-  receiverId: Guid
-  senderId: Guid
+  receiver: UserPublicDto
+  sender: UserPublicDto
   state: FriendRequestState
 }
