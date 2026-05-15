@@ -5,8 +5,8 @@ namespace Application.Dtos;
 public class GameDto
 {
     public Guid Id { get; set; }
-    public Guid WhitePlayerId { get; set; }
-    public Guid BlackPlayerId { get; set; }
+    public UserPublicDto WhitePlayer { get; set; } = null!;
+    public UserPublicDto BlackPlayer { get; set; } = null!;
     public GameResult? Result { get; set; }
     public GameTerminationReason? TerminationReason { get; set; }
     public DateTime? StartTimeUtc { get; set; }

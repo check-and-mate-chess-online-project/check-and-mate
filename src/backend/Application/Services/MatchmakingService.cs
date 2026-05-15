@@ -92,7 +92,7 @@ public class MatchmakingService(
         Guid whiteId = userIsWhite ? user.Id : opponent.Id;
         Guid blackId = userIsWhite ? opponent.Id : user.Id;
         Game game = _sessionService.Create(whiteId, blackId, timeControl);
-        await _eventDispatcher.PublishAsync(new GameStarted(GameMapper.ToDto(game)));
+        await _eventDispatcher.PublishAsync(new GameStarted(await GameMapper.ToDto(game, _userRepos)));
         await _uow.CommitChangesAsync();
     }
 }

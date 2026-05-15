@@ -29,10 +29,10 @@ public class GameplayService(
     private readonly IUserRepository _userRepos = userRepos;
     private readonly IUnitOfWork _uow = uow;
 
-    public GameDto? GetActiveGameByUser(Guid userId)
+    public async Task<GameDto?> GetActiveGameByUser(Guid userId)
     {
         Game? game = _sessionService.GetByUserId(userId);
-        return game != null ? GameMapper.ToDto(game) : null;
+        return game != null ? (await GameMapper.ToDto(game, _userRepos)) : null;
     }
 
     public async Task<MoveResultDto> MakeMoveAsync(Guid userId, int A, int B, int X, int Y, MoveOptionsDto moveOptions)
@@ -47,7 +47,7 @@ public class GameplayService(
             await HandleGameCompletion(game, userId, (GameTerminationReason)moveResult.TerminationReason!);
             await _uow.CommitChangesAsync();
         }
-        return MoveResultMapper.ToDto(moveResult, GameMapper.ToDto(game));
+        return MoveResultMapper.ToDto(moveResult, await GameMapper.ToDto(game, _userRepos));
     }
 
     public async Task<GameDto?> HandleTimeoutAsync(Guid userId)
@@ -57,7 +57,7 @@ public class GameplayService(
         game.EndByTimeout(userId);
         await HandleGameCompletion(game, userId, GameTerminationReason.Timeout);
         await _uow.CommitChangesAsync();
-        return GameMapper.ToDto(game);
+        return await GameMapper.ToDto(game, _userRepos);
     }
 
     public async Task<GameDto> HandleResignAsync(Guid userId)
@@ -68,7 +68,7 @@ public class GameplayService(
         game.EndByResignation(userId);
         await HandleGameCompletion(game, userId, GameTerminationReason.Resignation);
         await _uow.CommitChangesAsync();
-        return GameMapper.ToDto(game);
+        return await GameMapper.ToDto(game, _userRepos);
     }
     
     public async Task<GameDto?> HandleDisconnectAsync(Guid userId)
@@ -79,7 +79,7 @@ public class GameplayService(
         await HandleGameCompletion(game, userId, GameTerminationReason.Disconnect);
         await _uow.CommitChangesAsync();
         Console.WriteLine($"{game.StartTimeUtc} \n {game.EndTimeUtc} \n {game.TerminationReason}");
-        return GameMapper.ToDto(game);
+        return await GameMapper.ToDto(game, _userRepos);
     }
 
     private async Task HandleGameCompletion(Game game, Guid userId, GameTerminationReason terminationReason)
