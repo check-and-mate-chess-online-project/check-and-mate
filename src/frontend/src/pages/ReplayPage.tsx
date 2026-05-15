@@ -26,6 +26,16 @@ function coordToSquare(col: number, row: number): string {
   return String.fromCharCode(97 + col) + (row + 1)
 }
 
+function sideColor(
+  result: GameResult | null,
+  side: 'white' | 'black',
+): string {
+  if (result === null || result === GameResult.Draw) return 'text-slate-200'
+  const wonByWhite = result === GameResult.WhiteVictory
+  const won = (side === 'white') === wonByWhite
+  return won ? 'text-orange-400' : 'text-violet-300'
+}
+
 const PROMOTION_CHAR: Record<number, 'q' | 'r' | 'b' | 'n'> = {
   [FigureType.Queen]: 'q',
   [FigureType.Rook]: 'r',
@@ -151,7 +161,7 @@ export function ReplayPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full max-w-[84rem] mx-auto px-4">
       <Link
         to="/history"
         className="inline-block text-slate-400 hover:text-slate-100 text-sm mb-3"
@@ -180,9 +190,9 @@ export function ReplayPage() {
         </p>
       </div>
 
-      <div className="flex gap-6 items-start justify-center max-w-7xl mx-auto">
-        <div className="w-72 flex-shrink-0 hidden xl:block" aria-hidden />
-        <div className="w-full max-w-xl">
+      <div className="grid grid-cols-1 items-start justify-center gap-4 xl:grid-cols-[16rem_minmax(0,36rem)_16rem] xl:gap-6 2xl:grid-cols-[18rem_minmax(0,36rem)_18rem]">
+        <div className="hidden xl:block" aria-hidden />
+        <div className="w-full max-w-xl justify-self-center">
           <Chessboard
             options={{
               position: fen,
@@ -233,7 +243,7 @@ export function ReplayPage() {
           </div>
         </div>
 
-        <aside className="w-72 flex-shrink-0 max-h-[80vh] overflow-y-auto bg-slate-900/40 border border-slate-800 rounded-md p-3">
+        <aside className="w-full max-w-2xl justify-self-center max-h-[80vh] overflow-y-auto bg-slate-900/40 border border-slate-800 rounded-md p-3 xl:max-w-none xl:justify-self-stretch">
           <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-xs uppercase tracking-wider text-slate-500">
             <span />
             <span>{t('pages.replay.white')}</span>
@@ -241,8 +251,12 @@ export function ReplayPage() {
           </div>
           <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-sm font-mono mt-1">
             <span />
-            <span className="text-slate-50">{game.whitePlayerId.slice(0, 6)}</span>
-            <span className="text-slate-500">{game.blackPlayerId.slice(0, 6)}</span>
+            <span className={sideColor(game.result, 'white')}>
+              {game.whitePlayerId.slice(0, 6)}
+            </span>
+            <span className={sideColor(game.result, 'black')}>
+              {game.blackPlayerId.slice(0, 6)}
+            </span>
           </div>
           <div className="my-3 border-t border-slate-800" />
           <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-1 text-sm font-mono">
