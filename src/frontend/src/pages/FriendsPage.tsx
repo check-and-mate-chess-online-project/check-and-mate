@@ -117,7 +117,9 @@ export function FriendsPage() {
       {tab === 'friends' && (
         <FriendsList
           friends={friendsQuery.data ?? []}
-          onInvite={(id) => setInviteTarget({ id })}
+          onInvite={(friend) =>
+            setInviteTarget({ id: friend.id, login: friend.login })
+          }
           onRemove={(id) =>
             deleteFriend.mutate(id, {
               onError: (e) =>
@@ -189,7 +191,7 @@ export function FriendsPage() {
 
 interface FriendsListProps {
   friends: UserPublicDto[]
-  onInvite: (id: Guid) => void
+  onInvite: (friend: UserPublicDto) => void
   onRemove: (id: Guid) => void
   emptyText: string
 }
@@ -209,7 +211,7 @@ function FriendsList({ friends, onInvite, onRemove, emptyText }: FriendsListProp
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => onInvite(friend.id)}
+              onClick={() => onInvite(friend)}
               className="px-3 py-1 text-sm bg-violet-600 hover:bg-violet-500 rounded-md"
             >
               Invite
