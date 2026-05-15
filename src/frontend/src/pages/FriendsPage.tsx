@@ -1,7 +1,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import type { FriendRequestDto, GameInvitationDto, Guid } from '../shared/api'
+import type {
+  FriendRequestDto,
+  GameInvitationDto,
+  Guid,
+  UserPublicDto,
+} from '../shared/api'
 import { ApiError } from '../shared/api/http'
 import { useAuth } from '../shared/auth/useAuth'
 import {
@@ -17,10 +22,6 @@ import { gameHub } from '../shared/realtime/gameHub'
 import { InviteToGameModal } from '../shared/ui/InviteToGameModal'
 
 type Tab = 'friends' | 'incoming' | 'outgoing' | 'invitations'
-
-function shortId(id: string): string {
-  return id.slice(0, 8)
-}
 
 function errorMessage(e: unknown, fallback: string): string {
   if (e instanceof ApiError && e.message) return e.message
@@ -187,7 +188,7 @@ export function FriendsPage() {
 }
 
 interface FriendsListProps {
-  friends: Guid[]
+  friends: UserPublicDto[]
   onInvite: (id: Guid) => void
   onRemove: (id: Guid) => void
   emptyText: string
@@ -199,25 +200,23 @@ function FriendsList({ friends, onInvite, onRemove, emptyText }: FriendsListProp
   }
   return (
     <ul className="space-y-2">
-      {friends.map((id) => (
+      {friends.map((friend) => (
         <li
-          key={id}
+          key={friend.id}
           className="flex items-center justify-between bg-slate-900/60 border border-violet-900 rounded-md px-4 py-3"
         >
-          <span className="font-mono text-sm text-slate-300">
-            {shortId(id)}
-          </span>
+          <span className="text-sm text-slate-200">{friend.login}</span>
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => onInvite(id)}
+              onClick={() => onInvite(friend.id)}
               className="px-3 py-1 text-sm bg-violet-600 hover:bg-violet-500 rounded-md"
             >
               Invite
             </button>
             <button
               type="button"
-              onClick={() => onRemove(id)}
+              onClick={() => onRemove(friend.id)}
               className="px-3 py-1 text-sm text-orange-400 hover:text-orange-300"
             >
               ✕

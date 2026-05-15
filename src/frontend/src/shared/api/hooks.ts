@@ -9,6 +9,7 @@ import type {
   PlanetDto,
   SkinDto,
   UserDto,
+  UserPublicDto,
 } from '.'
 import type { FigureType } from './enums'
 
@@ -120,7 +121,7 @@ export function useGame(id: Guid) {
 export function useFriendsList() {
   return useQuery({
     queryKey: ['friends', 'list'],
-    queryFn: () => api.get<Guid[]>('/api/friends'),
+    queryFn: () => api.get<UserPublicDto[]>('/api/friends'),
   })
 }
 
