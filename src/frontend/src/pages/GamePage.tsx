@@ -12,6 +12,7 @@ import { gameHub, subscribeGameHub } from '../shared/realtime/gameHub'
 import { formatClock, useChessClock } from '../shared/lib/useChessClock'
 import { useEquippedSkinsStore } from '../shared/lib/equippedSkins'
 import { FightAnimation, type FightPiece } from '../shared/ui/FightAnimation'
+import { ConfirmModal } from '../shared/ui/ConfirmModal'
 
 type Color = 'white' | 'black'
 type Outcome = 'win' | 'loss' | 'draw'
@@ -40,27 +41,27 @@ const REASON_KEY: Record<GameTerminationReason, string> = {
 }
 
 interface ClockProps {
-  label: string
   ms: number
   active: boolean
+  login: string
 }
 
-function Clock({ label, ms, active }: ClockProps) {
+function Clock({ ms, active, login }: ClockProps) {
   const lowTime = ms < 30_000
   return (
     <div
-      className={`px-4 py-2 rounded-md border ${
+      className={`flex items-center justify-between px-5 py-3 rounded-md border ${
         active ? 'border-violet-500 bg-violet-500/10' : 'border-slate-800'
       }`}
     >
-      <div className="text-xs uppercase text-slate-500">{label}</div>
       <div
-        className={`text-2xl font-mono tabular-nums ${
+        className={`text-4xl font-mono tabular-nums leading-none ${
           lowTime ? 'text-red-400' : 'text-slate-100'
         }`}
       >
         {formatClock(ms)}
       </div>
+      <div className="text-sm text-slate-300 truncate ml-4">{login}</div>
     </div>
   )
 }
@@ -145,6 +146,17 @@ export function GamePage() {
         attacker: FightPiece
         victim: FightPiece
         key: number
+      }
+    | null
+  >(null)
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
+  const [pendingConfirm, setPendingConfirm] = useState<
+    | {
+        message: string
+        title?: string
+        confirmLabel?: string
+        danger?: boolean
+        onConfirm: () => void
       }
     | null
   >(null)
@@ -250,6 +262,39 @@ export function GamePage() {
   }
 
   const isMyTurn = turn === myColor
+  const opponentColor: Color = myColor === 'white' ? 'black' : 'white'
+  const opponentLogin =
+    cachedGame &&
+    (myColor === 'white'
+      ? cachedGame.blackPlayer.login
+      : cachedGame.whitePlayer.login)
+
+  const squareStyles: Record<string, React.CSSProperties> = (() => {
+    if (!selectedSquare) return {}
+    const styles: Record<string, React.CSSProperties> = {}
+    try {
+      const legalMoves = game.moves({ square: selectedSquare as never, verbose: true })
+      for (const m of legalMoves as Array<{ to: string; captured?: string }>) {
+        styles[m.to] = {
+          background: m.captured
+            ? 'radial-gradient(circle, rgba(251,146,60,0.55) 60%, transparent 65%)'
+            : 'radial-gradient(circle, rgba(251,146,60,0.55) 25%, transparent 28%)',
+        }
+      }
+    } catch {
+      // selected square may have no piece anymore
+    }
+    return styles
+  })()
+
+  const onPieceDrag = ({
+    square,
+  }: {
+    square: string | null
+  }) => {
+    if (!isMyTurn || !square) return
+    setSelectedSquare(square)
+  }
 
   const onPieceDrop = ({
     sourceSquare,
@@ -258,6 +303,7 @@ export function GamePage() {
     sourceSquare: string
     targetSquare: string | null
   }) => {
+    setSelectedSquare(null)
     if (!targetSquare) return false
     if (!isMyTurn) return false
     const preview = new Chess(game.fen())
@@ -277,32 +323,50 @@ export function GamePage() {
     return false
   }
 
-  const handleResign = async () => {
-    if (!confirm(t('pages.game.resignConfirm'))) return
-    try {
-      await gameHub.resign()
-    } catch {
-      toast.error('resign failed')
-    }
+  const handleResign = () => {
+    setPendingConfirm({
+      message: t('pages.game.resignConfirm'),
+      confirmLabel: t('pages.game.resign'),
+      danger: true,
+      onConfirm: async () => {
+        setPendingConfirm(null)
+        try {
+          await gameHub.resign()
+        } catch {
+          toast.error('resign failed')
+        }
+      },
+    })
   }
 
-  const handleExit = async () => {
+  const handleExit = () => {
     if (ended) {
       navigate('/lobby')
       return
     }
     if (!gameHasStarted) {
-      if (!confirm(t('pages.game.leaveMatchConfirm'))) return
-      try { await gameHub.leave() } catch { /* ignore */ }
-      navigate('/lobby')
+      setPendingConfirm({
+        message: t('pages.game.leaveMatchConfirm'),
+        confirmLabel: t('pages.game.exit'),
+        onConfirm: async () => {
+          setPendingConfirm(null)
+          try { await gameHub.leave() } catch { /* ignore */ }
+          navigate('/lobby')
+        },
+      })
       return
     }
-    if (!confirm(t('pages.game.exitConfirm'))) return
-    try { await gameHub.resign() } catch { /* ignore */ }
-    navigate('/lobby')
+    setPendingConfirm({
+      message: t('pages.game.exitConfirm'),
+      confirmLabel: t('pages.game.exit'),
+      danger: true,
+      onConfirm: async () => {
+        setPendingConfirm(null)
+        try { await gameHub.resign() } catch { /* ignore */ }
+        navigate('/lobby')
+      },
+    })
   }
-
-  const opponentColor: Color = myColor === 'white' ? 'black' : 'white'
 
   return (
     <div className="min-h-screen text-slate-100 flex flex-col">
@@ -331,15 +395,17 @@ export function GamePage() {
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-xl flex flex-col gap-3">
           <Clock
-            label={`${t('pages.game.opponent')} (${opponentColor})`}
             ms={opponentColor === 'white' ? whiteMs : blackMs}
             active={active === opponentColor}
+            login={opponentLogin}
           />
           <Chessboard
             options={{
               position: fen,
               onPieceDrop,
+              onPieceDrag,
               boardOrientation: myColor,
+              squareStyles,
               boardStyle: {
                 borderRadius: '12px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
@@ -349,15 +415,26 @@ export function GamePage() {
             }}
           />
           <Clock
-            label={`${t('pages.game.you')} (${myColor})`}
             ms={myColor === 'white' ? whiteMs : blackMs}
             active={active === myColor}
+            login={user?.login ?? ''}
           />
         </div>
       </main>
 
       {ended && (
         <ResultModal result={ended} onClose={() => navigate('/lobby')} />
+      )}
+
+      {pendingConfirm && (
+        <ConfirmModal
+          title={pendingConfirm.title}
+          message={pendingConfirm.message}
+          confirmLabel={pendingConfirm.confirmLabel}
+          danger={pendingConfirm.danger}
+          onConfirm={pendingConfirm.onConfirm}
+          onCancel={() => setPendingConfirm(null)}
+        />
       )}
 
       {activeFight && (

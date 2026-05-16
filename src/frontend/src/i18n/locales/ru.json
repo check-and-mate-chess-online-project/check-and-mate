@@ -22,6 +22,10 @@
       "reload": "Перезагрузить"
     }
   },
+  "common": {
+    "confirm": "Подтвердить",
+    "cancel": "Отмена"
+  },
   "invitations": {
     "received": "{{sender}} приглашает в игру ({{tc}})",
     "untimed": "без времени",

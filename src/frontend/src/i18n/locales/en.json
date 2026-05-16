@@ -22,6 +22,10 @@
       "reload": "Reload"
     }
   },
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
   "invitations": {
     "received": "{{sender}} invites you to a game ({{tc}})",
     "untimed": "untimed",
