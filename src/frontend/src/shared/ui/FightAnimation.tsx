@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import type { Guid } from '../api'
 import { FigureType } from '../api/enums'
@@ -67,6 +67,10 @@ export function FightAnimation({
 }: Props) {
   const [phase, setPhase] = useState<Phase>('start')
   const [frameIdx, setFrameIdx] = useState(0)
+  const onCompleteRef = useRef(onComplete)
+  useEffect(() => {
+    onCompleteRef.current = onComplete
+  })
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase('fight'), TIMINGS.start)
@@ -75,7 +79,7 @@ export function FightAnimation({
       TIMINGS.start + TIMINGS.fight,
     )
     const t3 = setTimeout(
-      () => onComplete(),
+      () => onCompleteRef.current(),
       TIMINGS.start + TIMINGS.fight + TIMINGS.end,
     )
     return () => {
@@ -83,7 +87,7 @@ export function FightAnimation({
       clearTimeout(t2)
       clearTimeout(t3)
     }
-  }, [onComplete])
+  }, [])
 
   useEffect(() => {
     if (phase !== 'fight') return
