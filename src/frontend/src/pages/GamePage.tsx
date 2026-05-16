@@ -141,14 +141,13 @@ export function GamePage() {
   const [turn, setTurn] = useState<Color>('white')
   const [ended, setEnded] = useState<ResultState | null>(null)
   const [gameHasStarted, setGameHasStarted] = useState(false)
-  const [activeFight, setActiveFight] = useState<
-    | {
-        attacker: FightPiece
-        victim: FightPiece
-        key: number
-      }
-    | null
-  >(null)
+  const [fightQueue, setFightQueue] = useState<
+    Array<{
+      attacker: FightPiece
+      victim: FightPiece
+      key: number
+    }>
+  >([])
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
   const [pendingConfirm, setPendingConfirm] = useState<
     | {
@@ -195,11 +194,14 @@ export function GamePage() {
             const attackerFigure = CHESS_TO_FIGURE[applied.piece]
             const victimFigure = CHESS_TO_FIGURE[applied.captured]
             if (attackerFigure && victimFigure) {
-              setActiveFight({
-                attacker: { figure: attackerFigure, color: attackerColor },
-                victim: { figure: victimFigure, color: victimColor },
-                key: Date.now(),
-              })
+              setFightQueue((q) => [
+                ...q,
+                {
+                  attacker: { figure: attackerFigure, color: attackerColor },
+                  victim: { figure: victimFigure, color: victimColor },
+                  key: Date.now() + Math.random(),
+                },
+              ])
             }
           }
           if (result.isGameOver) {
@@ -437,14 +439,14 @@ export function GamePage() {
         />
       )}
 
-      {activeFight && (
+      {fightQueue.length > 0 && (
         <FightAnimation
-          key={activeFight.key}
-          attacker={activeFight.attacker}
-          victim={activeFight.victim}
-          attackerSkinId={equipped[activeFight.attacker.figure]}
-          victimSkinId={equipped[activeFight.victim.figure]}
-          onComplete={() => setActiveFight(null)}
+          key={fightQueue[0].key}
+          attacker={fightQueue[0].attacker}
+          victim={fightQueue[0].victim}
+          attackerSkinId={equipped[fightQueue[0].attacker.figure]}
+          victimSkinId={equipped[fightQueue[0].victim.figure]}
+          onComplete={() => setFightQueue((q) => q.slice(1))}
         />
       )}
     </div>
