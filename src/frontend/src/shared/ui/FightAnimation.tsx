@@ -22,8 +22,8 @@ type Phase = 'start' | 'fight' | 'end'
 
 const TIMINGS = {
   start: 900,
-  fight: 1400,
-  end: 1500,
+  fight: 1200,
+  end: 2500,
 }
 
 const FIGHT_FRAMES = [
@@ -32,7 +32,7 @@ const FIGHT_FRAMES = [
   '/skins/fight-3.webp',
   '/skins/fight-4.webp',
 ]
-const FIGHT_FRAME_MS = 180
+const FIGHT_FRAME_MS = 70
 
 function poseUrl(skinId: Guid | undefined, pose: string): string | undefined {
   if (!skinId) return undefined
