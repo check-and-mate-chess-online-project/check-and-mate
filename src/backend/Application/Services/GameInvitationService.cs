@@ -40,20 +40,6 @@ public class GameInvitationService(
     }
 
     public async Task<GameInvitationDto> SendGameInvitationAsync(
-        Guid senderId, 
-        Guid receiverId, 
-        bool timeControlIsEnabled, 
-        int initialTimeSec, 
-        int incrementPerMoveSec)
-    {
-        User sender = await _userRepos.GetAsync(senderId) ?? throw new NotFoundException($"user {senderId} not found");
-        if (sender.IsDeleted) throw new UserDeletedException($"user {senderId} is deleted");
-        User user = await _userRepos.GetAsync(receiverId) ?? throw new NotFoundException($"user {receiverId} not found");
-        if (user.IsDeleted) throw new UserDeletedException($"user {receiverId} is deleted");
-        return await Send(senderId, receiverId, timeControlIsEnabled, initialTimeSec, incrementPerMoveSec);
-    }
-
-    public async Task<GameInvitationDto> SendGameInvitationAsync(
         Guid senderId,
         string receiverLogin,
         bool timeControlIsEnabled, 
@@ -64,7 +50,15 @@ public class GameInvitationService(
         if (sender.IsDeleted) throw new UserDeletedException($"user {senderId} is deleted");
         User receiver = await _userRepos.GetAsync(receiverLogin) ?? throw new NotFoundException($"user {receiverLogin} not found");
         if (receiver.IsDeleted) throw new UserDeletedException($"user {receiverLogin} is deleted");
-        return await Send(senderId, receiver.Id, timeControlIsEnabled, initialTimeSec, incrementPerMoveSec);
+        if (await _invitationRepos.GetPendingAsync(senderId, receiver.Id) != null) 
+            throw new ConflictException($"game invitation from {senderId} to {receiver.Id} already exist");
+        if (_sessionService.GetByUserId(senderId) != null) 
+            throw new ConflictException($"user {senderId} already in game");
+        ITimeControl timeControl = timeControlIsEnabled ? new TimeControl(initialTimeSec, incrementPerMoveSec) : new DisabledTimeControl();
+        GameInvitation invitation = new(senderId, receiver.Id, timeControl, GameInvitationState.Pending);
+        _invitationRepos.Add(invitation);
+        await _uow.CommitChangesAsync();
+        return await GameInvitationMapper.ToDto(invitation, _userRepos);
     }
 
     public async Task<GameInvitationDto> AcceptGameInvitationAsync(Guid invitationId)
@@ -89,24 +83,6 @@ public class GameInvitationService(
             throw new ConflictException($"game invitation {invitationId} already resolved");
         invitation.ChangeState(GameInvitationState.Rejected);
         _invitationRepos.Update(invitation);
-        await _uow.CommitChangesAsync();
-        return await GameInvitationMapper.ToDto(invitation, _userRepos);
-    }
-
-        private async Task<GameInvitationDto> Send(
-        Guid senderId, 
-        Guid receiverId, 
-        bool timeControlIsEnabled, 
-        int initialTimeSec, 
-        int incrementPerMoveSec)
-    {
-        if (await _invitationRepos.GetPendingAsync(senderId, receiverId) != null) 
-            throw new ConflictException($"game invitation from {senderId} to {receiverId} already exist");
-        if (_sessionService.GetByPlayers(senderId, receiverId) != null) 
-            throw new ConflictException($"game session beetwen {senderId} and {receiverId} already exist");
-        ITimeControl timeControl = timeControlIsEnabled ? new TimeControl(initialTimeSec, incrementPerMoveSec) : new DisabledTimeControl();
-        GameInvitation invitation = new(senderId, receiverId, timeControl, GameInvitationState.Pending);
-        _invitationRepos.Add(invitation);
         await _uow.CommitChangesAsync();
         return await GameInvitationMapper.ToDto(invitation, _userRepos);
     }

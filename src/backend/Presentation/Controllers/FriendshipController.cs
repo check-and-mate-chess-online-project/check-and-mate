@@ -45,16 +45,7 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
     public async Task<ActionResult<FriendRequestDto>> SendFriendRequest([FromBody]FriendRequest request)
     {
         Guid userId = GetUserId();
-        FriendRequestDto friendRequest;
-        if (request.ReceiverId != null)
-        {
-            friendRequest = await _friendship.SendFriendRequestAsync(userId, request.ReceiverId.Value);
-        }
-        else if (request.ReceiverLogin != null)
-        {
-            friendRequest = await _friendship.SendFriendRequestAsync(userId, request.ReceiverLogin);
-        }
-        else throw new ArgumentException("id or login must be specified");
+        FriendRequestDto friendRequest = await _friendship.SendFriendRequestAsync(userId, request.ReceiverLogin);
         return friendRequest;
     }
 

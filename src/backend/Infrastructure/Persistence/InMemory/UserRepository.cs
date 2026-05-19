@@ -25,6 +25,11 @@ public class UserRepository : IUserRepository
         return Task.FromResult<User?>(null);
     }
 
+    public Task<User?> GetByEmailAsync(string email)
+    {
+        return Task.FromResult(_usersById.Select(kvp => kvp.Value).FirstOrDefault(u => u.Email == email));
+    }
+
     public void Add(User user)
     {
         _usersById[user.Id] = user;

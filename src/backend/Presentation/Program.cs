@@ -36,6 +36,7 @@ using Infrastructure.Background;
 using Infrastructure.Assets.Loaders;
 using Core.Repositories;
 using Core.Exceptions;
+using Application.Orchestration.InputStringValidation;
 
 
 namespace Presentation;
@@ -115,6 +116,9 @@ public class Program
         builder.Services.AddSingleton<IRatingCalculator, RatingCalculator>();
         builder.Services.AddSingleton<IGameSessionService, GameSessionService>();
         builder.Services.AddSingleton<IConnectionGracePeriodTimer, ConnectionGracePeriodTimer>();
+        builder.Services.AddSingleton<LoginValidator>();
+        builder.Services.AddSingleton<PasswordValidator>();
+        builder.Services.AddSingleton<EmailValidator>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddScoped<IUserSkinService, UserSkinService>();
         builder.Services.AddScoped<ISkinDropService, SkinDropService>();
