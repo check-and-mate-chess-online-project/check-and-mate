@@ -83,25 +83,25 @@ public static class ChessMapper
         };
     }
 
-    public static Move ToDomain((int A, int B, int X, int Y) coords, IMoveOption[] options) 
+    public static Move ToDomain(ChessLib.Entities.MoveCoordinates coords, IMoveOption[] options) 
         => new(coords.A, coords.B, coords.X, coords.Y, options);
 
     public static List<Ply> ToDomain(ChessLib.Entities.ChessMove move, int moveNumber)
     {
         List<Ply> plies = [];
-        IList<(int, int, int, int)>  whiteMovesCoords = [.. move.GetWhiteMoves()];
-        if (whiteMovesCoords.Count > 0)
+        ChessLib.Entities.MoveCoordinates?  whiteMovesCoords = move.GetWhiteMove();
+        if (whiteMovesCoords != null)
         {
             IMoveOption[] whiteOptions = [.. move.GetWhiteMoveOptions().Select(ToDomain)];
-            List<Move> whiteMoveCoordinates = [.. whiteMovesCoords.Select(c => ToDomain(c, whiteOptions))];
-            plies.Add(new Ply(moveNumber, PlayerColor.White, whiteMoveCoordinates));
+            Move whiteMove = ToDomain(whiteMovesCoords, whiteOptions);
+            plies.Add(new Ply(moveNumber, PlayerColor.White, whiteMove));
         }
-        IList<(int, int, int, int)> blackMovesCoords = [.. move.GetBlackMoves()];
-        if (blackMovesCoords.Count > 0)
+        ChessLib.Entities.MoveCoordinates? blackMovesCoords = move.GetBlackMove();
+        if (blackMovesCoords != null)
         {
             IMoveOption[] blackOptions = [.. move.GetBlackMoveOptions().Select(ToDomain)];
-            List<Move> blackMoveCoordinates = [.. blackMovesCoords.Select(c => ToDomain(c, blackOptions))];
-            plies.Add(new Ply(moveNumber, PlayerColor.Black, blackMoveCoordinates));
+            Move blackMove = ToDomain(blackMovesCoords, blackOptions);
+            plies.Add(new Ply(moveNumber, PlayerColor.Black, blackMove));
         }
         return plies;
     }

@@ -24,6 +24,7 @@ using Application.Orchestration.SkinDrops;
 using Application.Orchestration.GameSessions;
 using Application.Orchestration.RatingCalculation;
 using Application.Orchestration.SkinConfigurations;
+using Application.Orchestration.InputStringValidation;
 using Application.Events;
 using Application.Exceptions;
 using Infrastructure.Settings;
@@ -36,7 +37,6 @@ using Infrastructure.Background;
 using Infrastructure.Assets.Loaders;
 using Core.Repositories;
 using Core.Exceptions;
-using Application.Orchestration.InputStringValidation;
 
 
 namespace Presentation;

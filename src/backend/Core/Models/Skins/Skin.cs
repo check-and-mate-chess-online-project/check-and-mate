@@ -4,6 +4,8 @@ namespace Core.Models.Skins;
 
 public class Skin(
     Guid setId, 
+    string name,
+    string? description,
     FigureType figure, 
     SkinRarity rarity, 
     byte[] whiteBoardImage, 
@@ -17,6 +19,8 @@ public class Skin(
 {
     public Guid Id { get; } = Guid.NewGuid();
     public Guid SetId { get; } = setId;
+    public string Name { get; } = name;
+    public string? Description { get; } = description;
     public FigureType Figure { get; } = figure;
     public SkinRarity Rarity { get; } = rarity;
     public byte[] WhiteBoardImage { get; } = whiteBoardImage;

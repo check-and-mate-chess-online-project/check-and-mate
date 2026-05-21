@@ -2,15 +2,15 @@ using Application.Services.Interfaces;
 using Application.Abstractions.UnitOfWork;
 using Application.Abstractions.Settings;
 using Application.Orchestration.GameSessions;
+using Application.Orchestration.RatingCalculation;
 using Application.Dtos;
 using Application.Mappers;
 using Application.Exceptions;
+using Application.Models;
 using Core.Repositories;
 using Core.Models.Chess;
 using Core.Models.Games;
 using Core.Models.Users;
-using Application.Models;
-using Application.Orchestration.RatingCalculation;
 
 namespace Application.Services;
 

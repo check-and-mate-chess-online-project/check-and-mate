@@ -4,13 +4,12 @@ using Application.Abstractions.Security;
 using Application.Abstractions.Tokens;
 using Application.Orchestration.SkinConfigurations;
 using Application.Orchestration.InputStringValidation;
+using Application.Orchestration.UserSkins;
 using Application.Dtos;
 using Application.Mappers;
 using Application.Exceptions;
 using Core.Repositories;
 using Core.Models.Users;
-using Application.Orchestration.UserSkins;
-using Core.Exceptions;
 
 namespace Application.Services;
 

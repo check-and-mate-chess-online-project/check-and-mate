@@ -27,6 +27,8 @@ public class DatabaseSeeder(IServiceScopeFactory scopeFactory) : IHostedService
             Skin skin = new
             (
                 skinSet.Id,
+                "",
+                "",
                 figure,
                 SkinRarity.Common,
                 assetsLoader.Load(figure, SkinImageType.WhiteBoard),
