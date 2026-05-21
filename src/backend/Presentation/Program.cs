@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Presentation.Hubs;
 using Presentation.Events.Handlers;
@@ -35,6 +36,7 @@ using Infrastructure.Events;
 using Infrastructure.Connections;
 using Infrastructure.Background;
 using Infrastructure.Assets.Loaders;
+using Infrastructure.Persistence.EfCore.Context;
 using Core.Repositories;
 using Core.Exceptions;
 
@@ -48,12 +50,8 @@ public class Program
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
         builder.Configuration.AddEnvironmentVariables(); 
-
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-
-        builder.Services.AddSwaggerGen();
-
         builder.Services.AddControllers();
         builder.Services.AddSignalR(hubOptions =>
         {
@@ -61,6 +59,9 @@ public class Program
             hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
             hubOptions.AddFilter<HubExceptionFilter>();
         });
+
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(builder.Configuration["PostgresConfig:ConnectionString"]));
 
         string key = builder.Configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("jwt key not found");
         if (key.Length < 32) throw new InvalidOperationException("jwt key too short");
