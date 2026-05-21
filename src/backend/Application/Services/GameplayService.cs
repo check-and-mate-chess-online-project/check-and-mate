@@ -113,7 +113,7 @@ public class GameplayService(
         RatingResult result = _calculator.CalculateRating(whitePlayer.Rating, blackPlayer.Rating, gameResult);
         whitePlayer.ChangeRating(result.WhiteRatingDelta);
         blackPlayer.ChangeRating(result.BlackRatingDelta);
-        _userRepos.Update(whitePlayer);
-        _userRepos.Update(blackPlayer);
+        await _userRepos.Update(whitePlayer);
+        await _userRepos.Update(blackPlayer);
     }
 }

@@ -45,7 +45,7 @@ public class SkinConfigurationService(
         SkinConfiguration configuration = await _configurationRepos.GetAsync(userId) ?? throw new InvalidOperationException($"configuration not exist");
         if (await _skinRepos.GetAsync(skinId) == null) throw new InvalidOperationException($"skin {skinId} not exist");
         configuration.ChangeFigureSkin(figure, skinId);
-        _configurationRepos.Update(configuration);
+        await _configurationRepos.Update(configuration);
         await _uow.CommitChangesAsync();
     }
 }

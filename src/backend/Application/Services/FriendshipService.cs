@@ -79,7 +79,7 @@ public class FriendshipService(
             throw new ConflictException($"friend request {requestId} already resolved");
         (Guid senderId, Guid receiverId) = FriendshipKey.Normalize(request.SenderId, request.ReceiverId);
         request.ChangeState(FriendRequestState.Accepted);
-        _requestRepos.Update(request);
+        await _requestRepos.Update(request);
         Friendship friendship = new(senderId, receiverId);
         _friendshipRepos.Add(friendship);
         await _uow.CommitChangesAsync();
@@ -92,7 +92,7 @@ public class FriendshipService(
         if (request.State != FriendRequestState.Pending) 
             throw new ConflictException($"friend request {requestId} already resolved");
         request.ChangeState(FriendRequestState.Rejected);
-        _requestRepos.Update(request);
+        await _requestRepos.Update(request);
         await _uow.CommitChangesAsync();
     }
 

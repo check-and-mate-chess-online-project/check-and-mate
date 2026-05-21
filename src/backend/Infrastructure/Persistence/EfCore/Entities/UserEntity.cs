@@ -24,4 +24,27 @@ public class UserEntity
     public ICollection<UserFigureSkinEntity> EquippedSkins { get; private set; } = [];
 
     private UserEntity() {}
+
+    public static UserEntity Create(
+        Guid id, 
+        string login, 
+        string passwordHash, 
+        string email, 
+        int rating, 
+        int balance, 
+        int lootBoxCount, 
+        int role, 
+        bool isDeleted) => new()
+    {
+
+        Id = id,
+        Login = login,
+        PasswordHash = passwordHash,
+        Email = email,
+        Rating = rating,
+        Balance = balance,
+        LootBoxCount = lootBoxCount,
+        Role = role,
+        IsDeleted = isDeleted 
+    };
 }

@@ -37,6 +37,8 @@ using Infrastructure.Connections;
 using Infrastructure.Background;
 using Infrastructure.Assets.Loaders;
 using Infrastructure.Persistence.EfCore.Context;
+using Infrastructure.Persistence.EfCore.Repositories;
+using Infrastructure.Persistence.EfCore.UnitOfWork;
 using Core.Repositories;
 using Core.Exceptions;
 
@@ -97,13 +99,13 @@ public class Program
         builder.Services.Configure<GameSettings>(builder.Configuration.GetSection("GameSettings"));
         builder.Services.AddSingleton<IGameSettingsProvider, GameSettingsProvider>();
 
-        builder.Services.AddSingleton<IGameRepository, GameRepository>();
-        builder.Services.AddSingleton<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IGameRepository, GameRepository>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<ISkinRepository, SkinRepository>();
         builder.Services.AddSingleton<ISkinSetRepository, SkinSetRepository>();
         builder.Services.AddSingleton<IUserSkinRepository, UserSkinRepository>();
         builder.Services.AddSingleton<IGameInvitationRepository, GameInvitationRepository>();
-        builder.Services.AddSingleton<IFriendRequestRepository, FriendRequestRepository>();
+        builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
         builder.Services.AddSingleton<IFriendshipRepository, FriendshipRepository>();
         builder.Services.AddSingleton<ISkinConfigurationRepository, SkinConfigurationRepository>();
 
@@ -120,7 +122,7 @@ public class Program
         builder.Services.AddSingleton<LoginValidator>();
         builder.Services.AddSingleton<PasswordValidator>();
         builder.Services.AddSingleton<EmailValidator>();
-        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddScoped<IUnitOfWork, AppUoW>();
         builder.Services.AddScoped<IUserSkinService, UserSkinService>();
         builder.Services.AddScoped<ISkinDropService, SkinDropService>();
         builder.Services.AddScoped<ISkinConfigurationService, SkinConfigurationService>();

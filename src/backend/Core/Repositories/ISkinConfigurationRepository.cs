@@ -6,5 +6,5 @@ public interface ISkinConfigurationRepository
 {
     Task<SkinConfiguration?> GetAsync(Guid userId);
     void Add(SkinConfiguration skinConfiguration);
-    void Update(SkinConfiguration skinConfiguration);
+    Task Update(SkinConfiguration skinConfiguration);
 }

@@ -9,5 +9,5 @@ public interface IGameInvitationRepository
     Task<List<GameInvitation>> GetByUserAsync(Guid userId);
     Task<List<GameInvitation>> GetPendingByUserAsync(Guid userId);
     void Add(GameInvitation invitation);
-    void Update(GameInvitation invitation);
+    Task Update(GameInvitation invitation);
 }

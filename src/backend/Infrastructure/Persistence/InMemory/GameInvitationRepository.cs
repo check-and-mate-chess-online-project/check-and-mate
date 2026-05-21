@@ -44,12 +44,13 @@ public class GameInvitationRepository : IGameInvitationRepository
         lock (_lock) _invitations.Add(invitation);
     }
 
-    public void Update(GameInvitation invitation)
+    public Task Update(GameInvitation invitation)
     {
         lock (_lock)
         {
             var index = _invitations.FindIndex(i => i.Id == invitation.Id);
             if (index != -1) _invitations[index] = invitation;
         }
+        return Task.CompletedTask;
     }
 }

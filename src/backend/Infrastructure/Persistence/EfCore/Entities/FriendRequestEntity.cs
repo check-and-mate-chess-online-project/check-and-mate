@@ -11,4 +11,12 @@ public class FriendRequestEntity
     public UserEntity Sender { get; private set; } = null!;
 
     private FriendRequestEntity() {}
+
+    public static FriendRequestEntity Create(Guid id, Guid senderId, Guid receiverId, int state) => new()
+    {
+        Id = id,
+        SenderId = senderId,
+        ReceiverId = receiverId,
+        State = state
+    };
 }

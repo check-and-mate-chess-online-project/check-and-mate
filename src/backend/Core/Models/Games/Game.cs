@@ -17,16 +17,22 @@ public class Game
     public ITimeControl TimeControl { get; }
     private readonly IChessEngine _engine;
 
-    public Game(Guid whitePlayerId, Guid blackPlayerId, IChessEngine engine, ITimeControl timeControl)
+    public Game(Guid whitePlayerId, Guid blackPlayerId,ITimeControl timeControl, IChessEngine engine) 
+        : this(Guid.NewGuid(), whitePlayerId, blackPlayerId, new PendingGameState(), timeControl, engine) {}
+
+    private Game(Guid id, Guid whitePlayerId, Guid blackPlayerId, IGameState state, ITimeControl timeControl, IChessEngine engine)
     {
         if (whitePlayerId == blackPlayerId) throw new CoreLogicException("players must be different");
-        Id = Guid.NewGuid();
+        Id = id;
         WhitePlayerId = whitePlayerId;
         BlackPlayerId = blackPlayerId;
-        State = new PendingGameState();
+        State = state;
         TimeControl = timeControl;
         _engine = engine;
     }
+
+    public static Game Restore(Guid id, Guid whitePlayerId, Guid blackPlayerId, ITimeControl timeControl, IChessEngine engine)
+        => new(id, whitePlayerId, blackPlayerId, new FinishedGameState(), timeControl, engine);
 
     public MoveResult MakeMove(Move move, Guid playerId) => State.MakeMove(this, move, playerId);
     

@@ -16,5 +16,5 @@ public class SkinConfigurationRepository : ISkinConfigurationRepository
 
     public void Add(SkinConfiguration skinConfiguration) => _store[skinConfiguration.UserId] = skinConfiguration;
 
-    public void Update(SkinConfiguration skinConfiguration) => _store[skinConfiguration.UserId] = skinConfiguration;
+    public Task Update(SkinConfiguration skinConfiguration) => Task.FromResult(_store[skinConfiguration.UserId] = skinConfiguration);
 }

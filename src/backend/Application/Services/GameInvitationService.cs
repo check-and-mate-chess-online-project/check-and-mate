@@ -68,7 +68,7 @@ public class GameInvitationService(
         if (invitation.State != GameInvitationState.Pending) 
             throw new ConflictException($"game invitation {invitationId} already resolved");
         invitation.ChangeState(GameInvitationState.Accepted);
-        _invitationRepos.Update(invitation);
+        await _invitationRepos.Update(invitation);
         Game game = _sessionService.Create(invitation.SenderId, invitation.ReceiverId, invitation.TimeControl);
         await _eventDispatcher.PublishAsync(new GameStarted(await GameMapper.ToDto(game, _userRepos)));
         await _uow.CommitChangesAsync();
@@ -82,7 +82,7 @@ public class GameInvitationService(
         if (invitation.State != GameInvitationState.Pending) 
             throw new ConflictException($"game invitation {invitationId} already resolved");
         invitation.ChangeState(GameInvitationState.Rejected);
-        _invitationRepos.Update(invitation);
+        await _invitationRepos.Update(invitation);
         await _uow.CommitChangesAsync();
         return await GameInvitationMapper.ToDto(invitation, _userRepos);
     }

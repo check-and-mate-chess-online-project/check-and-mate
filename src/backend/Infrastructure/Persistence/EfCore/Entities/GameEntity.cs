@@ -17,4 +17,28 @@ public class GameEntity
     public UserEntity BlackPlayer { get; private set; } = null!;
 
     private GameEntity() { }
+
+    public static GameEntity Create(
+        Guid id,
+        Guid whitePlayerId,
+        Guid blackPlayerId,
+        string? moves,
+        int? result,
+        int? terminationReason,
+        int? initialTimeSec,
+        int? incrementPerMoveSec,
+        DateTime? startTimeUtc,
+        DateTime? endTimeUtc) => new()
+    {
+        Id = id,
+        WhitePlayerId = whitePlayerId,
+        BlackPlayerId = blackPlayerId,
+        Moves = moves,
+        Result = result,
+        TerminationReason = terminationReason,
+        InitialTimeSec = initialTimeSec,
+        IncrementPerMoveSec = incrementPerMoveSec,
+        StartTimeUtc = startTimeUtc,
+        EndTimeUtc = endTimeUtc
+    };
 }

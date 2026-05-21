@@ -22,7 +22,7 @@ public class GameSessionService(IGameSessionStore sessionStore, IChessEngineFact
         if (_sessionStore.GetByPlayers(whitePlayerId, blackPlayerId) != null) 
             throw new ConflictException($"game session beetwen {whitePlayerId} and {blackPlayerId} already exist");
         IChessEngine engine = _factory.CreateEngine();
-        Game game = new(whitePlayerId, blackPlayerId, engine, timeControl);
+        Game game = new(whitePlayerId, blackPlayerId, timeControl, engine);
         _sessionStore.Add(game);
         return game;
     }
