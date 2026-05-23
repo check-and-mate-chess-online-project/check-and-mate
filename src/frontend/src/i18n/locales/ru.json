@@ -220,7 +220,8 @@
     },
     "shop": {
       "title": "Магазин",
-      "terminalSubtitle": "Орбитальный док",
+      "terminalSubtitle": "Доставка с орбиты",
+      "deckTitle": "Грузовой манифест",
       "caseTitle": "Кейс",
       "caseDescription": "Случайный скин с любой планеты",
       "amount": "Количество",

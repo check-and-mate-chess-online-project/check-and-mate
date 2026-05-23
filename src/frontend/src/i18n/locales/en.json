@@ -220,7 +220,8 @@
     },
     "shop": {
       "title": "Shop",
-      "terminalSubtitle": "Orbital trading dock",
+      "terminalSubtitle": "Orbital delivery",
+      "deckTitle": "Cargo manifest",
       "caseTitle": "Lootbox",
       "caseDescription": "Random skin from any planet",
       "amount": "Amount",

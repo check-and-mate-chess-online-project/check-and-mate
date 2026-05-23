@@ -7,6 +7,7 @@ import { ApiError } from '../shared/api/http'
 const PRICE_PER_CASE = 100
 const MIN_COUNT = 1
 const MAX_COUNT = 10
+const ORBIT_CYCLE = '12s'
 
 interface TwinkleStar {
   x: number
@@ -28,11 +29,40 @@ function generateTwinkleStars(count: number): TwinkleStar[] {
   }))
 }
 
-const THRUSTER_POSITIONS = [
+const BOTTOM_THRUSTERS = [
   { left: '32%', delay: '0s' },
   { left: '50%', delay: '0.12s' },
   { left: '68%', delay: '0.24s' },
 ]
+
+const FLAME_GRADIENT =
+  'radial-gradient(ellipse at 50% 0%, rgba(254,243,199,0.95) 0%, rgba(251,146,60,0.85) 22%, rgba(239,68,68,0.7) 50%, rgba(127,29,29,0.25) 80%, transparent 100%)'
+
+const SIDE_FLAME_GRADIENT =
+  'radial-gradient(ellipse at 0% 50%, rgba(254,243,199,0.95) 0%, rgba(251,146,60,0.85) 30%, rgba(239,68,68,0.65) 60%, rgba(127,29,29,0.2) 85%, transparent 100%)'
+
+function CornerBracket({
+  position,
+}: {
+  position: 'tl' | 'tr' | 'bl' | 'br'
+}) {
+  const base = 'absolute w-5 h-5 border-cyan-400/80 pointer-events-none'
+  const pos = {
+    tl: '-top-1 -left-1 border-t-2 border-l-2',
+    tr: '-top-1 -right-1 border-t-2 border-r-2',
+    bl: '-bottom-1 -left-1 border-b-2 border-l-2',
+    br: '-bottom-1 -right-1 border-b-2 border-r-2',
+  }[position]
+  return (
+    <div
+      aria-hidden
+      className={`${base} ${pos}`}
+      style={{
+        boxShadow: '0 0 8px rgba(34,211,238,0.5)',
+      }}
+    />
+  )
+}
 
 export function ShopPage() {
   const { t } = useTranslation()
@@ -101,10 +131,17 @@ export function ShopPage() {
         </p>
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center pr-0 lg:pr-[26rem]">
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          right: '4vw',
+          top: '50%',
+          transform: 'translateY(-50%)',
+        }}
+      >
         <div
           className="relative"
-          style={{ width: '55vh', height: '55vh', maxWidth: '80vw' }}
+          style={{ width: '62vh', height: '62vh', maxWidth: '50vw' }}
         >
           <div
             aria-hidden
@@ -112,7 +149,7 @@ export function ShopPage() {
             style={{
               background:
                 'radial-gradient(circle, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.04) 50%, transparent 75%)',
-              filter: 'blur(24px)',
+              filter: 'blur(28px)',
             }}
           />
           <div
@@ -123,8 +160,8 @@ export function ShopPage() {
               backgroundSize: 'contain',
               backgroundRepeat: 'no-repeat',
               backgroundPosition: 'center',
-              animation: 'planet-rotate 90s linear infinite',
-              filter: 'drop-shadow(0 0 28px rgba(56,189,248,0.25))',
+              animation: 'planet-rotate 120s linear infinite',
+              filter: 'drop-shadow(0 0 30px rgba(56,189,248,0.25))',
             }}
           />
 
@@ -133,26 +170,27 @@ export function ShopPage() {
             className="absolute inset-0 pointer-events-none"
             style={{
               transformOrigin: '50% 50%',
-              animation: 'orbit-swing 7s ease-in-out infinite',
+              animation: `orbit-swing ${ORBIT_CYCLE} ease-in-out infinite`,
             }}
           >
             <div
               className="absolute left-1/2 -translate-x-1/2"
-              style={{ top: '-6%' }}
+              style={{ top: '-22%' }}
             >
-              <div style={{ animation: 'orbit-dip 7s ease-in-out infinite' }}>
+              <div
+                style={{
+                  animation: `orbit-dip ${ORBIT_CYCLE} ease-in-out infinite`,
+                }}
+              >
                 <div
                   style={{
-                    animation: 'counter-swing 7s ease-in-out infinite',
-                    transformOrigin: 'center',
+                    animation: `thrust-shake ${ORBIT_CYCLE} linear infinite`,
                   }}
                 >
-                  <div
-                    style={{ animation: 'bob 2.6s ease-in-out infinite' }}
-                  >
+                  <div style={{ animation: 'bob 2.6s ease-in-out infinite' }}>
                     <div
                       className="relative"
-                      style={{ width: '180px' }}
+                      style={{ width: '210px' }}
                     >
                       <img
                         src="/boat.webp"
@@ -160,7 +198,7 @@ export function ShopPage() {
                         draggable={false}
                         className="block w-full h-auto"
                       />
-                      {THRUSTER_POSITIONS.map((p, i) => (
+                      {BOTTOM_THRUSTERS.map((p, i) => (
                         <div
                           key={i}
                           aria-hidden
@@ -171,13 +209,41 @@ export function ShopPage() {
                             width: '12%',
                             height: '34%',
                             transformOrigin: 'top',
-                            background:
-                              'radial-gradient(ellipse at 50% 0%, rgba(254,243,199,0.95) 0%, rgba(251,146,60,0.85) 22%, rgba(239,68,68,0.7) 50%, rgba(127,29,29,0.25) 80%, transparent 100%)',
+                            background: FLAME_GRADIENT,
                             filter: 'blur(2px)',
-                            animation: `thruster-fire 7s ease-in-out ${p.delay} infinite`,
+                            animation: `thruster-fire ${ORBIT_CYCLE} ease-in-out ${p.delay} infinite`,
                           }}
                         />
                       ))}
+                      <div
+                        aria-hidden
+                        className="absolute pointer-events-none"
+                        style={{
+                          top: '50%',
+                          right: '94%',
+                          width: '22%',
+                          height: '10%',
+                          transformOrigin: 'right center',
+                          background: SIDE_FLAME_GRADIENT,
+                          transform: 'scaleX(-1) translateY(-50%)',
+                          filter: 'blur(2px)',
+                          animation: `side-thrust-right ${ORBIT_CYCLE} ease-in-out infinite`,
+                        }}
+                      />
+                      <div
+                        aria-hidden
+                        className="absolute pointer-events-none"
+                        style={{
+                          top: '50%',
+                          left: '94%',
+                          width: '22%',
+                          height: '10%',
+                          transformOrigin: 'left center',
+                          background: SIDE_FLAME_GRADIENT,
+                          filter: 'blur(2px)',
+                          animation: `side-thrust-left ${ORBIT_CYCLE} ease-in-out infinite`,
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -187,66 +253,100 @@ export function ShopPage() {
         </div>
       </div>
 
-      <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-[min(90vw,24rem)]">
-        <div className="bg-slate-950/85 backdrop-blur border border-violet-800/70 rounded-lg px-6 py-6 shadow-[0_0_28px_rgba(56,189,248,0.18)]">
-          <div className="mb-5">
-            <div className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
-              {t('pages.shop.amount')}
-            </div>
-            <div className="font-display text-5xl text-violet-200 tabular-nums leading-none mt-2">
-              ×{count}
-            </div>
-          </div>
+      <div
+        className="absolute z-20 w-[min(92vw,24rem)]"
+        style={{
+          left: '32%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <div className="relative">
+          <CornerBracket position="tl" />
+          <CornerBracket position="tr" />
+          <CornerBracket position="bl" />
+          <CornerBracket position="br" />
 
-          <input
-            type="range"
-            min={MIN_COUNT}
-            max={MAX_COUNT}
-            value={count}
-            onChange={(e) => setCount(Number(e.target.value))}
-            className="w-full accent-violet-500 mb-2 cursor-pointer"
-          />
-          <div className="flex justify-between text-[10px] font-mono text-slate-500 mb-6">
-            <span>{MIN_COUNT}</span>
-            <span>{MAX_COUNT}</span>
-          </div>
-
-          <div className="border-t border-slate-800 pt-4 mb-5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
-                {t('pages.shop.total')}
-              </span>
-              <span
-                className={`font-display text-3xl tabular-nums leading-none ${
-                  notEnough ? 'text-red-400' : 'text-yellow-300'
-                }`}
-                style={
-                  notEnough
-                    ? undefined
-                    : { textShadow: '0 0 10px rgba(250,204,21,0.45)' }
-                }
-              >
-                {total} ◈
+          <div className="bg-slate-950/85 backdrop-blur border border-violet-800/50 rounded-md px-6 pt-3 pb-6 shadow-[0_0_36px_rgba(34,211,238,0.12)]">
+            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.3em] text-cyan-400/80 border-b border-cyan-500/20 pb-2 mb-5">
+              <span>{t('pages.shop.deckTitle')}</span>
+              <span className="flex items-center gap-1.5">
+                <span
+                  className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"
+                  style={{
+                    boxShadow: '0 0 6px rgba(52,211,153,0.9)',
+                    animation: 'twinkle 1.6s ease-in-out infinite',
+                  }}
+                />
+                <span className="text-emerald-300/80">ONLINE</span>
               </span>
             </div>
-          </div>
 
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={handleBuy}
-            className={
-              disabled
-                ? 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                : 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-400 hover:to-orange-600 text-slate-50 shadow-lg shadow-orange-900/40 transition-colors'
-            }
-          >
-            {notEnough
-              ? t('pages.shop.notEnoughBalance')
-              : purchasing
-                ? '…'
-                : t('pages.shop.purchase')}
-          </button>
+            <div className="mb-2">
+              <div className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
+                {t('pages.shop.amount')}
+              </div>
+              <div className="font-display text-6xl text-violet-100 tabular-nums leading-none mt-1">
+                ×{count}
+              </div>
+            </div>
+
+            <input
+              type="range"
+              min={MIN_COUNT}
+              max={MAX_COUNT}
+              value={count}
+              onChange={(e) => setCount(Number(e.target.value))}
+              className="w-full accent-violet-500 mb-1 cursor-pointer mt-3"
+            />
+            <div className="flex justify-between text-[10px] font-mono text-slate-600 mb-5">
+              {Array.from({ length: MAX_COUNT }, (_, i) => i + 1).map((n) => (
+                <span
+                  key={n}
+                  className={n === count ? 'text-violet-300' : ''}
+                >
+                  {n}
+                </span>
+              ))}
+            </div>
+
+            <div className="border-t border-slate-800 pt-4 mb-5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
+                  {t('pages.shop.total')}
+                </span>
+                <span
+                  className={`font-display text-3xl tabular-nums leading-none ${
+                    notEnough ? 'text-red-400' : 'text-yellow-300'
+                  }`}
+                  style={
+                    notEnough
+                      ? undefined
+                      : { textShadow: '0 0 10px rgba(250,204,21,0.45)' }
+                  }
+                >
+                  {total} ◈
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={handleBuy}
+              className={
+                disabled
+                  ? 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                  : 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-400 hover:to-orange-600 text-slate-50 shadow-lg shadow-orange-900/40 transition-colors'
+              }
+            >
+              {notEnough
+                ? t('pages.shop.notEnoughBalance')
+                : purchasing
+                  ? '…'
+                  : t('pages.shop.purchase')}
+            </button>
+          </div>
         </div>
       </div>
     </div>
