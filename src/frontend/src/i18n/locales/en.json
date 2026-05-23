@@ -163,7 +163,11 @@
     },
     "userProfile": {
       "title": "User profile",
-      "label": "Player profile"
+      "label": "Player profile",
+      "notFound": "User not found",
+      "rating": "Rating",
+      "balance": "Balance",
+      "lootboxes": "Lootboxes"
     },
     "inventory": {
       "title": "Planets",

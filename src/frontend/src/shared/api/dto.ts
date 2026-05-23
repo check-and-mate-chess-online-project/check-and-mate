@@ -69,7 +69,7 @@ export interface MoveDto {
 export interface PlyDto {
   moveNumber: number
   color: PlayerColor
-  coordinates: MoveDto[]
+  move: MoveDto
 }
 
 export interface MoveOptionsDto {
@@ -105,6 +105,8 @@ export interface PlanetDto {
 export interface SkinDto {
   id: Guid
   setId: Guid
+  name: string
+  description: string | null
   figure: FigureType
   rarity: SkinRarity
   whiteBoardImage: string
@@ -115,6 +117,10 @@ export interface SkinDto {
   endFightWinImage: string
   endFightLoseImage: string
   isDefault: boolean
+}
+
+export interface SkinConfigurationDto {
+  userFigureSkins: Record<number, SkinDto>
 }
 
 export interface GameInvitationDto {

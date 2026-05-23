@@ -1,17 +1,6 @@
 import { http, HttpResponse } from 'msw'
-import type { SkinDto, UserDto } from '../shared/api'
-import { FigureType, SkinRarity, UserRole } from '../shared/api'
-
-const mockUser: UserDto = {
-  id: '00000000-0000-0000-0000-000000000001',
-  login: 'mockuser',
-  email: 'mock@example.com',
-  rating: 1500,
-  balance: 1000,
-  lootBoxCount: 3,
-  role: UserRole.Player,
-  isDeleted: false,
-}
+import type { SkinDto } from '../shared/api'
+import { FigureType, SkinRarity } from '../shared/api'
 
 const PLANETS = [
   { id: 'earth', name: 'Earth', imageUrl: '/planets/earth_big.webp' },
@@ -32,6 +21,8 @@ const PLANET_SKINS: SkinDto[] = [
   {
     id: 'gagarin-king',
     setId: 'earth',
+    name: 'Gagarin',
+    description: null,
     figure: FigureType.King,
     rarity: SkinRarity.Legendary,
     ...EMPTY_SKIN_ASSETS,
@@ -41,6 +32,8 @@ const PLANET_SKINS: SkinDto[] = [
   {
     id: 'magnus-pawn',
     setId: 'earth',
+    name: 'Magnus',
+    description: null,
     figure: FigureType.Pawn,
     rarity: SkinRarity.Common,
     ...EMPTY_SKIN_ASSETS,
@@ -50,6 +43,8 @@ const PLANET_SKINS: SkinDto[] = [
   ...(['queen', 'rook', 'bishop', 'knight'] as const).map((f, i) => ({
     id: `earth-${f}-locked`,
     setId: 'earth',
+    name: `Earth ${f}`,
+    description: null,
     figure: (i + 2) as FigureType,
     rarity: (i % 2 === 0 ? SkinRarity.Rare : SkinRarity.Common) as SkinRarity,
     ...EMPTY_SKIN_ASSETS,
@@ -59,6 +54,8 @@ const PLANET_SKINS: SkinDto[] = [
     (f, i) => ({
       id: `mars-${f}-locked`,
       setId: 'mars',
+      name: `Mars ${f}`,
+      description: null,
       figure: (i + 1) as FigureType,
       rarity: (i % 3 === 0
         ? SkinRarity.Legendary
@@ -120,24 +117,6 @@ export const handlers = [
       skin: random,
       isDuplicate: Math.random() > 0.4,
     })
-  }),
-
-  // нет на бэке: чужой профиль
-  http.get('/api/users/:userId', ({ request, params }) => {
-    const denied = requireAuth(request)
-    if (denied) return denied
-    return HttpResponse.json({
-      ...mockUser,
-      id: params.userId,
-      login: `player-${String(params.userId).slice(0, 6)}`,
-    })
-  }),
-
-  // нет на бэке: партия по id
-  http.get('/api/games/:gameId', ({ request }) => {
-    const denied = requireAuth(request)
-    if (denied) return denied
-    return new HttpResponse(null, { status: 404 })
   }),
 
 ]

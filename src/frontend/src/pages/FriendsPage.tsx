@@ -43,10 +43,9 @@ export function FriendsPage() {
   const deleteFriend = useDeleteFriend()
   const [tab, setTab] = useState<Tab>('friends')
   const [search, setSearch] = useState('')
-  const [inviteTarget, setInviteTarget] = useState<{
-    login?: string
-    id?: Guid
-  } | null>(null)
+  const [inviteTarget, setInviteTarget] = useState<{ login: string } | null>(
+    null,
+  )
 
   const tabs: Tab[] = ['friends', 'incoming', 'outgoing', 'invitations']
 
@@ -117,9 +116,7 @@ export function FriendsPage() {
       {tab === 'friends' && (
         <FriendsList
           friends={friendsQuery.data ?? []}
-          onInvite={(friend) =>
-            setInviteTarget({ id: friend.id, login: friend.login })
-          }
+          onInvite={(friend) => setInviteTarget({ login: friend.login })}
           onRemove={(id) =>
             deleteFriend.mutate(id, {
               onError: (e) =>

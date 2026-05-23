@@ -7,6 +7,7 @@ import type {
   Guid,
   LootBoxDropResultDto,
   PlanetDto,
+  SkinConfigurationDto,
   SkinDto,
   UserDto,
   UserPublicDto,
@@ -43,11 +44,26 @@ export function useDeleteAccount() {
   })
 }
 
-export function useUserProfile(id: Guid) {
+export function useUserProfile(login: string) {
   return useQuery({
-    queryKey: ['user', id],
-    queryFn: () => api.get<UserDto>(`/api/users/${id}`),
-    enabled: !!id,
+    queryKey: ['user', login],
+    queryFn: () => api.get<UserPublicDto>(`/api/profile/${login}`),
+    enabled: !!login,
+  })
+}
+
+export function useUserSkins(login: string) {
+  return useQuery({
+    queryKey: ['user-skins', login],
+    queryFn: () => api.get<SkinDto[]>(`/api/inventory/skins/${login}`),
+    enabled: !!login,
+  })
+}
+
+export function useSkinConfiguration() {
+  return useQuery({
+    queryKey: ['skin-configuration'],
+    queryFn: () => api.get<SkinConfigurationDto>('/api/inventory/skins/current'),
   })
 }
 
@@ -110,14 +126,6 @@ export function useGameHistory() {
   })
 }
 
-export function useGame(id: Guid) {
-  return useQuery({
-    queryKey: ['games', id],
-    queryFn: () => api.get<GameDto>(`/api/games/${id}`),
-    enabled: !!id,
-  })
-}
-
 export function useFriendsList() {
   return useQuery({
     queryKey: ['friends', 'list'],
@@ -135,7 +143,7 @@ export function useFriendRequests() {
 export function useSendFriendRequest() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (body: { receiverId?: Guid; receiverLogin?: string }) =>
+    mutationFn: (body: { receiverLogin: string }) =>
       api.post<FriendRequestDto>('/api/friends/requests', body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['friends', 'requests'] }),
   })

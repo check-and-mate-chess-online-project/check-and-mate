@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import type { Guid } from '../api'
 import { ApiError } from '../api/http'
 import { gameHub } from '../realtime/gameHub'
 
@@ -20,7 +19,7 @@ const TIME_CONTROLS: TimeControlOption[] = [
 ]
 
 interface Props {
-  target: { login?: string; id?: Guid }
+  target: { login: string }
   onClose: () => void
 }
 
@@ -35,7 +34,6 @@ export function InviteToGameModal({ target, onClose }: Props) {
     setSending(true)
     try {
       await gameHub.sendGameInvitation({
-        receiverId: target.id,
         receiverLogin: target.login,
         timeControlIsEnabled: true,
         initialTimeSec: config.initialSec,
@@ -60,7 +58,7 @@ export function InviteToGameModal({ target, onClose }: Props) {
       >
         <h2 className="text-xl mb-1">{t('pages.friends.inviteTitle')}</h2>
         <p className="text-sm text-slate-400 mb-4 font-mono">
-          {target.login ?? target.id?.slice(0, 8) ?? ''}
+          {target.login}
         </p>
 
         <div className="text-sm uppercase tracking-wider text-slate-500 mb-2">

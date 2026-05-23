@@ -48,7 +48,7 @@ function plyToChessMove(ply: PlyDto): {
   to: string
   promotion?: 'q' | 'r' | 'b' | 'n'
 } | null {
-  const coord: MoveDto | undefined = ply.coordinates[0]
+  const coord: MoveDto | undefined = ply.move
   if (!coord) return null
   return {
     from: coordToSquare(coord.a, coord.b),

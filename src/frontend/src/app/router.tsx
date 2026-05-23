@@ -50,7 +50,7 @@ export const router = createBrowserRouter([
           { path: '/history', element: <HistoryPage /> },
           { path: '/history/:gameId', element: <ReplayPage /> },
           { path: '/profile', element: <MyProfilePage /> },
-          { path: '/profile/:userId', element: <UserProfilePage /> },
+          { path: '/profile/:login', element: <UserProfilePage /> },
           { path: '/debug/board', element: <DebugBoardPage /> },
         ],
       },
