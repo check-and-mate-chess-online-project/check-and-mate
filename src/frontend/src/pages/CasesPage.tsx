@@ -185,6 +185,14 @@ export function CasesPage() {
 
   return (
     <div className="fixed left-0 right-0 top-[81px] bottom-0 z-10 bg-black overflow-hidden">
+      <img
+        src="/boat.webp"
+        alt=""
+        aria-hidden
+        decoding="sync"
+        className="absolute pointer-events-none"
+        style={{ width: 1, height: 1, opacity: 0, top: 0, left: 0 }}
+      />
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {stars.map((s, i) => (
           <div
@@ -326,10 +334,10 @@ export function CasesPage() {
         {phase === 'descent' && drop && (
           <motion.div
             key="descent"
-            initial={{ opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
           >
             <div className="relative w-[min(90vw,72rem)] aspect-[16/9]">
