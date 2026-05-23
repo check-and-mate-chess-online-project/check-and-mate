@@ -126,6 +126,8 @@ export function CasesPage() {
 
   useEffect(() => {
     const id = window.setTimeout(() => setShipEntered(true), 1100)
+    const preload = new Image()
+    preload.src = '/boat.webp'
     return () => window.clearTimeout(id)
   }, [])
 
@@ -364,6 +366,7 @@ export function CasesPage() {
                 </motion.div>
 
                 <motion.div
+                  initial={{ y: 0 }}
                   animate={{ y: [0, -6, 0] }}
                   transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
                   className="relative"
