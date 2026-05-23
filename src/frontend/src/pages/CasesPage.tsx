@@ -137,6 +137,7 @@ export function CasesPage() {
   const palette = drop ? RARITY[drop.skin.rarity] : RARITY[SkinRarity.Common]
   const shipLifted =
     phase === 'descent' || phase === 'whiteflash' || phase === 'reveal'
+  const descentVisible = phase === 'descent' || phase === 'whiteflash'
 
   const clearScheduled = () => {
     timeoutsRef.current.forEach((id) => window.clearTimeout(id))
@@ -211,34 +212,29 @@ export function CasesPage() {
         ))}
       </div>
 
-      <AnimatePresence>
-        {phase === 'descent' && (
-          <motion.div
-            key="ascend-stars"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="absolute inset-0 overflow-hidden pointer-events-none"
-          >
-            {ascendStars.map((s, i) => (
-              <div
-                key={i}
-                className="absolute rounded-full bg-white"
-                style={{
-                  left: `${s.x}%`,
-                  top: `${s.startY}%`,
-                  width: s.size,
-                  height: s.size,
-                  opacity: s.opacity,
-                  animation: `ascend-star ${s.duration}s linear ${s.delay}s infinite`,
-                  boxShadow: `0 0 ${s.size * 3}px rgba(255,255,255,${s.opacity * 0.5})`,
-                }}
-              />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div
+        className="absolute inset-0 overflow-hidden pointer-events-none"
+        style={{
+          opacity: descentVisible ? 1 : 0,
+          transition: 'opacity 0.25s linear',
+        }}
+      >
+        {ascendStars.map((s, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-white"
+            style={{
+              left: `${s.x}%`,
+              top: `${s.startY}%`,
+              width: s.size,
+              height: s.size,
+              opacity: s.opacity,
+              animation: `ascend-star ${s.duration}s linear ${s.delay}s infinite`,
+              boxShadow: `0 0 ${s.size * 3}px rgba(255,255,255,${s.opacity * 0.5})`,
+            }}
+          />
+        ))}
+      </div>
 
       <motion.div
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
@@ -330,91 +326,89 @@ export function CasesPage() {
         </div>
       </motion.div>
 
-      <AnimatePresence>
-        {phase === 'descent' && drop && (
-          <motion.div
-            key="descent"
-            initial={false}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          >
-            <div className="relative w-[min(90vw,72rem)] aspect-[16/9]">
-              <div className="absolute left-1/2 top-[88%] -translate-x-1/2 -translate-y-1/2">
-                <motion.div
-                  aria-hidden
-                  initial={{ opacity: 0, scaleY: 0 }}
-                  animate={{ opacity: 1, scaleY: 1 }}
-                  transition={{ delay: 1.0, duration: 0.6, ease: 'easeOut' }}
-                  style={{ transformOrigin: 'bottom' }}
-                  className="absolute left-1/2 bottom-full -translate-x-1/2 w-[80px] h-[140vh] pointer-events-none"
-                >
-                  <div
-                    aria-hidden
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        'linear-gradient(to top, rgba(210,210,215,0.9) 0%, rgba(160,160,170,0.55) 30%, rgba(120,120,130,0.18) 70%, transparent 100%)',
-                      filter: 'blur(8px)',
-                    }}
-                  />
-                  <motion.div
-                    aria-hidden
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.4, duration: 0.6, ease: 'easeIn' }}
-                    className="absolute inset-0"
-                    style={{
-                      background: `linear-gradient(to top, ${palette.glow} 0%, ${palette.trail} 35%, rgba(0,0,0,0) 90%)`,
-                      filter: 'blur(10px)',
-                      mixBlendMode: 'screen',
-                    }}
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ y: 0 }}
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
-                  className="relative"
-                >
-                  <div
-                    aria-hidden
-                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[210px] h-[210px] pointer-events-none"
-                    style={{
-                      background:
-                        'radial-gradient(circle at 50% 62%, rgba(224,242,254,0.9) 0%, rgba(56,189,248,0.65) 18%, rgba(37,99,235,0.35) 38%, transparent 60%)',
-                      filter: 'blur(8px)',
-                      animation: 'burn-flicker 0.18s ease-in-out infinite alternate',
-                    }}
-                  />
-                  <div
-                    aria-hidden
-                    className="absolute left-1/2 top-[92%] -translate-x-1/2 w-[140px] h-[90px] pointer-events-none"
-                    style={{
-                      background:
-                        'radial-gradient(ellipse at 50% 0%, rgba(240,249,255,0.95) 0%, rgba(56,189,248,0.7) 25%, rgba(37,99,235,0.4) 55%, transparent 80%)',
-                      filter: 'blur(5px)',
-                      animation: 'burn-flicker 0.12s ease-in-out infinite alternate',
-                    }}
-                  />
-                  <img
-                    src="/boat.webp"
-                    alt=""
-                    draggable={false}
-                    className="relative w-[170px] h-auto"
-                    style={{
-                      filter:
-                        'drop-shadow(0 0 4px rgba(224,242,254,0.9)) drop-shadow(0 0 12px rgba(56,189,248,0.85)) drop-shadow(0 0 24px rgba(37,99,235,0.7))',
-                    }}
-                  />
-                </motion.div>
-              </div>
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        style={{
+          opacity: descentVisible ? 1 : 0,
+          transition: 'opacity 0.25s linear',
+        }}
+      >
+        <div className="relative w-[min(90vw,72rem)] aspect-[16/9]">
+          <div className="absolute left-1/2 top-[88%] -translate-x-1/2 -translate-y-1/2">
+            <div
+              aria-hidden
+              className="absolute left-1/2 bottom-full w-[80px] h-[140vh] pointer-events-none"
+              style={{
+                transformOrigin: 'bottom',
+                transform: `translateX(-50%) scaleY(${descentVisible ? 1 : 0})`,
+                opacity: descentVisible ? 1 : 0,
+                transition: descentVisible
+                  ? 'transform 0.6s ease-out 1.0s, opacity 0.6s ease-out 1.0s'
+                  : 'transform 0.2s linear, opacity 0.2s linear',
+              }}
+            >
+              <div
+                aria-hidden
+                className="absolute inset-0"
+                style={{
+                  background:
+                    'linear-gradient(to top, rgba(210,210,215,0.9) 0%, rgba(160,160,170,0.55) 30%, rgba(120,120,130,0.18) 70%, transparent 100%)',
+                  filter: 'blur(8px)',
+                }}
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(to top, ${palette.glow} 0%, ${palette.trail} 35%, rgba(0,0,0,0) 90%)`,
+                  filter: 'blur(10px)',
+                  mixBlendMode: 'screen',
+                  opacity: descentVisible ? 1 : 0,
+                  transition: descentVisible
+                    ? 'opacity 0.6s ease-in 1.4s'
+                    : 'opacity 0.2s linear',
+                }}
+              />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+            <div
+              className="relative"
+              style={{ animation: 'bob 1.2s ease-in-out infinite' }}
+            >
+              <div
+                aria-hidden
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[210px] h-[210px] pointer-events-none"
+                style={{
+                  background:
+                    'radial-gradient(circle at 50% 62%, rgba(224,242,254,0.9) 0%, rgba(56,189,248,0.65) 18%, rgba(37,99,235,0.35) 38%, transparent 60%)',
+                  filter: 'blur(8px)',
+                  animation: 'burn-flicker 0.18s ease-in-out infinite alternate',
+                }}
+              />
+              <div
+                aria-hidden
+                className="absolute left-1/2 top-[92%] -translate-x-1/2 w-[140px] h-[90px] pointer-events-none"
+                style={{
+                  background:
+                    'radial-gradient(ellipse at 50% 0%, rgba(240,249,255,0.95) 0%, rgba(56,189,248,0.7) 25%, rgba(37,99,235,0.4) 55%, transparent 80%)',
+                  filter: 'blur(5px)',
+                  animation: 'burn-flicker 0.12s ease-in-out infinite alternate',
+                }}
+              />
+              <img
+                src="/boat.webp"
+                alt=""
+                draggable={false}
+                className="relative w-[170px] h-auto"
+                style={{
+                  filter:
+                    'drop-shadow(0 0 4px rgba(224,242,254,0.9)) drop-shadow(0 0 12px rgba(56,189,248,0.85)) drop-shadow(0 0 24px rgba(37,99,235,0.7))',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
       <AnimatePresence>
         {phase === 'idle' && (
