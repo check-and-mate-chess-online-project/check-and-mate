@@ -101,18 +101,18 @@ export function ShopPage() {
         </p>
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center pr-0 lg:pr-[28rem]">
+      <div className="absolute inset-0 flex items-center justify-center pr-0 lg:pr-[26rem]">
         <div
           className="relative"
-          style={{ width: '82vh', height: '82vh', maxWidth: '90vw' }}
+          style={{ width: '55vh', height: '55vh', maxWidth: '80vw' }}
         >
           <div
             aria-hidden
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                'radial-gradient(circle, rgba(56,189,248,0.2) 0%, rgba(56,189,248,0.05) 50%, transparent 75%)',
-              filter: 'blur(28px)',
+                'radial-gradient(circle, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.04) 50%, transparent 75%)',
+              filter: 'blur(24px)',
             }}
           />
           <div
@@ -124,47 +124,63 @@ export function ShopPage() {
               backgroundRepeat: 'no-repeat',
               backgroundPosition: 'center',
               animation: 'planet-rotate 90s linear infinite',
-              filter: 'drop-shadow(0 0 40px rgba(56,189,248,0.3))',
+              filter: 'drop-shadow(0 0 28px rgba(56,189,248,0.25))',
             }}
           />
 
           <div
-            className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
-            style={{ top: '-10%' }}
+            aria-hidden
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              transformOrigin: '50% 50%',
+              animation: 'orbit-swing 7s ease-in-out infinite',
+            }}
           >
-            <div style={{ animation: 'bob 2.6s ease-in-out infinite' }}>
-              <div
-                className="relative"
-                style={{ width: '240px' }}
-              >
-                <img
-                  src="/boat.webp"
-                  alt=""
-                  draggable={false}
-                  className="block w-full h-auto"
+            <div
+              className="absolute left-1/2 -translate-x-1/2"
+              style={{ top: '-6%' }}
+            >
+              <div style={{ animation: 'orbit-dip 7s ease-in-out infinite' }}>
+                <div
                   style={{
-                    filter:
-                      'drop-shadow(0 0 8px rgba(254,202,202,0.85)) drop-shadow(0 0 22px rgba(239,68,68,0.55))',
+                    animation: 'counter-swing 7s ease-in-out infinite',
+                    transformOrigin: 'center',
                   }}
-                />
-                {THRUSTER_POSITIONS.map((p, i) => (
+                >
                   <div
-                    key={i}
-                    aria-hidden
-                    className="absolute pointer-events-none"
-                    style={{
-                      left: p.left,
-                      bottom: '-6%',
-                      width: '12%',
-                      height: '34%',
-                      transformOrigin: 'top',
-                      background:
-                        'radial-gradient(ellipse at 50% 0%, rgba(254,243,199,0.95) 0%, rgba(251,146,60,0.85) 22%, rgba(239,68,68,0.7) 50%, rgba(127,29,29,0.25) 80%, transparent 100%)',
-                      filter: 'blur(2px)',
-                      animation: `thruster-pulse 0.55s ease-in-out ${p.delay} infinite`,
-                    }}
-                  />
-                ))}
+                    style={{ animation: 'bob 2.6s ease-in-out infinite' }}
+                  >
+                    <div
+                      className="relative"
+                      style={{ width: '180px' }}
+                    >
+                      <img
+                        src="/boat.webp"
+                        alt=""
+                        draggable={false}
+                        className="block w-full h-auto"
+                      />
+                      {THRUSTER_POSITIONS.map((p, i) => (
+                        <div
+                          key={i}
+                          aria-hidden
+                          className="absolute pointer-events-none"
+                          style={{
+                            left: p.left,
+                            bottom: '-6%',
+                            width: '12%',
+                            height: '34%',
+                            transformOrigin: 'top',
+                            background:
+                              'radial-gradient(ellipse at 50% 0%, rgba(254,243,199,0.95) 0%, rgba(251,146,60,0.85) 22%, rgba(239,68,68,0.7) 50%, rgba(127,29,29,0.25) 80%, transparent 100%)',
+                            filter: 'blur(2px)',
+                            animation: `thruster-fire 7s ease-in-out ${p.delay} infinite`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

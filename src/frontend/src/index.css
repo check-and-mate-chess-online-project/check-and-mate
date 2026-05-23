@@ -123,3 +123,105 @@ h3 {
     transform: translateX(-50%) scaleY(1);
   }
 }
+
+@keyframes orbit-swing {
+  0% {
+    transform: rotate(0deg);
+  }
+  18% {
+    transform: rotate(45deg);
+  }
+  32% {
+    transform: rotate(45deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  68% {
+    transform: rotate(-45deg);
+  }
+  82% {
+    transform: rotate(-45deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes counter-swing {
+  0% {
+    transform: rotate(0deg);
+  }
+  18% {
+    transform: rotate(-45deg);
+  }
+  32% {
+    transform: rotate(-45deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  68% {
+    transform: rotate(45deg);
+  }
+  82% {
+    transform: rotate(45deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes orbit-dip {
+  0%,
+  18% {
+    transform: translateY(0);
+  }
+  26% {
+    transform: translateY(22px);
+  }
+  34% {
+    transform: translateY(0);
+  }
+  50%,
+  68% {
+    transform: translateY(0);
+  }
+  76% {
+    transform: translateY(22px);
+  }
+  84% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes thruster-fire {
+  0%,
+  22% {
+    opacity: 0.08;
+    transform: translateX(-50%) scaleY(0.25);
+  }
+  28%,
+  34% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1);
+  }
+  44%,
+  72% {
+    opacity: 0.08;
+    transform: translateX(-50%) scaleY(0.25);
+  }
+  78%,
+  84% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1);
+  }
+  94%,
+  100% {
+    opacity: 0.08;
+    transform: translateX(-50%) scaleY(0.25);
+  }
+}
