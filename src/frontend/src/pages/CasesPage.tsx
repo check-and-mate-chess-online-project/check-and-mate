@@ -394,7 +394,8 @@ export function CasesPage() {
                     draggable={false}
                     className="relative w-[170px] h-auto"
                     style={{
-                      filter: `drop-shadow(0 0 4px rgba(255,237,213,0.9)) drop-shadow(0 0 12px rgba(251,146,60,0.85)) drop-shadow(0 0 24px rgba(220,38,38,0.65)) drop-shadow(0 0 38px ${palette.glow})`,
+                      filter:
+                        'drop-shadow(0 0 4px rgba(255,237,213,0.9)) drop-shadow(0 0 12px rgba(251,146,60,0.85)) drop-shadow(0 0 24px rgba(220,38,38,0.65))',
                     }}
                   />
                 </motion.div>
