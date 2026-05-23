@@ -28,6 +28,12 @@ function generateTwinkleStars(count: number): TwinkleStar[] {
   }))
 }
 
+const THRUSTER_POSITIONS = [
+  { left: '32%', delay: '0s' },
+  { left: '50%', delay: '0.12s' },
+  { left: '68%', delay: '0.24s' },
+]
+
 export function ShopPage() {
   const { t } = useTranslation()
   const { data: me } = useMe()
@@ -95,130 +101,84 @@ export function ShopPage() {
         </p>
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center pr-0 lg:pr-[28rem]">
         <div
           className="relative"
-          style={{ width: '60vh', height: '60vh' }}
+          style={{ width: '82vh', height: '82vh', maxWidth: '90vw' }}
         >
           <div
             aria-hidden
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                'radial-gradient(circle, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.05) 50%, transparent 75%)',
-              filter: 'blur(20px)',
+                'radial-gradient(circle, rgba(56,189,248,0.2) 0%, rgba(56,189,248,0.05) 50%, transparent 75%)',
+              filter: 'blur(28px)',
             }}
           />
           <div
             aria-hidden
             className="absolute inset-0"
             style={{
-              backgroundImage:
-                'url(/planets/case-planetwebp.webp)',
+              backgroundImage: 'url(/planets/case-planetwebp.webp)',
               backgroundSize: 'contain',
               backgroundRepeat: 'no-repeat',
               backgroundPosition: 'center',
               animation: 'planet-rotate 90s linear infinite',
-              filter: 'drop-shadow(0 0 30px rgba(56,189,248,0.25))',
+              filter: 'drop-shadow(0 0 40px rgba(56,189,248,0.3))',
             }}
           />
 
           <div
             className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
-            style={{ top: '-12%' }}
+            style={{ top: '-10%' }}
           >
             <div style={{ animation: 'bob 2.6s ease-in-out infinite' }}>
-              <div className="relative">
+              <div
+                className="relative"
+                style={{ width: '240px' }}
+              >
                 <img
                   src="/boat.webp"
                   alt=""
                   draggable={false}
-                  className="w-[140px] h-auto"
+                  className="block w-full h-auto"
                   style={{
                     filter:
-                      'drop-shadow(0 0 6px rgba(186,230,253,0.85)) drop-shadow(0 0 18px rgba(56,189,248,0.55))',
+                      'drop-shadow(0 0 8px rgba(254,202,202,0.85)) drop-shadow(0 0 22px rgba(239,68,68,0.55))',
                   }}
                 />
-                <div
-                  aria-hidden
-                  className="absolute left-1/2 pointer-events-none"
-                  style={{
-                    bottom: '-10%',
-                    width: '20%',
-                    height: '38%',
-                    transformOrigin: 'top',
-                    background:
-                      'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.95) 0%, rgba(186,230,253,0.85) 25%, rgba(56,189,248,0.55) 55%, transparent 90%)',
-                    filter: 'blur(2px)',
-                    animation:
-                      'thruster-pulse 0.9s ease-in-out infinite',
-                  }}
-                />
-                <div
-                  aria-hidden
-                  className="absolute left-1/2 pointer-events-none"
-                  style={{
-                    bottom: '-6%',
-                    width: '14%',
-                    height: '28%',
-                    marginLeft: '-22%',
-                    transformOrigin: 'top',
-                    background:
-                      'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.9) 0%, rgba(186,230,253,0.75) 25%, rgba(56,189,248,0.45) 60%, transparent 90%)',
-                    filter: 'blur(2px)',
-                    animation:
-                      'thruster-pulse 1.1s ease-in-out 0.15s infinite',
-                  }}
-                />
-                <div
-                  aria-hidden
-                  className="absolute left-1/2 pointer-events-none"
-                  style={{
-                    bottom: '-6%',
-                    width: '14%',
-                    height: '28%',
-                    marginLeft: '8%',
-                    transformOrigin: 'top',
-                    background:
-                      'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.9) 0%, rgba(186,230,253,0.75) 25%, rgba(56,189,248,0.45) 60%, transparent 90%)',
-                    filter: 'blur(2px)',
-                    animation:
-                      'thruster-pulse 1.0s ease-in-out 0.3s infinite',
-                  }}
-                />
+                {THRUSTER_POSITIONS.map((p, i) => (
+                  <div
+                    key={i}
+                    aria-hidden
+                    className="absolute pointer-events-none"
+                    style={{
+                      left: p.left,
+                      bottom: '-6%',
+                      width: '12%',
+                      height: '34%',
+                      transformOrigin: 'top',
+                      background:
+                        'radial-gradient(ellipse at 50% 0%, rgba(254,243,199,0.95) 0%, rgba(251,146,60,0.85) 22%, rgba(239,68,68,0.7) 50%, rgba(127,29,29,0.25) 80%, transparent 100%)',
+                      filter: 'blur(2px)',
+                      animation: `thruster-pulse 0.55s ease-in-out ${p.delay} infinite`,
+                    }}
+                  />
+                ))}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 w-[min(92vw,38rem)]">
-        <div className="bg-slate-950/80 backdrop-blur border border-violet-800/70 rounded-lg px-6 py-5 shadow-[0_0_28px_rgba(56,189,248,0.18)]">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <div className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
-                {t('pages.shop.total')}
-              </div>
-              <div
-                className={`font-display text-3xl tabular-nums leading-none mt-1 ${
-                  notEnough ? 'text-red-400' : 'text-yellow-300'
-                }`}
-                style={
-                  notEnough
-                    ? undefined
-                    : { textShadow: '0 0 10px rgba(250,204,21,0.45)' }
-                }
-              >
-                {total} ◈
-              </div>
+      <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-[min(90vw,24rem)]">
+        <div className="bg-slate-950/85 backdrop-blur border border-violet-800/70 rounded-lg px-6 py-6 shadow-[0_0_28px_rgba(56,189,248,0.18)]">
+          <div className="mb-5">
+            <div className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
+              {t('pages.shop.amount')}
             </div>
-            <div className="text-right">
-              <div className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
-                {t('pages.shop.amount')}
-              </div>
-              <div className="font-display text-3xl text-violet-200 tabular-nums leading-none mt-1">
-                ×{count}
-              </div>
+            <div className="font-display text-5xl text-violet-200 tabular-nums leading-none mt-2">
+              ×{count}
             </div>
           </div>
 
@@ -228,8 +188,32 @@ export function ShopPage() {
             max={MAX_COUNT}
             value={count}
             onChange={(e) => setCount(Number(e.target.value))}
-            className="w-full accent-violet-500 mb-4 cursor-pointer"
+            className="w-full accent-violet-500 mb-2 cursor-pointer"
           />
+          <div className="flex justify-between text-[10px] font-mono text-slate-500 mb-6">
+            <span>{MIN_COUNT}</span>
+            <span>{MAX_COUNT}</span>
+          </div>
+
+          <div className="border-t border-slate-800 pt-4 mb-5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
+                {t('pages.shop.total')}
+              </span>
+              <span
+                className={`font-display text-3xl tabular-nums leading-none ${
+                  notEnough ? 'text-red-400' : 'text-yellow-300'
+                }`}
+                style={
+                  notEnough
+                    ? undefined
+                    : { textShadow: '0 0 10px rgba(250,204,21,0.45)' }
+                }
+              >
+                {total} ◈
+              </span>
+            </div>
+          </div>
 
           <button
             type="button"
