@@ -154,7 +154,7 @@ export function CasesPage() {
     setDrop(result)
     schedule(() => setPhase('descent'), 600)
     schedule(() => setPhase('whiteflash'), 600 + 2200)
-    schedule(() => setPhase('reveal'), 600 + 2200 + 400)
+    schedule(() => setPhase('reveal'), 600 + 2200 + 180)
   }
 
   const handleOpen = async () => {
@@ -468,7 +468,7 @@ export function CasesPage() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {phase === 'whiteflash' && (
+        {(phase === 'whiteflash' || phase === 'reveal') && (
           <motion.div
             key="whiteflash"
             initial={{ opacity: 0 }}
@@ -483,10 +483,10 @@ export function CasesPage() {
         {phase === 'reveal' && drop && (
           <motion.div
             key="reveal"
-            initial={{ opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.3 }}
             className="absolute inset-0 z-30 bg-black"
           >
             <div
