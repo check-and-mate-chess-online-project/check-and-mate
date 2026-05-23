@@ -1,272 +1,59 @@
 import { useEffect, useMemo, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useBuyLootbox, useMe } from '../shared/api/hooks'
 import { ApiError } from '../shared/api/http'
 
 const PRICE_PER_CASE = 100
+const MIN_COUNT = 1
+const MAX_COUNT = 10
 
-interface Bundle {
-  count: number
-  glow: string
-  glowSoft: string
-  accent: string
-  textShadow: string
-  badgeKey?: 'popular' | 'bestValue'
-}
-
-const BUNDLES: Bundle[] = [
-  {
-    count: 1,
-    glow: 'rgba(56,189,248,0.9)',
-    glowSoft: 'rgba(56,189,248,0.45)',
-    accent: 'text-sky-200',
-    textShadow: '0 0 18px rgba(56,189,248,0.85)',
-  },
-  {
-    count: 5,
-    glow: 'rgba(167,139,250,0.95)',
-    glowSoft: 'rgba(167,139,250,0.45)',
-    accent: 'text-violet-200',
-    textShadow: '0 0 18px rgba(167,139,250,0.85)',
-    badgeKey: 'popular',
-  },
-  {
-    count: 10,
-    glow: 'rgba(251,146,60,0.95)',
-    glowSoft: 'rgba(251,146,60,0.5)',
-    accent: 'text-orange-200',
-    textShadow: '0 0 20px rgba(251,146,60,0.9)',
-    badgeKey: 'bestValue',
-  },
-]
-
-interface DriftStar {
-  startX: number
+interface TwinkleStar {
+  x: number
   y: number
   size: number
   duration: number
   delay: number
-  opacity: number
+  baseOpacity: number
 }
 
-function generateDriftStars(count: number): DriftStar[] {
+function generateTwinkleStars(count: number): TwinkleStar[] {
   return Array.from({ length: count }, () => ({
-    startX: 100 + Math.random() * 30,
+    x: Math.random() * 100,
     y: Math.random() * 100,
     size: 1 + Math.random() * 2.5,
-    duration: 14 + Math.random() * 22,
-    delay: -Math.random() * 30,
-    opacity: 0.3 + Math.random() * 0.7,
+    duration: 2.5 + Math.random() * 4,
+    delay: Math.random() * 4,
+    baseOpacity: 0.35 + Math.random() * 0.55,
   }))
-}
-
-interface CoinSpark {
-  id: number
-  dx: number
-  delay: number
-  duration: number
-}
-
-function generateCoins(count: number): CoinSpark[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    dx: -30 + Math.random() * 60,
-    delay: Math.random() * 0.15,
-    duration: 0.7 + Math.random() * 0.3,
-  }))
-}
-
-interface OfferProps {
-  bundle: Bundle
-  price: number
-  cantAfford: boolean
-  busy: boolean
-  purchased: boolean
-  onBuy: () => void
-}
-
-function Offer({
-  bundle,
-  price,
-  cantAfford,
-  busy,
-  purchased,
-  onBuy,
-}: OfferProps) {
-  const { t } = useTranslation()
-  const disabled = cantAfford || busy
-  const coins = useMemo(() => generateCoins(8), [])
-
-  return (
-    <div className="flex flex-col items-center gap-4 relative">
-      <div className="relative">
-        <div
-          className="font-display text-7xl leading-none"
-          style={{ color: bundle.glow, textShadow: bundle.textShadow }}
-        >
-          ×{bundle.count}
-        </div>
-        {bundle.badgeKey && (
-          <span
-            className="absolute -top-2 -right-12 text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-sm border whitespace-nowrap"
-            style={{
-              color: bundle.glow,
-              borderColor: bundle.glow,
-              boxShadow: `0 0 10px ${bundle.glowSoft}`,
-            }}
-          >
-            {t(`pages.shop.badges.${bundle.badgeKey}`)}
-          </span>
-        )}
-      </div>
-
-      <div className="relative w-[180px] h-[220px] flex items-end justify-center">
-        <div
-          aria-hidden
-          className="absolute bottom-0 left-1/2 w-[180px] h-[40px] pointer-events-none"
-          style={{
-            background: `radial-gradient(ellipse at center, ${bundle.glow} 0%, ${bundle.glowSoft} 35%, transparent 75%)`,
-            filter: 'blur(6px)',
-            animation: 'pad-pulse 2.2s ease-in-out infinite',
-          }}
-        />
-        <div
-          aria-hidden
-          className="absolute bottom-1 left-1/2 -translate-x-1/2 h-px w-[140px] pointer-events-none"
-          style={{
-            background: `linear-gradient(to right, transparent, ${bundle.glow}, transparent)`,
-            boxShadow: `0 0 12px ${bundle.glow}`,
-          }}
-        />
-
-        <motion.div
-          animate={
-            purchased
-              ? { x: '30vw', y: '-65vh', scale: 0.2, opacity: 0 }
-              : { x: 0, y: 0, scale: 1, opacity: 1 }
-          }
-          transition={
-            purchased
-              ? { duration: 0.85, ease: 'easeIn' }
-              : { duration: 0.3, ease: 'easeOut' }
-          }
-          className="relative z-10 pointer-events-none"
-          style={{ animation: 'bob 2.6s ease-in-out infinite' }}
-        >
-          <img
-            src="/boat.webp"
-            alt=""
-            draggable={false}
-            className="w-[150px] h-auto"
-            style={{
-              filter: `drop-shadow(0 0 10px ${bundle.glow}) drop-shadow(0 0 24px ${bundle.glowSoft})`,
-            }}
-          />
-        </motion.div>
-
-        <AnimatePresence>
-          {purchased &&
-            coins.map((c) => (
-              <motion.span
-                key={c.id}
-                initial={{ opacity: 0, y: 0, x: c.dx, scale: 0.6 }}
-                animate={{
-                  opacity: [0, 1, 1, 0],
-                  y: -180,
-                  x: c.dx + 60,
-                  scale: 1,
-                }}
-                transition={{
-                  duration: c.duration,
-                  delay: c.delay,
-                  times: [0, 0.15, 0.7, 1],
-                  ease: 'easeOut',
-                }}
-                className="absolute left-1/2 top-1/2 text-yellow-300 text-lg pointer-events-none select-none"
-                style={{ textShadow: '0 0 8px rgba(250,204,21,0.8)' }}
-              >
-                ◈
-              </motion.span>
-            ))}
-        </AnimatePresence>
-      </div>
-
-      <div className="flex items-baseline gap-2">
-        <span
-          className={`font-display text-3xl tabular-nums ${
-            cantAfford ? 'text-red-400' : 'text-yellow-300'
-          }`}
-          style={
-            cantAfford
-              ? undefined
-              : { textShadow: '0 0 8px rgba(250,204,21,0.5)' }
-          }
-        >
-          {price}
-        </span>
-        <span
-          className={cantAfford ? 'text-red-400' : 'text-yellow-300'}
-        >
-          ◈
-        </span>
-      </div>
-
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={onBuy}
-        className={
-          disabled
-            ? 'mt-1 px-7 py-2.5 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-slate-800/80 text-slate-500 cursor-not-allowed border border-slate-700'
-            : 'mt-1 px-7 py-2.5 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-slate-950/70 hover:bg-slate-900/90 backdrop-blur border-2 transition-colors'
-        }
-        style={
-          disabled
-            ? undefined
-            : {
-                color: bundle.glow,
-                borderColor: bundle.glow,
-                boxShadow: `0 0 14px ${bundle.glowSoft}, inset 0 0 14px ${bundle.glowSoft}`,
-              }
-        }
-      >
-        {cantAfford
-          ? t('pages.shop.notEnoughBalance')
-          : busy
-            ? '…'
-            : t('pages.shop.purchase')}
-      </button>
-    </div>
-  )
 }
 
 export function ShopPage() {
   const { t } = useTranslation()
   const { data: me } = useMe()
   const buy = useBuyLootbox()
-  const stars = useMemo(() => generateDriftStars(140), [])
-  const [purchasingIdx, setPurchasingIdx] = useState<number | null>(null)
-  const [purchasedIdx, setPurchasedIdx] = useState<number | null>(null)
+  const stars = useMemo(() => generateTwinkleStars(180), [])
+  const [count, setCount] = useState(1)
+  const [purchasing, setPurchasing] = useState(false)
 
   useEffect(() => {
-    const img = new Image()
-    img.src = '/boat.webp'
     const planet = new Image()
-    planet.src = '/planets/earth_big.webp'
+    planet.src = '/planets/case-planetwebp.webp'
+    const boat = new Image()
+    boat.src = '/boat.webp'
   }, [])
 
   const balance = me?.balance ?? 0
+  const total = count * PRICE_PER_CASE
+  const notEnough = balance < total
+  const disabled = notEnough || purchasing
 
-  const handleBuy = (bundle: Bundle, idx: number) => {
-    const total = bundle.count * PRICE_PER_CASE
-    if (balance < total || purchasingIdx !== null) return
-    setPurchasingIdx(idx)
-    setPurchasedIdx(idx)
-    buy.mutate(bundle.count, {
+  const handleBuy = () => {
+    if (disabled) return
+    setPurchasing(true)
+    buy.mutate(count, {
       onSuccess: () => {
-        toast.success(t('pages.shop.purchased', { count: bundle.count }))
+        toast.success(t('pages.shop.purchased', { count }))
       },
       onError: (e) => {
         const msg =
@@ -276,64 +63,30 @@ export function ShopPage() {
         toast.error(msg || t('pages.shop.buyFailed'))
       },
       onSettled: () => {
-        window.setTimeout(() => {
-          setPurchasingIdx(null)
-          setPurchasedIdx(null)
-        }, 1000)
+        window.setTimeout(() => setPurchasing(false), 400)
       },
     })
   }
 
   return (
     <div className="fixed left-0 right-0 top-[81px] bottom-0 z-10 bg-black overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none">
         {stars.map((s, i) => (
           <div
             key={i}
             className="absolute rounded-full bg-white"
             style={{
-              left: `${s.startX}vw`,
+              left: `${s.x}%`,
               top: `${s.y}%`,
               width: s.size,
               height: s.size,
-              opacity: s.opacity,
-              animation: `drift-left ${s.duration}s linear ${s.delay}s infinite`,
-              boxShadow: `0 0 ${s.size * 2}px rgba(255,255,255,${s.opacity * 0.6})`,
+              opacity: s.baseOpacity,
+              animation: `twinkle ${s.duration}s ease-in-out ${s.delay}s infinite`,
+              boxShadow: `0 0 ${s.size * 2}px rgba(255,255,255,${s.baseOpacity * 0.6})`,
             }}
           />
         ))}
       </div>
-
-      <div
-        aria-hidden
-        className="absolute pointer-events-none"
-        style={{
-          width: '95vh',
-          height: '95vh',
-          right: '-30vh',
-          bottom: '-40vh',
-          backgroundImage: 'url(/planets/earth_big.webp)',
-          backgroundSize: 'contain',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center',
-          filter: 'brightness(0.55) saturate(0.85)',
-          opacity: 0.6,
-          animation: 'planet-rotate 240s linear infinite',
-        }}
-      />
-      <div
-        aria-hidden
-        className="absolute pointer-events-none"
-        style={{
-          width: '95vh',
-          height: '95vh',
-          right: '-30vh',
-          bottom: '-40vh',
-          background:
-            'radial-gradient(circle at 30% 35%, rgba(96,165,250,0.18) 0%, transparent 55%)',
-          filter: 'blur(20px)',
-        }}
-      />
 
       <div className="absolute top-6 left-6 z-20">
         <h1 className="text-3xl">{t('pages.shop.title')}</h1>
@@ -342,22 +95,158 @@ export function ShopPage() {
         </p>
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center px-4 z-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16 w-full max-w-5xl">
-          {BUNDLES.map((b, idx) => {
-            const total = b.count * PRICE_PER_CASE
-            return (
-              <Offer
-                key={b.count}
-                bundle={b}
-                price={total}
-                cantAfford={balance < total}
-                busy={purchasingIdx === idx}
-                purchased={purchasedIdx === idx}
-                onBuy={() => handleBuy(b, idx)}
-              />
-            )
-          })}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="relative"
+          style={{ width: '60vh', height: '60vh' }}
+        >
+          <div
+            aria-hidden
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.05) 50%, transparent 75%)',
+              filter: 'blur(20px)',
+            }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'url(/planets/case-planetwebp.webp)',
+              backgroundSize: 'contain',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              animation: 'planet-rotate 90s linear infinite',
+              filter: 'drop-shadow(0 0 30px rgba(56,189,248,0.25))',
+            }}
+          />
+
+          <div
+            className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
+            style={{ top: '-12%' }}
+          >
+            <div style={{ animation: 'bob 2.6s ease-in-out infinite' }}>
+              <div className="relative">
+                <img
+                  src="/boat.webp"
+                  alt=""
+                  draggable={false}
+                  className="w-[140px] h-auto"
+                  style={{
+                    filter:
+                      'drop-shadow(0 0 6px rgba(186,230,253,0.85)) drop-shadow(0 0 18px rgba(56,189,248,0.55))',
+                  }}
+                />
+                <div
+                  aria-hidden
+                  className="absolute left-1/2 pointer-events-none"
+                  style={{
+                    bottom: '-10%',
+                    width: '20%',
+                    height: '38%',
+                    transformOrigin: 'top',
+                    background:
+                      'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.95) 0%, rgba(186,230,253,0.85) 25%, rgba(56,189,248,0.55) 55%, transparent 90%)',
+                    filter: 'blur(2px)',
+                    animation:
+                      'thruster-pulse 0.9s ease-in-out infinite',
+                  }}
+                />
+                <div
+                  aria-hidden
+                  className="absolute left-1/2 pointer-events-none"
+                  style={{
+                    bottom: '-6%',
+                    width: '14%',
+                    height: '28%',
+                    marginLeft: '-22%',
+                    transformOrigin: 'top',
+                    background:
+                      'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.9) 0%, rgba(186,230,253,0.75) 25%, rgba(56,189,248,0.45) 60%, transparent 90%)',
+                    filter: 'blur(2px)',
+                    animation:
+                      'thruster-pulse 1.1s ease-in-out 0.15s infinite',
+                  }}
+                />
+                <div
+                  aria-hidden
+                  className="absolute left-1/2 pointer-events-none"
+                  style={{
+                    bottom: '-6%',
+                    width: '14%',
+                    height: '28%',
+                    marginLeft: '8%',
+                    transformOrigin: 'top',
+                    background:
+                      'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.9) 0%, rgba(186,230,253,0.75) 25%, rgba(56,189,248,0.45) 60%, transparent 90%)',
+                    filter: 'blur(2px)',
+                    animation:
+                      'thruster-pulse 1.0s ease-in-out 0.3s infinite',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 w-[min(92vw,38rem)]">
+        <div className="bg-slate-950/80 backdrop-blur border border-violet-800/70 rounded-lg px-6 py-5 shadow-[0_0_28px_rgba(56,189,248,0.18)]">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
+                {t('pages.shop.total')}
+              </div>
+              <div
+                className={`font-display text-3xl tabular-nums leading-none mt-1 ${
+                  notEnough ? 'text-red-400' : 'text-yellow-300'
+                }`}
+                style={
+                  notEnough
+                    ? undefined
+                    : { textShadow: '0 0 10px rgba(250,204,21,0.45)' }
+                }
+              >
+                {total} ◈
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
+                {t('pages.shop.amount')}
+              </div>
+              <div className="font-display text-3xl text-violet-200 tabular-nums leading-none mt-1">
+                ×{count}
+              </div>
+            </div>
+          </div>
+
+          <input
+            type="range"
+            min={MIN_COUNT}
+            max={MAX_COUNT}
+            value={count}
+            onChange={(e) => setCount(Number(e.target.value))}
+            className="w-full accent-violet-500 mb-4 cursor-pointer"
+          />
+
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={handleBuy}
+            className={
+              disabled
+                ? 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                : 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-400 hover:to-orange-600 text-slate-50 shadow-lg shadow-orange-900/40 transition-colors'
+            }
+          >
+            {notEnough
+              ? t('pages.shop.notEnoughBalance')
+              : purchasing
+                ? '…'
+                : t('pages.shop.purchase')}
+          </button>
         </div>
       </div>
     </div>

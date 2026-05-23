@@ -111,3 +111,15 @@ h3 {
     transform: translateX(-50%) scale(1.08);
   }
 }
+
+@keyframes thruster-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateX(-50%) scaleY(0.55);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1);
+  }
+}
