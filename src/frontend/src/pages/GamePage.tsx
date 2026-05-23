@@ -277,11 +277,12 @@ export function GamePage() {
     try {
       const legalMoves = game.moves({ square: selectedSquare as never, verbose: true })
       for (const m of legalMoves as Array<{ to: string; captured?: string }>) {
-        styles[m.to] = {
-          background: m.captured
-            ? 'radial-gradient(circle, rgba(251,146,60,0.55) 60%, transparent 65%)'
-            : 'radial-gradient(circle, rgba(251,146,60,0.55) 25%, transparent 28%)',
-        }
+        styles[m.to] = m.captured
+          ? { boxShadow: 'inset 0 0 0 5px rgba(251,146,60,0.75)' }
+          : {
+              background:
+                'radial-gradient(circle, rgba(251,146,60,0.55) 25%, transparent 28%)',
+            }
       }
     } catch {
       // selected square may have no piece anymore
@@ -341,9 +342,14 @@ export function GamePage() {
     })
   }
 
+  const exitToLobby = () => {
+    qc.invalidateQueries({ queryKey: ['me'] })
+    navigate('/lobby')
+  }
+
   const handleExit = () => {
     if (ended) {
-      navigate('/lobby')
+      exitToLobby()
       return
     }
     if (!gameHasStarted) {
@@ -353,7 +359,7 @@ export function GamePage() {
         onConfirm: async () => {
           setPendingConfirm(null)
           try { await gameHub.leave() } catch { /* ignore */ }
-          navigate('/lobby')
+          exitToLobby()
         },
       })
       return
@@ -365,7 +371,7 @@ export function GamePage() {
       onConfirm: async () => {
         setPendingConfirm(null)
         try { await gameHub.resign() } catch { /* ignore */ }
-        navigate('/lobby')
+        exitToLobby()
       },
     })
   }
@@ -425,7 +431,7 @@ export function GamePage() {
       </main>
 
       {ended && (
-        <ResultModal result={ended} onClose={() => navigate('/lobby')} />
+        <ResultModal result={ended} onClose={exitToLobby} />
       )}
 
       {pendingConfirm && (

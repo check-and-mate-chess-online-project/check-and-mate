@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import logo from '../assets/logo.svg'
@@ -6,6 +7,7 @@ import { LanguageToggle } from '../shared/ui/LanguageToggle'
 import { PageTransition } from '../shared/ui/PageTransition'
 import { useAuthStore } from '../shared/auth/authStore'
 import { useAuth } from '../shared/auth/useAuth'
+import { useMe } from '../shared/api/hooks'
 import { useGlobalGameEvents } from '../shared/lib/useGlobalGameEvents'
 import { stopGameHub } from '../shared/realtime/gameHub'
 
@@ -16,7 +18,13 @@ export function RootLayout() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { data: meData } = useMe()
+  const setUser = useAuthStore((s) => s.setUser)
   useGlobalGameEvents()
+
+  useEffect(() => {
+    if (meData) setUser(meData)
+  }, [meData, setUser])
 
   const handleLogout = () => {
     stopGameHub().catch(() => {})

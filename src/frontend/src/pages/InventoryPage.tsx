@@ -80,8 +80,10 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
   const { t } = useTranslation()
   const equip = useEquipSkin()
   const setEquipped = useEquippedSkinsStore((s) => s.setEquipped)
+  const equippedMap = useEquippedSkinsStore((s) => s.equipped)
   const [idx, setIdx] = useState(0)
   const skin = skins[idx]
+  const isActive = !!skin && equippedMap[skin.figure] === skin.id
 
   const planetName = t(`pages.inventory.planets.${planet.id}`, {
     defaultValue: planet.name,
@@ -207,7 +209,7 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
               )}
               <button
                 type="button"
-                disabled={equip.isPending}
+                disabled={equip.isPending || isActive}
                 onClick={() =>
                   equip.mutate(
                     { figure: skin.figure, skinId: skin.id },
@@ -216,9 +218,22 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
                     },
                   )
                 }
-                className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 rounded-md text-sm self-start"
+                className={
+                  isActive
+                    ? 'px-4 py-2 bg-violet-900/60 border border-violet-500 text-violet-200 rounded-md text-sm self-start cursor-default flex items-center gap-2'
+                    : 'px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-md text-sm self-start'
+                }
               >
-                {t('pages.inventory.setActive')}
+                {isActive ? (
+                  <>
+                    <span>✓</span>
+                    <span>{t('pages.inventory.active')}</span>
+                  </>
+                ) : equip.isPending ? (
+                  t('pages.inventory.activating')
+                ) : (
+                  t('pages.inventory.setActive')
+                )}
               </button>
             </>
           ) : (

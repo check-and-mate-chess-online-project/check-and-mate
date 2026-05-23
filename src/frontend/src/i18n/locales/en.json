@@ -172,7 +172,8 @@
     "inventory": {
       "title": "Planets",
       "back": "back",
-      "active": "active",
+      "active": "Active",
+      "activating": "Activating…",
       "setActive": "Set active",
       "locked": "Locked",
       "lockedHint": "Unlock this skin from cases",
