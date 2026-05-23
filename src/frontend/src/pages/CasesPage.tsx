@@ -258,7 +258,7 @@ export function CasesPage() {
               left: '-45%',
               width: '50%',
               background:
-                'linear-gradient(to right, transparent 0%, rgba(167,139,250,0.08) 45%, rgba(251,146,60,0.25) 100%)',
+                'linear-gradient(to right, transparent 0%, rgba(37,99,235,0.1) 45%, rgba(56,189,248,0.3) 100%)',
               filter: 'blur(16px)',
               animation: 'trail-flicker 0.6s ease-in-out infinite',
             }}
@@ -271,7 +271,7 @@ export function CasesPage() {
               left: '-35%',
               width: '40%',
               background:
-                'linear-gradient(to right, transparent 0%, rgba(251,146,60,0.2) 55%, rgba(255,255,255,0.55) 100%)',
+                'linear-gradient(to right, transparent 0%, rgba(125,211,252,0.35) 55%, rgba(240,249,255,0.7) 100%)',
               filter: 'blur(4px)',
               animation: 'trail-flicker 0.35s ease-in-out infinite',
             }}
@@ -384,7 +384,7 @@ export function CasesPage() {
                     className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[210px] h-[210px] pointer-events-none"
                     style={{
                       background:
-                        'radial-gradient(circle at 50% 62%, rgba(255,237,213,0.9) 0%, rgba(251,146,60,0.65) 18%, rgba(220,38,38,0.35) 38%, transparent 60%)',
+                        'radial-gradient(circle at 50% 62%, rgba(224,242,254,0.9) 0%, rgba(56,189,248,0.65) 18%, rgba(37,99,235,0.35) 38%, transparent 60%)',
                       filter: 'blur(8px)',
                       animation: 'burn-flicker 0.18s ease-in-out infinite alternate',
                     }}
@@ -394,7 +394,7 @@ export function CasesPage() {
                     className="absolute left-1/2 top-[92%] -translate-x-1/2 w-[140px] h-[90px] pointer-events-none"
                     style={{
                       background:
-                        'radial-gradient(ellipse at 50% 0%, rgba(255,247,200,0.95) 0%, rgba(251,146,60,0.7) 25%, rgba(220,38,38,0.35) 55%, transparent 80%)',
+                        'radial-gradient(ellipse at 50% 0%, rgba(240,249,255,0.95) 0%, rgba(56,189,248,0.7) 25%, rgba(37,99,235,0.4) 55%, transparent 80%)',
                       filter: 'blur(5px)',
                       animation: 'burn-flicker 0.12s ease-in-out infinite alternate',
                     }}
@@ -406,7 +406,7 @@ export function CasesPage() {
                     className="relative w-[170px] h-auto"
                     style={{
                       filter:
-                        'drop-shadow(0 0 4px rgba(255,237,213,0.9)) drop-shadow(0 0 12px rgba(251,146,60,0.85)) drop-shadow(0 0 24px rgba(220,38,38,0.65))',
+                        'drop-shadow(0 0 4px rgba(224,242,254,0.9)) drop-shadow(0 0 12px rgba(56,189,248,0.85)) drop-shadow(0 0 24px rgba(37,99,235,0.7))',
                     }}
                   />
                 </motion.div>
