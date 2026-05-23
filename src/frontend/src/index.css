@@ -90,3 +90,45 @@ h3 {
     transform: translateY(-6px);
   }
 }
+
+@keyframes scanline-shift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 4px;
+  }
+}
+
+@keyframes scan-beam {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(2000%);
+    opacity: 0;
+  }
+}
+
+@keyframes terminal-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  94% {
+    opacity: 0.6;
+  }
+  96% {
+    opacity: 1;
+  }
+}

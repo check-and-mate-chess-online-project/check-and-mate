@@ -220,12 +220,20 @@
     },
     "shop": {
       "title": "Магазин",
+      "terminalSubtitle": "Галактический терминал",
       "caseTitle": "Кейс",
       "caseDescription": "Случайный скин с любой планеты",
       "amount": "Количество",
       "total": "Итого",
       "buyButton": "Купить",
-      "notEnoughBalance": "Недостаточно средств"
+      "purchase": "Купить",
+      "purchased": "Получено кейсов: {{count}}",
+      "buyFailed": "Покупка не удалась",
+      "notEnoughBalance": "Недостаточно средств",
+      "badges": {
+        "popular": "Популярно",
+        "bestValue": "Выгодно"
+      }
     },
     "friends": {
       "title": "Друзья",

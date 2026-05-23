@@ -220,12 +220,20 @@
     },
     "shop": {
       "title": "Shop",
+      "terminalSubtitle": "Galactic vending terminal",
       "caseTitle": "Lootbox",
       "caseDescription": "Random skin from any planet",
       "amount": "Amount",
       "total": "Total",
       "buyButton": "Buy",
-      "notEnoughBalance": "Not enough balance"
+      "purchase": "Purchase",
+      "purchased": "Acquired {{count}} case(s)",
+      "buyFailed": "Purchase failed",
+      "notEnoughBalance": "Not enough balance",
+      "badges": {
+        "popular": "Popular",
+        "bestValue": "Best value"
+      }
     },
     "friends": {
       "title": "Friends",
