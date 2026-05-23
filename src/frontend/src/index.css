@@ -91,44 +91,23 @@ h3 {
   }
 }
 
-@keyframes scanline-shift {
+@keyframes planet-rotate {
   from {
-    background-position: 0 0;
+    transform: rotate(0deg);
   }
   to {
-    background-position: 0 4px;
+    transform: rotate(360deg);
   }
 }
 
-@keyframes scan-beam {
-  0% {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(2000%);
-    opacity: 0;
-  }
-}
-
-@keyframes terminal-flicker {
+@keyframes pad-pulse {
   0%,
   100% {
-    opacity: 1;
+    opacity: 0.55;
+    transform: translateX(-50%) scale(1);
   }
-  92% {
-    opacity: 1;
-  }
-  94% {
-    opacity: 0.6;
-  }
-  96% {
-    opacity: 1;
+  50% {
+    opacity: 0.85;
+    transform: translateX(-50%) scale(1.08);
   }
 }
