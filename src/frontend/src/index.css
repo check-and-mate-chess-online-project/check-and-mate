@@ -24,3 +24,41 @@ h3 {
     opacity: 1;
   }
 }
+
+@keyframes drift-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-130vw);
+  }
+}
+
+@keyframes ship-rumble {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(0.5px, -1px);
+  }
+  40% {
+    transform: translate(-0.5px, 1px);
+  }
+  60% {
+    transform: translate(1px, 0.5px);
+  }
+  80% {
+    transform: translate(-1px, -0.5px);
+  }
+}
+
+@keyframes trail-flicker {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}

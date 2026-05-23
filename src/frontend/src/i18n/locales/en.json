@@ -209,10 +209,13 @@
     "cases": {
       "title": "Cases",
       "youHave": "You have {{count}} cases",
-      "openButton": "Open case",
+      "youHaveShort": "Cases:",
+      "openButton": "Open",
+      "openFailed": "Failed to open case",
       "duplicate": "Duplicate skin — converted to currency",
       "dropped": "Dropped: {{id}}",
-      "noCases": "No cases. Buy some in the shop"
+      "noCases": "No cases. Buy some in the shop",
+      "continue": "Continue"
     },
     "shop": {
       "title": "Shop",
