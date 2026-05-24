@@ -8,6 +8,7 @@ const PRICE_PER_CASE = 100
 const MIN_COUNT = 1
 const MAX_COUNT = 10
 const LANDING_CYCLE = '16s'
+const ORBIT_CYCLE = '48s'
 
 interface TwinkleStar {
   x: number
@@ -137,8 +138,8 @@ export function ShopPage() {
       <div
         className="absolute pointer-events-none"
         style={{
-          right: '8vw',
-          top: '53%',
+          right: '12vw',
+          top: '50%',
           transform: 'translateY(-50%)',
         }}
       >
@@ -167,10 +168,13 @@ export function ShopPage() {
               filter: 'drop-shadow(0 0 30px rgba(56,189,248,0.25))',
             }}
           />
-
           <div
             aria-hidden
             className="absolute inset-0 pointer-events-none"
+            style={{
+              transformOrigin: '50% 50%',
+              animation: `landing-orbit ${ORBIT_CYCLE} linear infinite`,
+            }}
           >
             <div
               className="absolute left-1/2"
@@ -285,7 +289,7 @@ export function ShopPage() {
       <div
         className="absolute z-20 w-[min(92vw,24rem)]"
         style={{
-          left: '32%',
+          left: '30%',
           top: '50%',
           transform: 'translate(-50%, -50%)',
         }}

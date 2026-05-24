@@ -124,43 +124,52 @@ h3 {
   }
 }
 
+@keyframes landing-orbit {
+  0% {
+    transform: rotate(-28deg);
+  }
+  100% {
+    transform: rotate(332deg);
+  }
+}
+
 @keyframes landing-path {
   0%,
   12% {
     transform: translateX(-50%) translate(0, 0) scale(0.42);
   }
   30% {
-    transform: translateX(-50%) translate(0, 58px) scale(0.62);
+    transform: translateX(-50%) translate(0, 44px) scale(0.6);
   }
   36% {
-    transform: translateX(-50%) translate(0, 84px) scale(0.72);
+    transform: translateX(-50%) translate(0, 66px) scale(0.68);
   }
   40% {
-    transform: translateX(-50%) translate(-34px, 98px) scale(0.79);
+    transform: translateX(-50%) translate(-30px, 78px) scale(0.74);
   }
   45% {
-    transform: translateX(-50%) translate(-68px, 112px) scale(0.84);
+    transform: translateX(-50%) translate(-58px, 88px) scale(0.8);
   }
   49% {
-    transform: translateX(-50%) translate(-48px, 118px) scale(0.87);
+    transform: translateX(-50%) translate(-42px, 94px) scale(0.82);
   }
   52% {
-    transform: translateX(-50%) translate(42px, 122px) scale(0.88);
+    transform: translateX(-50%) translate(36px, 98px) scale(0.83);
   }
   55% {
-    transform: translateX(-50%) translate(84px, 110px) scale(0.82);
+    transform: translateX(-50%) translate(70px, 88px) scale(0.78);
   }
   58% {
-    transform: translateX(-50%) translate(62px, 92px) scale(0.73);
+    transform: translateX(-50%) translate(52px, 72px) scale(0.68);
   }
   66% {
-    transform: translateX(-50%) translate(10px, 42px) scale(0.57);
+    transform: translateX(-50%) translate(8px, 32px) scale(0.54);
   }
   82% {
-    transform: translateX(-50%) translate(0, -8px) scale(0.43);
+    transform: translateX(-50%) translate(0, -4px) scale(0.43);
   }
   88% {
-    transform: translateX(-50%) translate(0, -4px) scale(0.42);
+    transform: translateX(-50%) translate(0, -2px) scale(0.42);
   }
   100% {
     transform: translateX(-50%) translate(0, 0) scale(0.42);
