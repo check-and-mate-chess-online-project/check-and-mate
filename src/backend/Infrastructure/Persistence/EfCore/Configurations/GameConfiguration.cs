@@ -26,10 +26,10 @@ public class GameConfiguration : IEntityTypeConfiguration<GameEntity>
             .HasColumnType("jsonb");
 
         builder.Property(g => g.Result)
-            .IsRequired(false);
+            .IsRequired();
 
         builder.Property(g => g.TerminationReason)
-            .IsRequired(false);
+            .IsRequired();
 
         builder.Property(g => g.InitialTimeSec)
             .IsRequired(false);
@@ -38,11 +38,11 @@ public class GameConfiguration : IEntityTypeConfiguration<GameEntity>
             .IsRequired(false);
             
         builder.Property(g => g.StartTimeUtc)
-            .IsRequired(false)
+            .IsRequired()
             .HasColumnType("timestamptz");
 
         builder.Property(g => g.EndTimeUtc)
-            .IsRequired(false)
+            .IsRequired()
             .HasColumnType("timestamptz");
     }
 }

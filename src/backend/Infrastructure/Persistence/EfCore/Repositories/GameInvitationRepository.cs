@@ -21,7 +21,7 @@ public class GameInvitationRepository(AppDbContext context) : IGameInvitationRep
     public async Task<GameInvitation?> GetPendingAsync(Guid senderId, Guid receiverId)
     {
         GameInvitationEntity? invitation = await _context.GameInvitations
-            .FirstOrDefaultAsync(i => i.SenderId == senderId && i.ReceiverId == receiverId);
+            .FirstOrDefaultAsync(i => i.SenderId == senderId && i.ReceiverId == receiverId && i.State == (int)GameInvitationState.Pending);
         return invitation != null ? GameInvitationMapper.ToDomain(invitation) : null;
     }
 
@@ -41,7 +41,7 @@ public class GameInvitationRepository(AppDbContext context) : IGameInvitationRep
         return [.. invitation.Select(GameInvitationMapper.ToDomain)];
     }
 
-    public async void Add(GameInvitation invitation) => _context.GameInvitations.Add(GameInvitationMapper.ToDb(invitation));
+    public void Add(GameInvitation invitation) => _context.GameInvitations.Add(GameInvitationMapper.ToDb(invitation));
 
     public async Task Update(GameInvitation invitation)
     {

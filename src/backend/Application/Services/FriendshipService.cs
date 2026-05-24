@@ -53,7 +53,7 @@ public class FriendshipService(
         if (sender.IsDeleted) throw new UserDeletedException($"user {senderId} is deleted");
         User receiver = await _userRepos.GetAsync(receiverLogin) ?? throw new NotFoundException($"user {receiverLogin} not found");
         if (receiver.IsDeleted) throw new UserDeletedException($"user {receiverLogin} is deleted");
-        if (senderId == receiver.Id) throw new CoreLogicException("users must be different");
+        if (sender.Id == receiver.Id) throw new CoreLogicException("users must be different");
         if (await _requestRepos.GetPendingAsync(sender.Id, receiver.Id) != null) 
             throw new ConflictException($"friend request from {senderId} to {receiver.Id} already exist");
         FriendRequest? reverseRequest = await _requestRepos.GetPendingAsync(receiver.Id, sender.Id);
@@ -65,7 +65,7 @@ public class FriendshipService(
         (Guid senderId, Guid userId) key = FriendshipKey.Normalize(senderId, receiver.Id);
         if (await _friendshipRepos.GetAsync(key.senderId, key.userId) != null) 
             throw new ConflictException($"users {senderId} and {receiver.Id} already friends");
-        FriendRequest request = new(senderId, receiver.Id, FriendRequestState.Pending);
+        FriendRequest request = new(sender.Id, receiver.Id, FriendRequestState.Pending);
         _requestRepos.Add(request);
         await _uow.CommitChangesAsync();
         return await FriendRequestMapper.ToDto(request, _userRepos);

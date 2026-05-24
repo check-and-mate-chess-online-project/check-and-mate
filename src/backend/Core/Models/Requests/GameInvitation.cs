@@ -20,8 +20,8 @@ public class GameInvitation
     private GameInvitation(Guid id, Guid senderId, Guid receiverId, ITimeControl timeControl, DateTime expiresAt, GameInvitationState state)
     {
         Id = id;
-        ReceiverId = receiverId;
         SenderId = senderId;
+        ReceiverId = receiverId;
         TimeControl = timeControl;
         ExpiresAt = expiresAt;
         State = state;

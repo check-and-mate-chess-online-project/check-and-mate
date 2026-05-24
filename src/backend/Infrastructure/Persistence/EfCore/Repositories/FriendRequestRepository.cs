@@ -44,18 +44,18 @@ public class FriendRequestRepository(AppDbContext context) : IFriendRequestRepos
     public void Add(FriendRequest request) => _context.FriendRequests.Add(FriendRequestMapper.ToDb(request));
 
     public async Task Update(FriendRequest request)
-{
-    FriendRequestEntity entity = FriendRequestMapper.ToDb(request);
-    EntityEntry<FriendRequestEntity>? existingEntry = _context.ChangeTracker.Entries<FriendRequestEntity>()
-        .FirstOrDefault(e => e.Entity.Id == entity.Id);
-    if (existingEntry != null)
     {
-        existingEntry.CurrentValues.SetValues(entity);
+        FriendRequestEntity entity = FriendRequestMapper.ToDb(request);
+        EntityEntry<FriendRequestEntity>? existingEntry = _context.ChangeTracker.Entries<FriendRequestEntity>()
+            .FirstOrDefault(e => e.Entity.Id == entity.Id);
+        if (existingEntry != null)
+        {
+            existingEntry.CurrentValues.SetValues(entity);
+        }
+        else
+        {
+            _context.FriendRequests.Attach(entity);
+            _context.Entry(entity).State = EntityState.Modified;
+        }
     }
-    else
-    {
-        _context.FriendRequests.Attach(entity);
-        _context.Entry(entity).State = EntityState.Modified;
-    }
-}
 }
