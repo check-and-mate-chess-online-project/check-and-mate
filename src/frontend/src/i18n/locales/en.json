@@ -120,7 +120,7 @@
       "resignDisabledHint": "Available after the first move",
       "exit": "Exit",
       "exitConfirm": "Leave game? It will count as a resignation.",
-      "leaveMatchConfirm": "Leave the match? The game has not started yet, no rating change.",
+      "leaveMatchConfirm": "Leave the match? It will count as a loss and your rating will change.",
       "opponentDisconnected": "Opponent disconnected",
       "gameEnded": "Game ended",
       "notFound": "Game not found. Return to lobby.",
