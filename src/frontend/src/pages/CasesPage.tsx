@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
 import { useMe, useOpenLootbox, usePlanets } from '../shared/api/hooks'
 import {
   FigureType,
@@ -177,6 +178,7 @@ export function CasesPage() {
   const { data: me } = useMe()
   const { data: planets } = usePlanets()
   const open = useOpenLootbox()
+  const qc = useQueryClient()
   const [searchParams] = useSearchParams()
   const fakeRarity = searchParams.get('fake')
     ? FAKE_RARITY[searchParams.get('fake') ?? '']
@@ -270,6 +272,8 @@ export function CasesPage() {
     setStarsFrozen(false)
     setPhase('idle')
     setDrop(null)
+    qc.invalidateQueries({ queryKey: ['me'] })
+    qc.invalidateQueries({ queryKey: ['inventory'] })
   }
 
   return (

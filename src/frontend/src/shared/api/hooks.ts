@@ -136,14 +136,9 @@ export function useEquipSkin() {
 }
 
 export function useOpenLootbox() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: () =>
       api.post<LootBoxDropResultDto>('/api/inventory/lootboxes/open'),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['me'] })
-      qc.invalidateQueries({ queryKey: ['inventory'] })
-    },
   })
 }
 
