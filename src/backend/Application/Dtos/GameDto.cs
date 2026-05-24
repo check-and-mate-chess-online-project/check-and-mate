@@ -14,6 +14,8 @@ public class GameDto
     public bool TimeControlIsEnabled { get; set; }
     public int? InitialTimeSec { get; set; }
     public int? IncrementPerMoveSec { get; set; }
+    public double? WhiteTimeLeftSec { get; set; }
+    public double? BlackTimeLeftSec { get; set; }
     public List<FigureDto> Figures { get; set; } = null!;
     public List<PlyDto> Moves { get; set; } = null!;
 }

@@ -8,6 +8,8 @@ public class TimeControl : ITimeControl
     public bool IsEnabled { get; } = true;
     public int InitialTimeSec { get; }
     public int IncrementPerMoveSec { get; }
+    public double WhiteTimeLeftSec => _whiteTimeLeftSec;
+    public double BlackTimeLeftSec => _blackTimeLeftSec;
     private double _whiteTimeLeftSec;
     private double _blackTimeLeftSec;
     private DateTime _whiteLastMoveStartTimeUtc;
