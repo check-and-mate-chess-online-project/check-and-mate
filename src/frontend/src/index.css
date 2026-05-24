@@ -34,37 +34,43 @@ h3 {
   }
 }
 
-@keyframes ship-fly-across {
-  0% {
-    opacity: 0;
-    transform: translate3d(110vw, 0, 0);
-  }
+@keyframes ship-fly-ltr {
+  0%,
   6% {
-    opacity: 1;
-  }
-  92% {
-    opacity: 1;
-  }
-  100% {
     opacity: 0;
     transform: translate3d(-30vw, 0, 0);
-  }
-}
-
-@keyframes comet-streak {
-  0% {
-    opacity: 0;
-    transform: translate3d(110vw, -20vh, 0) rotate(20deg);
   }
   10% {
     opacity: 1;
   }
-  85% {
+  22% {
     opacity: 1;
+    transform: translate3d(110vw, 0, 0);
   }
+  24%,
   100% {
     opacity: 0;
-    transform: translate3d(-40vw, 80vh, 0) rotate(20deg);
+    transform: translate3d(110vw, 0, 0);
+  }
+}
+
+@keyframes comet-streak {
+  0%,
+  4% {
+    opacity: 0;
+    transform: translate3d(-30vw, -25vh, 0);
+  }
+  8% {
+    opacity: 1;
+  }
+  18% {
+    opacity: 1;
+    transform: translate3d(130vw, 95vh, 0);
+  }
+  20%,
+  100% {
+    opacity: 0;
+    transform: translate3d(130vw, 95vh, 0);
   }
 }
 
