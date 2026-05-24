@@ -378,9 +378,9 @@ export function ShopPage() {
                     notEnough
                       ? undefined
                       : {
-                          color: '#fcd34d',
+                          color: '#e8a763',
                           textShadow:
-                            '0 0 10px rgba(252,211,77,0.5), 0 0 22px rgba(217,119,6,0.22)',
+                            '0 0 12px rgba(232,167,99,0.55), 0 0 26px rgba(180,83,9,0.3)',
                         }
                   }
                 >
@@ -394,9 +394,11 @@ export function ShopPage() {
               disabled={disabled}
               onClick={handleBuy}
               className={
-                disabled
-                  ? 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-slate-800/60 text-slate-500 cursor-not-allowed border border-slate-700/70 backdrop-blur-sm'
-                  : 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm text-violet-50 bg-gradient-to-b from-violet-500 to-violet-800 hover:from-violet-400 hover:to-violet-700 border border-violet-300/40 shadow-[0_4px_22px_rgba(167,139,250,0.42),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_4px_30px_rgba(167,139,250,0.6),inset_0_1px_0_rgba(255,255,255,0.22)] active:translate-y-px transition-all backdrop-blur-sm'
+                notEnough
+                  ? 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm text-violet-200 bg-violet-950/40 border border-violet-500/50 shadow-[0_0_18px_rgba(167,139,250,0.18),inset_0_1px_0_rgba(167,139,250,0.18)] cursor-not-allowed backdrop-blur-sm'
+                  : purchasing
+                    ? 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm text-orange-50 bg-gradient-to-b from-orange-500 to-orange-700 border border-orange-300/40 shadow-[0_4px_22px_rgba(251,146,60,0.45),inset_0_1px_0_rgba(255,255,255,0.18)] opacity-80 cursor-wait backdrop-blur-sm'
+                    : 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm text-orange-50 bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-400 hover:to-orange-600 border border-orange-300/40 shadow-[0_4px_22px_rgba(251,146,60,0.45),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_4px_30px_rgba(251,146,60,0.62),inset_0_1px_0_rgba(255,255,255,0.22)] active:translate-y-px transition-all backdrop-blur-sm'
               }
             >
               {notEnough

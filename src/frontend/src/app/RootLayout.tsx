@@ -60,11 +60,11 @@ export function RootLayout() {
               {user?.rating ?? 0} ★
             </span>
             <span
-              className="text-sm tabular-nums"
+              className="text-sm tabular-nums font-medium"
               style={{
-                color: '#fcd34d',
+                color: '#e8a763',
                 textShadow:
-                  '0 0 8px rgba(252,211,77,0.5), 0 0 18px rgba(217,119,6,0.22)',
+                  '0 0 10px rgba(232,167,99,0.55), 0 0 22px rgba(180,83,9,0.3)',
               }}
             >
               {user?.balance ?? 0} ◈

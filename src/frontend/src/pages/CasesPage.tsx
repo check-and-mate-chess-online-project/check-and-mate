@@ -596,7 +596,7 @@ export function CasesPage() {
                 onClick={handlePrimaryAction}
                 className={
                   empty
-                    ? 'px-8 py-3 rounded-md font-display text-lg uppercase tracking-[0.18em] text-cyan-50 bg-gradient-to-b from-cyan-500 to-blue-700 hover:from-cyan-400 hover:to-blue-600 border border-cyan-300/40 shadow-[0_4px_22px_rgba(56,189,248,0.42),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_4px_30px_rgba(56,189,248,0.6),inset_0_1px_0_rgba(255,255,255,0.22)] active:translate-y-px transition-all backdrop-blur-sm'
+                    ? 'px-8 py-3 rounded-md font-display text-lg uppercase tracking-[0.18em] text-violet-50 bg-gradient-to-b from-violet-500 to-violet-800 hover:from-violet-400 hover:to-violet-700 border border-violet-300/40 shadow-[0_4px_22px_rgba(167,139,250,0.42),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_4px_30px_rgba(167,139,250,0.6),inset_0_1px_0_rgba(255,255,255,0.22)] active:translate-y-px transition-all backdrop-blur-sm'
                     : 'px-8 py-3 rounded-md font-display text-lg uppercase tracking-[0.18em] text-orange-50 bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-400 hover:to-orange-600 border border-orange-300/40 shadow-[0_4px_22px_rgba(251,146,60,0.45),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_4px_30px_rgba(251,146,60,0.62),inset_0_1px_0_rgba(255,255,255,0.22)] active:translate-y-px transition-all backdrop-blur-sm'
                 }
               >
