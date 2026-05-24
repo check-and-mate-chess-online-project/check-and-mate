@@ -215,7 +215,8 @@
       "openFailed": "Failed to open case",
       "duplicate": "Duplicate skin — converted to currency",
       "dropped": "Dropped: {{id}}",
-      "noCases": "No cases. Buy some in the shop",
+      "noCases": "No cases",
+      "buyCases": "Buy",
       "continue": "Continue"
     },
     "shop": {
@@ -229,6 +230,7 @@
       "buyButton": "Buy",
       "purchase": "Purchase",
       "purchased": "Acquired {{count}} case(s)",
+      "openCases": "Go to opening",
       "buyFailed": "Purchase failed",
       "notEnoughBalance": "Not enough balance",
       "badges": {
