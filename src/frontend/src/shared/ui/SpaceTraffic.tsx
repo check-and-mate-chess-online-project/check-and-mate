@@ -35,9 +35,9 @@ const COMET_COLORS: Record<Comet['hue'], { head: string; tail: string }> = {
 function generateShips(count: number, frequent: boolean): Ship[] {
   return Array.from({ length: count }, () => {
     const duration = frequent ? 24 + Math.random() * 14 : 80 + Math.random() * 40
-    const height = 55 + Math.random() * 30
+    const height = 60 + Math.random() * 25
     return {
-      bottom: 8 + Math.random() * 28,
+      bottom: Math.round(Math.random() * 10),
       height,
       duration,
       delay: -Math.random() * duration,
@@ -117,7 +117,7 @@ export function SpaceTraffic() {
             alt=""
             aria-hidden
             draggable={false}
-            className="absolute right-0 top-0 h-full w-auto"
+            className="absolute right-0 bottom-0 h-full w-auto"
             style={{
               filter:
                 'drop-shadow(0 0 8px rgba(56,189,248,0.45)) drop-shadow(0 0 14px rgba(0,0,0,0.7))',
