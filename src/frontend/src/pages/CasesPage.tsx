@@ -3,9 +3,9 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { useMe, useOpenLootbox } from '../shared/api/hooks'
+import { useMe, useOpenLootbox, usePlanets } from '../shared/api/hooks'
 import { FigureType, SkinRarity } from '../shared/api/enums'
-import type { LootBoxDropResultDto } from '../shared/api'
+import type { LootBoxDropResultDto, PlanetDto } from '../shared/api'
 import { ApiError } from '../shared/api/http'
 import { skinImageSrc } from '../shared/lib/skinImage'
 
@@ -13,6 +13,26 @@ const FAKE_RARITY: Record<string, SkinRarity> = {
   common: SkinRarity.Common,
   rare: SkinRarity.Rare,
   legendary: SkinRarity.Legendary,
+}
+
+const CASE_DESCENT_MS = 7600
+const CASE_WHITE_FLASH_MS = 520
+const CASE_LANDING_THRUSTERS = [
+  { left: '32%', delay: '0s' },
+  { left: '50%', delay: '0.12s' },
+  { left: '68%', delay: '0.24s' },
+]
+const CASE_FLAME_GRADIENT =
+  'radial-gradient(ellipse at 50% 0%, rgba(254,243,199,0.95) 0%, rgba(251,146,60,0.85) 22%, rgba(239,68,68,0.7) 50%, rgba(127,29,29,0.25) 80%, transparent 100%)'
+const CASE_SIDE_FLAME_GRADIENT =
+  'radial-gradient(ellipse at 0% 50%, rgba(240,249,255,0.95) 0%, rgba(125,211,252,0.8) 30%, rgba(14,165,233,0.48) 62%, transparent 100%)'
+const CASE_SIDE_FLAME_GRADIENT_REVERSED =
+  'radial-gradient(ellipse at 100% 50%, rgba(240,249,255,0.95) 0%, rgba(125,211,252,0.8) 30%, rgba(14,165,233,0.48) 62%, transparent 100%)'
+
+const FALLBACK_LANDING_PLANET: PlanetDto = {
+  id: 'case-planet',
+  name: 'Case Planet',
+  imageUrl: '/planets/case-planetwebp.webp',
 }
 
 function makeFakeDrop(rarity: SkinRarity): LootBoxDropResultDto {
@@ -108,9 +128,21 @@ function generateAscendStars(count: number): AscendStar[] {
   }))
 }
 
+function findLandingPlanet(
+  drop: LootBoxDropResultDto | null,
+  planets: PlanetDto[] | undefined,
+): PlanetDto {
+  if (!drop) return FALLBACK_LANDING_PLANET
+  return (
+    planets?.find((planet) => planet.id === drop.skin.setId) ??
+    FALLBACK_LANDING_PLANET
+  )
+}
+
 export function CasesPage() {
   const { t } = useTranslation()
   const { data: me } = useMe()
+  const { data: planets } = usePlanets()
   const open = useOpenLootbox()
   const [searchParams] = useSearchParams()
   const fakeRarity = searchParams.get('fake')
@@ -135,6 +167,7 @@ export function CasesPage() {
   const empty = count === 0 && !fakeRarity
   const animating = phase !== 'idle'
   const palette = drop ? RARITY[drop.skin.rarity] : RARITY[SkinRarity.Common]
+  const landingPlanet = findLandingPlanet(drop, planets)
   const shipLifted =
     phase === 'descent' || phase === 'whiteflash' || phase === 'reveal'
   const descentVisible = phase === 'descent' || phase === 'whiteflash'
@@ -153,8 +186,11 @@ export function CasesPage() {
   const runAnimation = (result: LootBoxDropResultDto) => {
     setDrop(result)
     schedule(() => setPhase('descent'), 600)
-    schedule(() => setPhase('whiteflash'), 600 + 2200)
-    schedule(() => setPhase('reveal'), 600 + 2200 + 180)
+    schedule(() => setPhase('whiteflash'), 600 + CASE_DESCENT_MS)
+    schedule(
+      () => setPhase('reveal'),
+      600 + CASE_DESCENT_MS + CASE_WHITE_FLASH_MS,
+    )
   }
 
   const handleOpen = async () => {
@@ -333,8 +369,41 @@ export function CasesPage() {
           transition: 'opacity 0.25s linear',
         }}
       >
-        <div className="relative w-[min(90vw,72rem)] aspect-[16/9]">
-          <div className="absolute left-1/2 top-[88%] -translate-x-1/2 -translate-y-1/2">
+        <div
+          className="relative w-[min(90vw,72rem)] aspect-[16/9]"
+          style={{
+            animation:
+              phase === 'whiteflash'
+                ? `case-whiteflash-camera ${CASE_WHITE_FLASH_MS}ms ease-in forwards`
+                : descentVisible
+                  ? `case-descent-camera-prep ${CASE_DESCENT_MS}ms ease-in-out forwards`
+                  : undefined,
+            transformOrigin: '50% 78%',
+          }}
+        >
+          <img
+            src={landingPlanet.imageUrl}
+            alt=""
+            aria-hidden
+            draggable={false}
+            className="absolute left-1/2 bottom-[-350%] w-[220%] max-w-none rounded-full pointer-events-none"
+            style={{
+              filter:
+                'drop-shadow(0 -24px 44px rgba(56,189,248,0.2)) drop-shadow(0 0 70px rgba(15,23,42,0.72))',
+              opacity: 0,
+              animation: descentVisible
+                ? `case-descent-planet-reveal ${CASE_DESCENT_MS}ms ease-out forwards`
+                : undefined,
+            }}
+          />
+          <div
+            className="absolute left-1/2 top-[84%]"
+            style={{
+              animation: descentVisible
+                ? `case-transfer-landing ${CASE_DESCENT_MS}ms ease-in-out forwards`
+                : undefined,
+            }}
+          >
             <div
               aria-hidden
               className="absolute left-1/2 bottom-full w-[80px] h-[140vh] pointer-events-none"
@@ -342,6 +411,9 @@ export function CasesPage() {
                 transformOrigin: 'bottom',
                 transform: `translateX(-50%) scaleY(${descentVisible ? 1 : 0})`,
                 opacity: descentVisible ? 1 : 0,
+                animation: descentVisible
+                  ? `case-transfer-trail ${CASE_DESCENT_MS}ms ease-in-out forwards`
+                  : undefined,
                 transition: descentVisible
                   ? 'transform 0.6s ease-out 1.0s, opacity 0.6s ease-out 1.0s'
                   : 'transform 0.2s linear, opacity 0.2s linear',
@@ -372,37 +444,105 @@ export function CasesPage() {
             </div>
 
             <div
-              className="relative"
-              style={{ animation: 'bob 1.2s ease-in-out infinite' }}
+              className="relative w-[220px]"
+              style={{
+                animation: descentVisible
+                  ? `case-lander-engine-shake ${CASE_DESCENT_MS}ms linear forwards`
+                  : 'bob 1.2s ease-in-out infinite',
+              }}
             >
               <div
                 aria-hidden
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[210px] h-[210px] pointer-events-none"
+                className="absolute pointer-events-none"
                 style={{
+                  inset: '-24%',
+                  borderRadius: '45%',
                   background:
-                    'radial-gradient(circle at 50% 62%, rgba(224,242,254,0.9) 0%, rgba(56,189,248,0.65) 18%, rgba(37,99,235,0.35) 38%, transparent 60%)',
-                  filter: 'blur(8px)',
-                  animation: 'burn-flicker 0.18s ease-in-out infinite alternate',
-                }}
-              />
-              <div
-                aria-hidden
-                className="absolute left-1/2 top-[92%] -translate-x-1/2 w-[140px] h-[90px] pointer-events-none"
-                style={{
-                  background:
-                    'radial-gradient(ellipse at 50% 0%, rgba(240,249,255,0.95) 0%, rgba(56,189,248,0.7) 25%, rgba(37,99,235,0.4) 55%, transparent 80%)',
-                  filter: 'blur(5px)',
-                  animation: 'burn-flicker 0.12s ease-in-out infinite alternate',
+                    'radial-gradient(ellipse at 50% 58%, rgba(56,189,248,0.32) 0%, rgba(56,189,248,0.18) 34%, transparent 62%), radial-gradient(ellipse at 52% 60%, transparent 0%, transparent 34%, rgba(248,113,113,0.34) 46%, transparent 68%)',
+                  filter: 'blur(7px)',
+                  mixBlendMode: 'screen',
+                  animation: descentVisible
+                    ? `case-atmosphere-glow ${CASE_DESCENT_MS}ms ease-in-out forwards`
+                    : undefined,
                 }}
               />
               <img
                 src="/boat.webp"
                 alt=""
                 draggable={false}
-                className="relative w-[170px] h-auto"
+                className="relative w-full h-auto"
                 style={{
-                  filter:
-                    'drop-shadow(0 0 4px rgba(224,242,254,0.9)) drop-shadow(0 0 12px rgba(56,189,248,0.85)) drop-shadow(0 0 24px rgba(37,99,235,0.7))',
+                  animation: descentVisible
+                    ? `case-reentry-hull-glow ${CASE_DESCENT_MS}ms ease-in-out forwards`
+                    : undefined,
+                }}
+              />
+              {CASE_LANDING_THRUSTERS.map((thruster) => (
+                <div
+                  key={thruster.left}
+                  aria-hidden
+                  className="absolute pointer-events-none rounded-full"
+                  style={{
+                    left: thruster.left,
+                    bottom: '-30%',
+                    width: '12%',
+                    height: '38%',
+                    transformOrigin: 'top',
+                    background: CASE_FLAME_GRADIENT,
+                    filter: 'blur(2px)',
+                    animation: descentVisible
+                      ? `case-landing-burn ${CASE_DESCENT_MS}ms ease-in-out ${thruster.delay} forwards`
+                      : undefined,
+                  }}
+                />
+              ))}
+              <div
+                aria-hidden
+                className="absolute pointer-events-none rounded-full z-10"
+                style={{
+                  left: '50%',
+                  bottom: '-26%',
+                  width: '118%',
+                  height: '34%',
+                  transformOrigin: 'center',
+                  background:
+                    'radial-gradient(ellipse at 50% 52%, rgba(150,105,72,0.76) 0%, rgba(104,72,48,0.52) 32%, rgba(72,48,32,0.34) 58%, rgba(42,30,22,0.18) 76%, transparent 88%)',
+                  filter: 'blur(6px)',
+                  animation: descentVisible
+                    ? `case-landing-dust ${CASE_DESCENT_MS}ms ease-out forwards`
+                    : undefined,
+                }}
+              />
+              <div
+                aria-hidden
+                className="absolute pointer-events-none"
+                style={{
+                  top: '25%',
+                  left: '70%',
+                  width: '26%',
+                  height: '9%',
+                  transformOrigin: 'left center',
+                  background: CASE_SIDE_FLAME_GRADIENT,
+                  filter: 'blur(1.5px)',
+                  animation: descentVisible
+                    ? `case-stabilizer-right ${CASE_DESCENT_MS}ms ease-in-out forwards`
+                    : undefined,
+                }}
+              />
+              <div
+                aria-hidden
+                className="absolute pointer-events-none"
+                style={{
+                  top: '25%',
+                  right: '70%',
+                  width: '26%',
+                  height: '9%',
+                  transformOrigin: 'right center',
+                  background: CASE_SIDE_FLAME_GRADIENT_REVERSED,
+                  filter: 'blur(1.5px)',
+                  animation: descentVisible
+                    ? `case-stabilizer-left ${CASE_DESCENT_MS}ms ease-in-out forwards`
+                    : undefined,
                 }}
               />
             </div>
@@ -473,7 +613,7 @@ export function CasesPage() {
             key="whiteflash"
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 1, 1, 0] }}
-            transition={{ duration: 0.45, times: [0, 0.3, 0.6, 1] }}
+            transition={{ duration: CASE_WHITE_FLASH_MS / 1000, times: [0, 0.35, 0.72, 1] }}
             className="absolute inset-0 bg-white pointer-events-none z-40"
           />
         )}
