@@ -56,8 +56,24 @@ export function RootLayout() {
           </div>
           <div className="flex items-center gap-4">
             <LanguageToggle />
-            <span className="text-sky-300 text-sm tabular-nums">
-              {user?.rating ?? 0} ★
+            <span className="text-sm tabular-nums font-medium flex items-center gap-1">
+              <span
+                style={{
+                  color: '#fafafa',
+                  textShadow: '0 0 6px rgba(255,255,255,0.35)',
+                }}
+              >
+                {user?.rating ?? 0}
+              </span>
+              <span
+                style={{
+                  color: '#f87171',
+                  textShadow:
+                    '0 0 8px rgba(248,113,113,0.7), 0 0 18px rgba(220,38,38,0.4)',
+                }}
+              >
+                ★
+              </span>
             </span>
             <span
               className="text-sm tabular-nums font-medium"
