@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 
 interface Ship {
-  top: number
+  bottom: number
   height: number
   duration: number
   delay: number
@@ -15,7 +15,6 @@ interface Comet {
   hue: 'cyan' | 'orange' | 'violet'
 }
 
-const SHIP_COUNT = 1
 const COMET_COUNT = 2
 
 const COMET_COLORS: Record<Comet['hue'], { head: string; tail: string }> = {
@@ -33,13 +32,17 @@ const COMET_COLORS: Record<Comet['hue'], { head: string; tail: string }> = {
   },
 }
 
-function generateShips(count: number): Ship[] {
-  return Array.from({ length: count }, () => ({
-    top: 10 + Math.random() * 50,
-    height: 70 + Math.random() * 40,
-    duration: 80 + Math.random() * 40,
-    delay: -Math.random() * 80,
-  }))
+function generateShips(count: number, frequent: boolean): Ship[] {
+  return Array.from({ length: count }, () => {
+    const duration = frequent ? 24 + Math.random() * 14 : 80 + Math.random() * 40
+    const height = 55 + Math.random() * 30
+    return {
+      bottom: 8 + Math.random() * 28,
+      height,
+      duration,
+      delay: -Math.random() * duration,
+    }
+  })
 }
 
 function generateComets(count: number): Comet[] {
@@ -54,7 +57,12 @@ function generateComets(count: number): Comet[] {
 
 export function SpaceTraffic() {
   const location = useLocation()
-  const ships = useMemo(() => generateShips(SHIP_COUNT), [])
+  const isLanding = location.pathname === '/'
+  const shipCount = isLanding ? 2 : 1
+  const ships = useMemo(
+    () => generateShips(shipCount, isLanding),
+    [shipCount, isLanding],
+  )
   const comets = useMemo(() => generateComets(COMET_COUNT), [])
 
   if (
@@ -70,7 +78,7 @@ export function SpaceTraffic() {
           key={`ship-${i}`}
           className="absolute left-0"
           style={{
-            top: `${s.top}%`,
+            bottom: `${s.bottom}px`,
             height: `${s.height}px`,
             width: `${s.height * 4.5}px`,
             animation: `ship-fly-ltr ${s.duration}s linear ${s.delay}s infinite`,
