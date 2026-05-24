@@ -7,10 +7,12 @@ import { LanguageToggle } from '../shared/ui/LanguageToggle'
 import { MuteToggle } from '../shared/ui/MuteToggle'
 import { ActiveGamePill } from '../shared/ui/ActiveGamePill'
 import { PageTransition } from '../shared/ui/PageTransition'
+import { SpaceTraffic } from '../shared/ui/SpaceTraffic'
 import { useAuthStore } from '../shared/auth/authStore'
 import { useAuth } from '../shared/auth/useAuth'
 import { useMe } from '../shared/api/hooks'
 import { useGlobalGameEvents } from '../shared/lib/useGlobalGameEvents'
+import { useSyncEquippedSkins } from '../shared/lib/useSyncEquippedSkins'
 import { stopGameHub } from '../shared/realtime/gameHub'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -23,6 +25,7 @@ export function RootLayout() {
   const { data: meData } = useMe()
   const setUser = useAuthStore((s) => s.setUser)
   useGlobalGameEvents()
+  useSyncEquippedSkins()
 
   useEffect(() => {
     if (meData) setUser(meData)
@@ -36,6 +39,7 @@ export function RootLayout() {
 
   return (
     <div className="min-h-screen text-slate-100 flex flex-col">
+      <SpaceTraffic />
       <header className="border-b border-violet-900 px-6 py-4">
         <nav className="flex items-center justify-between">
           <div className="flex items-center gap-6">
