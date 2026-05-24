@@ -20,6 +20,11 @@ public static class GameMapper
             game.Id,
             game.WhitePlayerId,
             game.BlackPlayerId,
+            new FinishedGameState(),
+            (GameResult)game.Result,
+            (GameTerminationReason)game.TerminationReason,
+            game.StartTimeUtc,
+            game.EndTimeUtc,
             timeControl,
             new ArchivedChessEngine(moves)
         );
@@ -34,12 +39,12 @@ public static class GameMapper
             game.WhitePlayerId,
             game.BlackPlayerId,
             JsonSerializer.Serialize(moves),
-            (int?)game.Result,
-            (int?)game.TerminationReason,
+            (int)(game.Result ?? throw new InvalidOperationException("game must be completed")),
+            (int)(game.TerminationReason ?? throw new InvalidOperationException("game must be completed")),
             game.TimeControl.InitialTimeSec,
             game.TimeControl.IncrementPerMoveSec,
-            game.StartTimeUtc,
-            game.EndTimeUtc
+            game.StartTimeUtc ?? throw new InvalidOperationException("game must be completed"),
+            game.EndTimeUtc ?? throw new InvalidOperationException("game must be completed")
         );
     }
 }

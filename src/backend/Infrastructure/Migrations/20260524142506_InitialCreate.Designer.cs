@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260523210431_InitialCreate")]
+    [Migration("20260524142506_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -73,7 +73,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("BlackPlayerId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("EndTimeUtc")
+                    b.Property<DateTime>("EndTimeUtc")
                         .HasColumnType("timestamptz");
 
                     b.Property<int?>("IncrementPerMoveSec")
@@ -85,13 +85,13 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Moves")
                         .HasColumnType("jsonb");
 
-                    b.Property<int?>("Result")
+                    b.Property<int>("Result")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("StartTimeUtc")
+                    b.Property<DateTime>("StartTimeUtc")
                         .HasColumnType("timestamptz");
 
-                    b.Property<int?>("TerminationReason")
+                    b.Property<int>("TerminationReason")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("WhitePlayerId")

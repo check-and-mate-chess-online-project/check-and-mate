@@ -18,21 +18,45 @@ public class Game
     private readonly IChessEngine _engine;
 
     public Game(Guid whitePlayerId, Guid blackPlayerId,ITimeControl timeControl, IChessEngine engine) 
-        : this(Guid.NewGuid(), whitePlayerId, blackPlayerId, new PendingGameState(), timeControl, engine) {}
+        : this(Guid.NewGuid(), whitePlayerId, blackPlayerId, new PendingGameState(), null, null, DateTime.UtcNow, null, timeControl, engine) {}
 
-    private Game(Guid id, Guid whitePlayerId, Guid blackPlayerId, IGameState state, ITimeControl timeControl, IChessEngine engine)
+    private Game(
+        Guid id, 
+        Guid whitePlayerId, 
+        Guid blackPlayerId, 
+        IGameState state,
+        GameResult? result,
+        GameTerminationReason? terminationReason,
+        DateTime? startTimeUtc,
+        DateTime? endTimeUtc,
+        ITimeControl timeControl, 
+        IChessEngine engine)
     {
         if (whitePlayerId == blackPlayerId) throw new CoreLogicException("players must be different");
         Id = id;
         WhitePlayerId = whitePlayerId;
         BlackPlayerId = blackPlayerId;
         State = state;
+        Result = result;
+        TerminationReason = terminationReason;
+        StartTimeUtc = startTimeUtc;
+        EndTimeUtc = endTimeUtc;
         TimeControl = timeControl;
         _engine = engine;
     }
 
-    public static Game Restore(Guid id, Guid whitePlayerId, Guid blackPlayerId, ITimeControl timeControl, IChessEngine engine)
-        => new(id, whitePlayerId, blackPlayerId, new FinishedGameState(), timeControl, engine);
+    public static Game Restore(
+        Guid id, 
+        Guid whitePlayerId, 
+        Guid blackPlayerId,
+        IGameState state,
+        GameResult result,
+        GameTerminationReason terminationReason,
+        DateTime startTimeUtc,
+        DateTime endTimeUtc,
+        ITimeControl timeControl, 
+        IChessEngine engine)
+        => new(id, whitePlayerId, blackPlayerId, state, result, terminationReason, startTimeUtc, endTimeUtc, timeControl, engine);
 
     public MoveResult MakeMove(Move move, Guid playerId) => State.MakeMove(this, move, playerId);
     

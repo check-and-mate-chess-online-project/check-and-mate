@@ -160,12 +160,12 @@ namespace Infrastructure.Migrations
                     WhitePlayerId = table.Column<Guid>(type: "uuid", nullable: false),
                     BlackPlayerId = table.Column<Guid>(type: "uuid", nullable: false),
                     Moves = table.Column<string>(type: "jsonb", nullable: true),
-                    Result = table.Column<int>(type: "integer", nullable: true),
-                    TerminationReason = table.Column<int>(type: "integer", nullable: true),
+                    Result = table.Column<int>(type: "integer", nullable: false),
+                    TerminationReason = table.Column<int>(type: "integer", nullable: false),
                     InitialTimeSec = table.Column<int>(type: "integer", nullable: true),
                     IncrementPerMoveSec = table.Column<int>(type: "integer", nullable: true),
-                    StartTimeUtc = table.Column<DateTime>(type: "timestamptz", nullable: true),
-                    EndTimeUtc = table.Column<DateTime>(type: "timestamptz", nullable: true)
+                    StartTimeUtc = table.Column<DateTime>(type: "timestamptz", nullable: false),
+                    EndTimeUtc = table.Column<DateTime>(type: "timestamptz", nullable: false)
                 },
                 constraints: table =>
                 {

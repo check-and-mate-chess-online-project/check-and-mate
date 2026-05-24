@@ -35,7 +35,7 @@ public class RatingCalculator : IRatingCalculator
 
     private double PointsPercentage(int ratingRange)
     {
-        double percent = (ratingRange / 750) + 0.5;
+        double percent = (ratingRange / 750.0) + 0.5;
         if (percent > 1.0) percent = 1.0;
         if (percent < 0.0) percent = 0.0;
         return percent;
