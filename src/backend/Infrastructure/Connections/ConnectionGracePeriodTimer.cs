@@ -11,7 +11,7 @@ public class ConnectionGracePeriodTimer : IConnectionGracePeriodTimer
     public void StartGracePeriod(Guid userId, Func<Task> onGraceExpired)
     {
         if (_timers.TryRemove(userId, out CancellationTokenSource? oldCts)) oldCts.Cancel();
-        CancellationTokenSource cts = new(_gracePeriod);
+        CancellationTokenSource cts = new();
         _timers[userId] = cts;
         _ = Task.Run(async () =>
         {
