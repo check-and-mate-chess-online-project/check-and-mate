@@ -157,6 +157,10 @@ export const gameHub = {
     const c = await ensureStarted()
     return c.invoke<GameInvitationDto[]>('GetPendingInvitations')
   },
+  getActiveGameState: async (): Promise<GameDto | null> => {
+    const c = await ensureStarted()
+    return c.invoke<GameDto | null>('GetActiveGameState')
+  },
   sendGameInvitation: async (
     request: SendGameInvitationRequest,
   ): Promise<void> => {
@@ -194,7 +198,8 @@ export function subscribeGameHub(handlers: GameHubEventHandlers): () => void {
   subscribers.add(handlers)
 
   if (handlers.onMoveMade) {
-    for (const event of moveHistory) handlers.onMoveMade(event.move, event.result)
+    for (const event of moveHistory)
+      handlers.onMoveMade(event.move, event.result)
   }
 
   return () => {

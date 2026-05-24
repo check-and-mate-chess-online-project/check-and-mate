@@ -8,12 +8,16 @@ import {
   GameResult,
   GameTerminationReason,
   PlayerColor,
+  normalizeFigureType,
+  normalizeGameResult,
+  normalizeGameTerminationReason,
+  normalizePlayerColor,
 } from '../shared/api/enums'
 import { useAuth } from '../shared/auth/useAuth'
 import { useGameHistory } from '../shared/api/hooks'
 import { Chessboard } from '../shared/ui/Chessboard/Chessboard'
 
-const REASON_KEY: Record<GameTerminationReason, string> = {
+const REASON_KEY: Record<number, string> = {
   [GameTerminationReason.CheckMate]: 'checkmate',
   [GameTerminationReason.StaleMate]: 'stalemate',
   [GameTerminationReason.Resignation]: 'resignation',
@@ -26,12 +30,12 @@ function coordToSquare(col: number, row: number): string {
   return String.fromCharCode(97 + col) + (row + 1)
 }
 
-function sideColor(
-  result: GameResult | null,
-  side: 'white' | 'black',
-): string {
-  if (result === null || result === GameResult.Draw) return 'text-slate-200'
-  const wonByWhite = result === GameResult.WhiteVictory
+function sideColor(result: GameResult | null, side: 'white' | 'black'): string {
+  const normalizedResult = normalizeGameResult(result)
+  if (normalizedResult === null || normalizedResult === GameResult.Draw) {
+    return 'text-slate-200'
+  }
+  const wonByWhite = normalizedResult === GameResult.WhiteVictory
   const won = (side === 'white') === wonByWhite
   return won ? 'text-orange-400' : 'text-violet-300'
 }
@@ -48,13 +52,13 @@ function plyToChessMove(ply: PlyDto): {
   to: string
   promotion?: 'q' | 'r' | 'b' | 'n'
 } | null {
-  const coord: MoveDto | undefined = ply.move
+  const coord: MoveDto | undefined = ply.move ?? ply.coordinates?.[0]
   if (!coord) return null
   return {
     from: coordToSquare(coord.a, coord.b),
     to: coordToSquare(coord.x, coord.y),
-    promotion: coord.options.selectedFigure
-      ? PROMOTION_CHAR[coord.options.selectedFigure]
+    promotion: coord.options?.selectedFigure
+      ? PROMOTION_CHAR[normalizeFigureType(coord.options.selectedFigure) ?? 0]
       : undefined,
   }
 }
@@ -63,7 +67,7 @@ interface AppliedPly {
   san: string
   fen: string
   moveNumber: number
-  color: PlayerColor
+  color: number
 }
 
 function applyPlies(plies: PlyDto[]): AppliedPly[] {
@@ -71,14 +75,15 @@ function applyPlies(plies: PlyDto[]): AppliedPly[] {
   const out: AppliedPly[] = []
   for (const ply of plies) {
     const move = plyToChessMove(ply)
-    if (!move) continue
+    const color = normalizePlayerColor(ply.color)
+    if (!move || color === null) continue
     try {
       const applied = chess.move(move)
       out.push({
         san: applied.san,
         fen: chess.fen(),
         moveNumber: ply.moveNumber,
-        color: ply.color,
+        color,
       })
     } catch {
       break
@@ -100,7 +105,7 @@ export function ReplayPage() {
     if (!game?.moves) return []
     return [...game.moves].sort((a, b) => {
       if (a.moveNumber !== b.moveNumber) return a.moveNumber - b.moveNumber
-      return a.color === PlayerColor.White ? -1 : 1
+      return normalizePlayerColor(a.color) === PlayerColor.White ? -1 : 1
     })
   }, [game])
 
@@ -138,18 +143,23 @@ export function ReplayPage() {
   const myColor = game.whitePlayer.id === user.id ? 'white' : 'black'
   const opponent =
     game.whitePlayer.id === user.id ? game.blackPlayer : game.whitePlayer
+  const result = normalizeGameResult(game.result)
   const outcome =
-    game.result === GameResult.Draw
+    result === GameResult.Draw
       ? 'draw'
-      : (game.result === GameResult.WhiteVictory) === (myColor === 'white')
+      : (result === GameResult.WhiteVictory) === (myColor === 'white')
         ? 'win'
         : 'loss'
-  const reasonText = game.terminationReason !== null
-    ? t(`pages.game.reason.${REASON_KEY[game.terminationReason]}`)
-    : ''
+  const reason = normalizeGameTerminationReason(game.terminationReason)
+  const reasonText =
+    reason !== null ? t(`pages.game.reason.${REASON_KEY[reason]}`) : ''
 
   // Pair plies into rounds: [{whitePly, blackPly?}]
-  const rounds: Array<{ moveNumber: number; white?: AppliedPly; black?: AppliedPly }> = []
+  const rounds: Array<{
+    moveNumber: number
+    white?: AppliedPly
+    black?: AppliedPly
+  }> = []
   for (const a of applied) {
     let round = rounds.find((r) => r.moveNumber === a.moveNumber)
     if (!round) {
@@ -259,12 +269,18 @@ export function ReplayPage() {
           <div className="my-3 border-t border-slate-800" />
           <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-1 text-sm font-mono">
             {rounds.map((round) => {
-              const whiteIdx = applied.findIndex(
-                (p) => p.moveNumber === round.moveNumber && p.color === PlayerColor.White,
-              ) + 1
-              const blackIdx = applied.findIndex(
-                (p) => p.moveNumber === round.moveNumber && p.color === PlayerColor.Black,
-              ) + 1
+              const whiteIdx =
+                applied.findIndex(
+                  (p) =>
+                    p.moveNumber === round.moveNumber &&
+                    p.color === PlayerColor.White,
+                ) + 1
+              const blackIdx =
+                applied.findIndex(
+                  (p) =>
+                    p.moveNumber === round.moveNumber &&
+                    p.color === PlayerColor.Black,
+                ) + 1
               return (
                 <div key={round.moveNumber} className="contents">
                   <span className="text-slate-500">{round.moveNumber}.</span>

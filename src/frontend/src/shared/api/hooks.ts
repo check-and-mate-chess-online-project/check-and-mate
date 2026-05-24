@@ -63,7 +63,8 @@ export function useUserSkins(login: string) {
 export function useSkinConfiguration() {
   return useQuery({
     queryKey: ['skin-configuration'],
-    queryFn: () => api.get<SkinConfigurationDto>('/api/inventory/skins/current'),
+    queryFn: () =>
+      api.get<SkinConfigurationDto>('/api/inventory/skins/current'),
   })
 }
 
@@ -94,7 +95,10 @@ export function useEquipSkin() {
   return useMutation({
     mutationFn: (body: { figure: FigureType; skinId: Guid }) =>
       api.post<void>('/api/inventory/skins/equip', body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['inventory'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['inventory'] })
+      qc.invalidateQueries({ queryKey: ['skin-configuration'] })
+    },
   })
 }
 
@@ -145,7 +149,8 @@ export function useSendFriendRequest() {
   return useMutation({
     mutationFn: (body: { receiverLogin: string }) =>
       api.post<FriendRequestDto>('/api/friends/requests', body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['friends', 'requests'] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ['friends', 'requests'] }),
   })
 }
 
@@ -165,7 +170,8 @@ export function useRejectFriendRequest() {
   return useMutation({
     mutationFn: (friendRequestId: Guid) =>
       api.patch<void>(`/api/friends/requests/${friendRequestId}/reject`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['friends', 'requests'] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ['friends', 'requests'] }),
   })
 }
 

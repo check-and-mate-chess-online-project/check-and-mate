@@ -4,7 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useMe, useOpenLootbox, usePlanets } from '../shared/api/hooks'
-import { FigureType, SkinRarity } from '../shared/api/enums'
+import {
+  FigureType,
+  SkinRarity,
+  figureTypeI18nKey,
+  normalizeSkinRarity,
+  skinRarityI18nKey,
+} from '../shared/api/enums'
 import type { LootBoxDropResultDto, PlanetDto } from '../shared/api'
 import { ApiError } from '../shared/api/http'
 import { skinImageSrc } from '../shared/lib/skinImage'
@@ -47,13 +53,15 @@ function makeFakeDrop(rarity: SkinRarity): LootBoxDropResultDto {
         'Test description for the dropped skin. The actual lore will come from the backend.',
       figure: FigureType.King,
       rarity,
-      whiteBoardImage: '',
-      blackBoardImage: '',
-      idleImage: '',
-      startFightWinImage: '',
-      startFightLoseImage: '',
-      endFightWinImage: '',
-      endFightLoseImage: '',
+      assets: {
+        whiteBoardImage: '',
+        blackBoardImage: '',
+        idleImage: '',
+        startFightWinImage: '',
+        startFightLoseImage: '',
+        endFightWinImage: '',
+        endFightLoseImage: '',
+      },
       isDefault: false,
     },
   }
@@ -68,7 +76,7 @@ interface RarityPalette {
   text: string
 }
 
-const RARITY: Record<SkinRarity, RarityPalette> = {
+const RARITY: Record<number, RarityPalette> = {
   [SkinRarity.Common]: {
     glow: 'rgba(203,213,225,0.85)',
     trail: 'rgba(203,213,225,0.65)',
@@ -169,7 +177,9 @@ export function CasesPage() {
   const count = me?.lootBoxCount ?? 0
   const empty = count === 0 && !fakeRarity
   const animating = phase !== 'idle'
-  const palette = drop ? RARITY[drop.skin.rarity] : RARITY[SkinRarity.Common]
+  const palette = drop
+    ? RARITY[normalizeSkinRarity(drop.skin.rarity) ?? SkinRarity.Common]
+    : RARITY[SkinRarity.Common]
   const landingPlanet = findLandingPlanet(drop, planets)
   const shipLifted =
     phase === 'descent' || phase === 'whiteflash' || phase === 'reveal'
@@ -215,7 +225,8 @@ export function CasesPage() {
       runAnimation(result)
     } catch (e) {
       setPhase('idle')
-      const msg = e instanceof ApiError && e.message ? e.message : (e as Error).message
+      const msg =
+        e instanceof ApiError && e.message ? e.message : (e as Error).message
       toast.error(msg || t('pages.cases.openFailed'))
     }
   }
@@ -339,7 +350,11 @@ export function CasesPage() {
                 key="flash"
                 initial={{ opacity: 0, scale: 0.2 }}
                 animate={{ opacity: [0, 1, 1, 0], scale: [0.2, 1.2, 1, 0.9] }}
-                transition={{ duration: 0.55, times: [0, 0.2, 0.55, 1], ease: 'easeOut' }}
+                transition={{
+                  duration: 0.55,
+                  times: [0, 0.2, 0.55, 1],
+                  ease: 'easeOut',
+                }}
                 className="absolute left-1/2 top-[74%] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ width: '18%', aspectRatio: '1' }}
               >
@@ -600,7 +615,9 @@ export function CasesPage() {
                     : 'px-8 py-3 rounded-md font-display text-lg uppercase tracking-[0.18em] text-orange-50 bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-400 hover:to-orange-600 border border-orange-300/40 shadow-[0_4px_22px_rgba(251,146,60,0.45),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_4px_30px_rgba(251,146,60,0.62),inset_0_1px_0_rgba(255,255,255,0.22)] active:translate-y-px transition-all backdrop-blur-sm'
                 }
               >
-                {empty ? t('pages.cases.buyCases') : t('pages.cases.openButton')}
+                {empty
+                  ? t('pages.cases.buyCases')
+                  : t('pages.cases.openButton')}
               </button>
             </div>
             {empty && (
@@ -635,7 +652,10 @@ export function CasesPage() {
             key="whiteflash"
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 1, 1, 0] }}
-            transition={{ duration: CASE_WHITE_FLASH_MS / 1000, times: [0, 0.35, 0.72, 1] }}
+            transition={{
+              duration: CASE_WHITE_FLASH_MS / 1000,
+              times: [0, 0.35, 0.72, 1],
+            }}
             className="absolute inset-0 bg-white pointer-events-none z-40"
           />
         )}
@@ -669,9 +689,9 @@ export function CasesPage() {
                   className="relative"
                   style={{ filter: `drop-shadow(0 0 60px ${palette.glow})` }}
                 >
-                  {drop.skin.idleImage ? (
+                  {drop.skin.assets.idleImage ? (
                     <img
-                      src={skinImageSrc(drop.skin.idleImage)}
+                      src={skinImageSrc(drop.skin.assets.idleImage)}
                       alt={drop.skin.name}
                       className="max-h-[70vh] object-contain"
                     />
@@ -697,13 +717,17 @@ export function CasesPage() {
                 <div
                   className={`text-sm uppercase tracking-[0.3em] mb-3 ${palette.text}`}
                 >
-                  {t(`skin.rarity.${drop.skin.rarity}`)}
+                  {t(
+                    `pages.inventory.rarity.${skinRarityI18nKey(drop.skin.rarity)}`,
+                  )}
                 </div>
                 <h2 className="font-display text-5xl md:text-6xl mb-2 leading-tight">
                   {drop.skin.name}
                 </h2>
                 <div className="text-violet-300 text-lg mb-6">
-                  {t(`skin.figure.${drop.skin.figure}`)}
+                  {t(
+                    `pages.inventory.figures.${figureTypeI18nKey(drop.skin.figure)}`,
+                  )}
                 </div>
                 {drop.skin.description && (
                   <p className="text-slate-400 leading-relaxed mb-6">

@@ -2,7 +2,12 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { GameDto, Guid } from '../shared/api'
-import { GameResult, GameTerminationReason } from '../shared/api/enums'
+import {
+  GameResult,
+  GameTerminationReason,
+  normalizeGameResult,
+  normalizeGameTerminationReason,
+} from '../shared/api/enums'
 import { useAuth } from '../shared/auth/useAuth'
 import { useGameHistory } from '../shared/api/hooks'
 
@@ -10,7 +15,7 @@ type Filter = 'all' | 'wins' | 'losses'
 
 type Outcome = 'win' | 'loss' | 'draw'
 
-const REASON_KEY: Record<GameTerminationReason, string> = {
+const REASON_KEY: Record<number, string> = {
   [GameTerminationReason.CheckMate]: 'checkmate',
   [GameTerminationReason.StaleMate]: 'stalemate',
   [GameTerminationReason.Resignation]: 'resignation',
@@ -20,10 +25,11 @@ const REASON_KEY: Record<GameTerminationReason, string> = {
 }
 
 function gameOutcome(game: GameDto, userId: Guid): Outcome {
-  if (game.result === GameResult.Draw) return 'draw'
+  const result = normalizeGameResult(game.result)
+  if (result === GameResult.Draw) return 'draw'
   const userIsWhite = game.whitePlayer.id === userId
-  if (game.result === GameResult.WhiteVictory) return userIsWhite ? 'win' : 'loss'
-  if (game.result === GameResult.BlackVictory) return userIsWhite ? 'loss' : 'win'
+  if (result === GameResult.WhiteVictory) return userIsWhite ? 'win' : 'loss'
+  if (result === GameResult.BlackVictory) return userIsWhite ? 'loss' : 'win'
   return 'draw'
 }
 
@@ -108,9 +114,11 @@ export function HistoryPage() {
             const opponent =
               g.whitePlayer.id === user.id ? g.blackPlayer : g.whitePlayer
             const myColor = g.whitePlayer.id === user.id ? 'white' : 'black'
-            const reasonText = g.terminationReason !== null
-              ? t(`pages.game.reason.${REASON_KEY[g.terminationReason]}`)
-              : ''
+            const reason = normalizeGameTerminationReason(g.terminationReason)
+            const reasonText =
+              reason !== null
+                ? t(`pages.game.reason.${REASON_KEY[reason]}`)
+                : ''
             const outcomeColor =
               outcome === 'win'
                 ? 'text-orange-400'
@@ -127,12 +135,12 @@ export function HistoryPage() {
                     <span className={`text-lg font-semibold ${outcomeColor}`}>
                       {t(`pages.game.result.${outcome}`)}
                     </span>
-                    <span className="text-xs text-slate-500">
-                      {reasonText}
-                    </span>
+                    <span className="text-xs text-slate-500">{reasonText}</span>
                   </div>
                   <div className="flex-1 text-sm text-slate-300">
-                    <span className="text-slate-500">{t('pages.history.enemy')} </span>
+                    <span className="text-slate-500">
+                      {t('pages.history.enemy')}{' '}
+                    </span>
                     <span>{opponent.login}</span>
                     <span className="text-slate-500"> · {myColor}</span>
                   </div>

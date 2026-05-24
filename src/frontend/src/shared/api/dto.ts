@@ -69,7 +69,8 @@ export interface MoveDto {
 export interface PlyDto {
   moveNumber: number
   color: PlayerColor
-  move: MoveDto
+  move?: MoveDto
+  coordinates?: MoveDto[]
 }
 
 export interface MoveOptionsDto {
@@ -109,6 +110,11 @@ export interface SkinDto {
   description: string | null
   figure: FigureType
   rarity: SkinRarity
+  assets: SkinAssetsDto
+  isDefault: boolean
+}
+
+export interface SkinAssetsDto {
   whiteBoardImage: string
   blackBoardImage: string
   idleImage: string
@@ -116,11 +122,10 @@ export interface SkinDto {
   startFightLoseImage: string
   endFightWinImage: string
   endFightLoseImage: string
-  isDefault: boolean
 }
 
 export interface SkinConfigurationDto {
-  userFigureSkins: Record<number, SkinDto>
+  userFigureSkins: Record<string, SkinDto>
 }
 
 export interface GameInvitationDto {

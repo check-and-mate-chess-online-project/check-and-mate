@@ -5,8 +5,16 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Chess } from 'chess.js'
 import { Chessboard } from '../shared/ui/Chessboard/Chessboard'
 import { toast } from 'sonner'
-import type { GameDto, MakeMoveRequest } from '../shared/api'
-import { FigureType, GameTerminationReason } from '../shared/api/enums'
+import type { GameDto, MakeMoveRequest, MoveDto, PlyDto } from '../shared/api'
+import {
+  FigureType,
+  GameResult,
+  GameTerminationReason,
+  normalizeFigureType,
+  normalizeGameResult,
+  normalizeGameTerminationReason,
+  normalizePlayerColor,
+} from '../shared/api/enums'
 import { useAuth } from '../shared/auth/useAuth'
 import { gameHub, subscribeGameHub } from '../shared/realtime/gameHub'
 import { formatClock, useChessClock } from '../shared/lib/useChessClock'
@@ -31,13 +39,20 @@ const CHESS_TO_FIGURE: Record<string, FigureType> = {
   p: FigureType.Pawn,
 }
 
-const REASON_KEY: Record<GameTerminationReason, string> = {
+const REASON_KEY: Record<number, string> = {
   [GameTerminationReason.CheckMate]: 'checkmate',
   [GameTerminationReason.StaleMate]: 'stalemate',
   [GameTerminationReason.Resignation]: 'resignation',
   [GameTerminationReason.Timeout]: 'timeout',
   [GameTerminationReason.DrawAgreement]: 'drawAgreement',
   [GameTerminationReason.Disconnect]: 'disconnect',
+}
+
+const PROMOTION_CHAR: Record<number, 'q' | 'r' | 'b' | 'n'> = {
+  [FigureType.Queen]: 'q',
+  [FigureType.Rook]: 'r',
+  [FigureType.Bishop]: 'b',
+  [FigureType.Knight]: 'n',
 }
 
 interface ClockProps {
@@ -74,11 +89,32 @@ function squareToCoord(sq: string): { col: number; row: number } {
   return { col: sq.charCodeAt(0) - 97, row: parseInt(sq[1], 10) - 1 }
 }
 
-function apiMoveToSquares(move: MakeMoveRequest): { from: string; to: string } {
+function apiMoveToSquares(move: Pick<MoveDto, 'a' | 'b' | 'x' | 'y'>): {
+  from: string
+  to: string
+} {
   return {
     from: coordToSquare(move.a, move.b),
     to: coordToSquare(move.x, move.y),
   }
+}
+
+function promotionFromMove(
+  move: Pick<MoveDto, 'options'>,
+): 'q' | 'r' | 'b' | 'n' | undefined {
+  const figure = normalizeFigureType(move.options?.selectedFigure)
+  return figure === null ? undefined : PROMOTION_CHAR[figure]
+}
+
+function sortPlies(plies: PlyDto[]): PlyDto[] {
+  return [...plies].sort((a, b) => {
+    if (a.moveNumber !== b.moveNumber) return a.moveNumber - b.moveNumber
+    return normalizePlayerColor(a.color) === 1 ? -1 : 1
+  })
+}
+
+function firstPlyMove(ply: PlyDto): MoveDto | undefined {
+  return ply.move ?? ply.coordinates?.[0]
 }
 
 function squaresToApiMove(from: string, to: string): MakeMoveRequest {
@@ -100,6 +136,7 @@ interface ResultModalProps {
 
 function ResultModal({ result, onClose }: ResultModalProps) {
   const { t } = useTranslation()
+  const reason = normalizeGameTerminationReason(result.reason)
   const titleClass =
     result.outcome === 'win'
       ? 'text-orange-400'
@@ -107,8 +144,8 @@ function ResultModal({ result, onClose }: ResultModalProps) {
         ? 'text-violet-300'
         : 'text-slate-200'
   const reasonText =
-    result.reason !== null
-      ? t(`pages.game.reason.${REASON_KEY[result.reason]}`)
+    reason !== null
+      ? t(`pages.game.reason.${REASON_KEY[reason]}`)
       : t('pages.game.gameEnded')
   return (
     <div className="fixed inset-0 z-40 bg-black/70 flex items-center justify-center">
@@ -149,41 +186,113 @@ export function GamePage() {
     }>
   >([])
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null)
-  const [pendingConfirm, setPendingConfirm] = useState<
-    | {
-        message: string
-        title?: string
-        confirmLabel?: string
-        danger?: boolean
-        onConfirm: () => void
-      }
-    | null
-  >(null)
+  const [pendingConfirm, setPendingConfirm] = useState<{
+    message: string
+    title?: string
+    confirmLabel?: string
+    danger?: boolean
+    onConfirm: () => void
+  } | null>(null)
   const equipped = useEquippedSkinsStore((s) => s.equipped)
 
   const cachedGame = qc.getQueryData<GameDto>(['game', gameId])
-  const initialMs = (cachedGame?.initialTimeSec ?? 300) * 1000
-  const incMs = (cachedGame?.incrementPerMoveSec ?? 0) * 1000
-  const { whiteMs, blackMs, active, switchTo, pause } = useChessClock(
+  const [activeGame, setActiveGame] = useState<GameDto | undefined>(cachedGame)
+  const [loadingGame, setLoadingGame] = useState(!cachedGame)
+  const initialMs = (activeGame?.initialTimeSec ?? 300) * 1000
+  const incMs = (activeGame?.incrementPerMoveSec ?? 0) * 1000
+  const { whiteMs, blackMs, active, switchTo, pause, reset } = useChessClock(
     initialMs,
     incMs,
   )
 
-  const myColor: Color | null = !user || !cachedGame
-    ? null
-    : user.id === cachedGame.whitePlayer.id
-      ? 'white'
-      : user.id === cachedGame.blackPlayer.id
-        ? 'black'
-        : null
+  const myColor: Color | null =
+    !user || !activeGame
+      ? null
+      : user.id === activeGame.whitePlayer.id
+        ? 'white'
+        : user.id === activeGame.blackPlayer.id
+          ? 'black'
+          : null
 
   useEffect(() => {
-    if (!cachedGame || !myColor) return
+    if (!gameId || activeGame || !user) return
+    let ignore = false
+    gameHub
+      .getActiveGameState()
+      .then((nextGame) => {
+        if (ignore || !nextGame || nextGame.id !== gameId) return
+        qc.setQueryData(['game', nextGame.id], nextGame)
+        setActiveGame(nextGame)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!ignore) setLoadingGame(false)
+      })
+    return () => {
+      ignore = true
+    }
+  }, [activeGame, gameId, qc, user])
+
+  useEffect(() => {
+    if (!activeGame || !myColor) return
+    const id = window.setTimeout(() => {
+      game.reset()
+      reset()
+      let appliedCount = 0
+      for (const ply of sortPlies(activeGame.moves ?? [])) {
+        const move = firstPlyMove(ply)
+        if (!move) continue
+        const { from, to } = apiMoveToSquares(move)
+        try {
+          game.move({
+            from,
+            to,
+            promotion: promotionFromMove(move) ?? 'q',
+          })
+          appliedCount += 1
+        } catch {
+          break
+        }
+      }
+      setFen(game.fen())
+      const nextTurn = game.turn() === 'w' ? 'white' : 'black'
+      setTurn(nextTurn)
+      setGameHasStarted(appliedCount > 0)
+
+      const result = normalizeGameResult(activeGame.result)
+      const reason = normalizeGameTerminationReason(
+        activeGame.terminationReason,
+      )
+      if (result !== null) {
+        const outcome: Outcome =
+          result === GameResult.Draw
+            ? 'draw'
+            : (result === GameResult.WhiteVictory) === (myColor === 'white')
+              ? 'win'
+              : 'loss'
+        setEnded({ outcome, reason })
+        pause()
+        return
+      }
+
+      setEnded(null)
+      if (appliedCount > 0) switchTo(nextTurn)
+      else pause()
+    }, 0)
+    return () => window.clearTimeout(id)
+  }, [activeGame, myColor, game, reset, switchTo, pause])
+
+  useEffect(() => {
+    if (!activeGame || !myColor) return
     return subscribeGameHub({
       onMoveMade: (move, result) => {
         const { from, to } = apiMoveToSquares(move)
         try {
-          const applied = game.move({ from, to, promotion: 'q' })
+          const applied = game.move({
+            from,
+            to,
+            promotion: promotionFromMove(move) ?? 'q',
+          })
           setFen(game.fen())
           setGameHasStarted(true)
           if (applied.captured) {
@@ -206,7 +315,9 @@ export function GamePage() {
           }
           if (result.isGameOver) {
             const moverColor: Color = game.turn() === 'w' ? 'black' : 'white'
-            const reason = result.terminationReason
+            const reason = normalizeGameTerminationReason(
+              result.terminationReason,
+            )
             const outcome: Outcome =
               reason === GameTerminationReason.StaleMate ||
               reason === GameTerminationReason.DrawAgreement
@@ -245,9 +356,17 @@ export function GamePage() {
         pause()
       },
     })
-  }, [cachedGame, myColor, user?.id, t, game, switchTo, pause])
+  }, [activeGame, myColor, user?.id, t, game, switchTo, pause])
 
-  if (!cachedGame || !myColor) {
+  if (loadingGame) {
+    return (
+      <div className="min-h-screen text-slate-100 flex items-center justify-center">
+        <p className="text-slate-500">{t('pages.game.connecting')}</p>
+      </div>
+    )
+  }
+
+  if (!activeGame || !myColor) {
     return (
       <div className="min-h-screen text-slate-100 flex items-center justify-center">
         <div className="text-center">
@@ -266,16 +385,18 @@ export function GamePage() {
   const isMyTurn = turn === myColor
   const opponentColor: Color = myColor === 'white' ? 'black' : 'white'
   const opponentLogin =
-    cachedGame &&
-    (myColor === 'white'
-      ? cachedGame.blackPlayer.login
-      : cachedGame.whitePlayer.login)
+    myColor === 'white'
+      ? activeGame.blackPlayer.login
+      : activeGame.whitePlayer.login
 
   const squareStyles: Record<string, React.CSSProperties> = (() => {
     if (!selectedSquare) return {}
     const styles: Record<string, React.CSSProperties> = {}
     try {
-      const legalMoves = game.moves({ square: selectedSquare as never, verbose: true })
+      const legalMoves = game.moves({
+        square: selectedSquare as never,
+        verbose: true,
+      })
       for (const m of legalMoves as Array<{ to: string; captured?: string }>) {
         styles[m.to] = m.captured
           ? { boxShadow: 'inset 0 0 0 5px rgba(251,146,60,0.75)' }
@@ -290,11 +411,7 @@ export function GamePage() {
     return styles
   })()
 
-  const onPieceDrag = ({
-    square,
-  }: {
-    square: string | null
-  }) => {
+  const onPieceDrag = ({ square }: { square: string | null }) => {
     if (!isMyTurn || !square) return
     setSelectedSquare(square)
   }
@@ -358,7 +475,11 @@ export function GamePage() {
         confirmLabel: t('pages.game.exit'),
         onConfirm: async () => {
           setPendingConfirm(null)
-          try { await gameHub.leave() } catch { /* ignore */ }
+          try {
+            await gameHub.leave()
+          } catch {
+            /* ignore */
+          }
           exitToLobby()
         },
       })
@@ -370,7 +491,11 @@ export function GamePage() {
       danger: true,
       onConfirm: async () => {
         setPendingConfirm(null)
-        try { await gameHub.resign() } catch { /* ignore */ }
+        try {
+          await gameHub.resign()
+        } catch {
+          /* ignore */
+        }
         exitToLobby()
       },
     })
@@ -393,7 +518,9 @@ export function GamePage() {
           type="button"
           onClick={handleResign}
           disabled={!!ended || !gameHasStarted}
-          title={!gameHasStarted ? t('pages.game.resignDisabledHint') : undefined}
+          title={
+            !gameHasStarted ? t('pages.game.resignDisabledHint') : undefined
+          }
           className="text-sm text-orange-400 hover:text-orange-300 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {t('pages.game.resign')}
@@ -430,9 +557,7 @@ export function GamePage() {
         </div>
       </main>
 
-      {ended && (
-        <ResultModal result={ended} onClose={exitToLobby} />
-      )}
+      {ended && <ResultModal result={ended} onClose={exitToLobby} />}
 
       {pendingConfirm && (
         <ConfirmModal

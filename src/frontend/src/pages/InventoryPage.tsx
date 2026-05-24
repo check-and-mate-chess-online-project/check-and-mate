@@ -9,6 +9,11 @@ import {
   usePlanetSkins,
   usePlanets,
 } from '../shared/api/hooks'
+import {
+  figureTypeI18nKey,
+  normalizeFigureType,
+  skinRarityI18nKey,
+} from '../shared/api/enums'
 import { skinImageSrc } from '../shared/lib/skinImage'
 import { useEquippedSkinsStore } from '../shared/lib/equippedSkins'
 import { Skeleton } from '../shared/ui/Skeleton'
@@ -17,7 +22,10 @@ interface DisplaySkin extends SkinDto {
   isOwned: boolean
 }
 
-function mergeSkins(planetSkins: SkinDto[], inventory: SkinDto[]): DisplaySkin[] {
+function mergeSkins(
+  planetSkins: SkinDto[],
+  inventory: SkinDto[],
+): DisplaySkin[] {
   const ownedIds = new Set(inventory.map((s) => s.id))
   return planetSkins.map((s) => ({ ...s, isOwned: ownedIds.has(s.id) }))
 }
@@ -83,7 +91,9 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
   const equippedMap = useEquippedSkinsStore((s) => s.equipped)
   const [idx, setIdx] = useState(0)
   const skin = skins[idx]
-  const isActive = !!skin && equippedMap[skin.figure] === skin.id
+  const skinFigure = skin ? normalizeFigureType(skin.figure) : null
+  const isActive =
+    !!skin && skinFigure !== null && equippedMap[skinFigure] === skin.id
 
   const planetName = t(`pages.inventory.planets.${planet.id}`, {
     defaultValue: planet.name,
@@ -154,9 +164,9 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
                 aspectRatio: '832 / 1216',
               }}
             >
-              {skin.isOwned && skin.idleImage ? (
+              {skin.isOwned && skin.assets.idleImage ? (
                 <img
-                  src={skinImageSrc(skin.idleImage)}
+                  src={skinImageSrc(skin.assets.idleImage)}
                   alt={skinName}
                   className="h-full w-full object-contain"
                 />
@@ -199,8 +209,9 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
             <>
               <h2 className="text-2xl mb-1">{skinName || '—'}</h2>
               <div className="text-sm text-slate-400 mb-4">
-                {t(`pages.inventory.figures.${skin.figure}`)} ·{' '}
-                {t(`pages.inventory.rarity.${skin.rarity}`)}
+                {t(`pages.inventory.figures.${figureTypeI18nKey(skin.figure)}`)}{' '}
+                ·{' '}
+                {t(`pages.inventory.rarity.${skinRarityI18nKey(skin.rarity)}`)}
               </div>
               {skinDescription && (
                 <p className="text-sm text-slate-300 mb-6 leading-relaxed">
@@ -212,9 +223,10 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
                 disabled={equip.isPending || isActive}
                 onClick={() =>
                   equip.mutate(
-                    { figure: skin.figure, skinId: skin.id },
+                    { figure: skinFigure ?? skin.figure, skinId: skin.id },
                     {
-                      onSuccess: () => setEquipped(skin.figure, skin.id),
+                      onSuccess: () =>
+                        setEquipped(skinFigure ?? skin.figure, skin.id),
                     },
                   )
                 }
@@ -240,8 +252,9 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
             <>
               <h2 className="text-2xl mb-1 text-slate-500">???</h2>
               <div className="text-sm text-slate-500 mb-4">
-                {t(`pages.inventory.figures.${skin.figure}`)} ·{' '}
-                {t(`pages.inventory.rarity.${skin.rarity}`)}
+                {t(`pages.inventory.figures.${figureTypeI18nKey(skin.figure)}`)}{' '}
+                ·{' '}
+                {t(`pages.inventory.rarity.${skinRarityI18nKey(skin.rarity)}`)}
               </div>
               <p className="text-sm text-slate-400 mb-6">
                 {t('pages.inventory.lockedHint')}

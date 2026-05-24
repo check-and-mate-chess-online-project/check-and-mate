@@ -25,8 +25,10 @@ const PLANET_SKINS: SkinDto[] = [
     description: null,
     figure: FigureType.King,
     rarity: SkinRarity.Legendary,
-    ...EMPTY_SKIN_ASSETS,
-    idleImage: '/skins/gagarin-king-idle.webp',
+    assets: {
+      ...EMPTY_SKIN_ASSETS,
+      idleImage: '/skins/gagarin-king-idle.webp',
+    },
     isDefault: false,
   },
   {
@@ -36,8 +38,10 @@ const PLANET_SKINS: SkinDto[] = [
     description: null,
     figure: FigureType.Pawn,
     rarity: SkinRarity.Common,
-    ...EMPTY_SKIN_ASSETS,
-    idleImage: '/skins/magnus-pawn/idle.webp',
+    assets: {
+      ...EMPTY_SKIN_ASSETS,
+      idleImage: '/skins/magnus-pawn/idle.webp',
+    },
     isDefault: false,
   },
   ...(['queen', 'rook', 'bishop', 'knight'] as const).map((f, i) => ({
@@ -47,7 +51,7 @@ const PLANET_SKINS: SkinDto[] = [
     description: null,
     figure: (i + 2) as FigureType,
     rarity: (i % 2 === 0 ? SkinRarity.Rare : SkinRarity.Common) as SkinRarity,
-    ...EMPTY_SKIN_ASSETS,
+    assets: EMPTY_SKIN_ASSETS,
     isDefault: false,
   })),
   ...(['king', 'queen', 'rook', 'bishop', 'knight', 'pawn'] as const).map(
@@ -62,7 +66,7 @@ const PLANET_SKINS: SkinDto[] = [
         : i % 2 === 0
           ? SkinRarity.Rare
           : SkinRarity.Common) as SkinRarity,
-      ...EMPTY_SKIN_ASSETS,
+      assets: EMPTY_SKIN_ASSETS,
       isDefault: false,
     }),
   ),
@@ -98,7 +102,9 @@ export const handlers = [
   http.get('/api/inventory/skins', ({ request }) => {
     const denied = requireAuth(request)
     if (denied) return denied
-    return HttpResponse.json(PLANET_SKINS.filter((s) => OWNED_SKIN_IDS.has(s.id)))
+    return HttpResponse.json(
+      PLANET_SKINS.filter((s) => OWNED_SKIN_IDS.has(s.id)),
+    )
   }),
 
   // бэк проверяет Guid, моки используют строковые id — мокаем equip отдельно
@@ -118,5 +124,4 @@ export const handlers = [
       isDuplicate: Math.random() > 0.4,
     })
   }),
-
 ]

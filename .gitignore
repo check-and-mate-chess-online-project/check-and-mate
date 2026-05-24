@@ -2,5 +2,4 @@
 **/obj/
 .vscode/
 .DS_Store
-src/frontend/public/planets/
 src/frontend/public/skins/
