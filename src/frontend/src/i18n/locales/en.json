@@ -140,7 +140,7 @@
         "resignation": "by resignation",
         "timeout": "on time",
         "drawAgreement": "by agreement",
-        "disconnect": "opponent disconnected — rating updated"
+        "disconnect": "match participant disconnected"
       }
     },
     "history": {
