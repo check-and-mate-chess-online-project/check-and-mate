@@ -7,7 +7,7 @@ import { ApiError } from '../shared/api/http'
 const PRICE_PER_CASE = 100
 const MIN_COUNT = 1
 const MAX_COUNT = 10
-const ORBIT_CYCLE = '12s'
+const LANDING_CYCLE = '16s'
 
 interface TwinkleStar {
   x: number
@@ -39,7 +39,10 @@ const FLAME_GRADIENT =
   'radial-gradient(ellipse at 50% 0%, rgba(254,243,199,0.95) 0%, rgba(251,146,60,0.85) 22%, rgba(239,68,68,0.7) 50%, rgba(127,29,29,0.25) 80%, transparent 100%)'
 
 const SIDE_FLAME_GRADIENT =
-  'radial-gradient(ellipse at 0% 50%, rgba(254,243,199,0.95) 0%, rgba(251,146,60,0.85) 30%, rgba(239,68,68,0.65) 60%, rgba(127,29,29,0.2) 85%, transparent 100%)'
+  'radial-gradient(ellipse at 0% 50%, rgba(240,249,255,0.95) 0%, rgba(125,211,252,0.8) 30%, rgba(14,165,233,0.48) 62%, transparent 100%)'
+
+const SIDE_FLAME_GRADIENT_REVERSED =
+  'radial-gradient(ellipse at 100% 50%, rgba(240,249,255,0.95) 0%, rgba(125,211,252,0.8) 30%, rgba(14,165,233,0.48) 62%, transparent 100%)'
 
 function CornerBracket({
   position,
@@ -134,14 +137,14 @@ export function ShopPage() {
       <div
         className="absolute pointer-events-none"
         style={{
-          right: '4vw',
-          top: '50%',
+          right: '8vw',
+          top: '53%',
           transform: 'translateY(-50%)',
         }}
       >
         <div
           className="relative"
-          style={{ width: '62vh', height: '62vh', maxWidth: '50vw' }}
+          style={{ width: 'min(62vh, 50vw)', aspectRatio: '1' }}
         >
           <div
             aria-hidden
@@ -168,83 +171,109 @@ export function ShopPage() {
           <div
             aria-hidden
             className="absolute inset-0 pointer-events-none"
-            style={{
-              transformOrigin: '50% 50%',
-              animation: `orbit-swing ${ORBIT_CYCLE} ease-in-out infinite`,
-            }}
           >
             <div
-              className="absolute left-1/2 -translate-x-1/2"
-              style={{ top: '-22%' }}
+              className="absolute left-1/2"
+              style={{
+                top: '-30%',
+                transformOrigin: '50% 50%',
+                animation: `landing-path ${LANDING_CYCLE} linear infinite`,
+              }}
             >
               <div
                 style={{
-                  animation: `orbit-dip ${ORBIT_CYCLE} ease-in-out infinite`,
+                  animation: `landing-tilt ${LANDING_CYCLE} linear infinite`,
                 }}
               >
                 <div
                   style={{
-                    animation: `thrust-shake ${ORBIT_CYCLE} linear infinite`,
+                    animation: `thrust-shake ${LANDING_CYCLE} linear infinite`,
                   }}
                 >
-                  <div style={{ animation: 'bob 2.6s ease-in-out infinite' }}>
+                  <div className="relative" style={{ width: '210px' }}>
                     <div
-                      className="relative"
-                      style={{ width: '210px' }}
-                    >
-                      <img
-                        src="/boat.webp"
-                        alt=""
-                        draggable={false}
-                        className="block w-full h-auto"
-                      />
-                      {BOTTOM_THRUSTERS.map((p, i) => (
-                        <div
-                          key={i}
-                          aria-hidden
-                          className="absolute pointer-events-none"
-                          style={{
-                            left: p.left,
-                            bottom: '-6%',
-                            width: '12%',
-                            height: '34%',
-                            transformOrigin: 'top',
-                            background: FLAME_GRADIENT,
-                            filter: 'blur(2px)',
-                            animation: `thruster-fire ${ORBIT_CYCLE} ease-in-out ${p.delay} infinite`,
-                          }}
-                        />
-                      ))}
+                      aria-hidden
+                      className="absolute pointer-events-none"
+                      style={{
+                        inset: '-24%',
+                        borderRadius: '45%',
+                        background:
+                          'radial-gradient(ellipse at 50% 58%, rgba(56,189,248,0.32) 0%, rgba(56,189,248,0.18) 34%, transparent 62%), radial-gradient(ellipse at 52% 60%, transparent 0%, transparent 34%, rgba(248,113,113,0.34) 46%, transparent 68%)',
+                        filter: 'blur(7px)',
+                        mixBlendMode: 'screen',
+                        animation: `atmosphere-glow ${LANDING_CYCLE} ease-in-out infinite`,
+                      }}
+                    />
+                    <img
+                      src="/boat.webp"
+                      alt=""
+                      draggable={false}
+                      className="block w-full h-auto relative"
+                      style={{
+                        animation: `reentry-hull-glow ${LANDING_CYCLE} ease-in-out infinite`,
+                      }}
+                    />
+                    {BOTTOM_THRUSTERS.map((p, i) => (
                       <div
+                        key={i}
                         aria-hidden
-                        className="absolute pointer-events-none"
+                        className="absolute pointer-events-none rounded-full"
                         style={{
-                          top: '50%',
-                          right: '94%',
-                          width: '22%',
-                          height: '10%',
-                          transformOrigin: 'right center',
-                          background: SIDE_FLAME_GRADIENT,
-                          transform: 'scaleX(-1) translateY(-50%)',
+                          left: p.left,
+                          bottom: '-30%',
+                          width: '12%',
+                          height: '38%',
+                          transformOrigin: 'top',
+                          background: FLAME_GRADIENT,
                           filter: 'blur(2px)',
-                          animation: `side-thrust-right ${ORBIT_CYCLE} ease-in-out infinite`,
+                          animation: `thruster-fire ${LANDING_CYCLE} ease-in-out ${p.delay} infinite`,
                         }}
                       />
-                      <div
-                        aria-hidden
-                        className="absolute pointer-events-none"
-                        style={{
-                          top: '50%',
-                          left: '94%',
-                          width: '22%',
-                          height: '10%',
-                          transformOrigin: 'left center',
-                          background: SIDE_FLAME_GRADIENT,
-                          filter: 'blur(2px)',
-                          animation: `side-thrust-left ${ORBIT_CYCLE} ease-in-out infinite`,
-                        }}
-                      />
-                    </div>
+                    ))}
+                    <div
+                      aria-hidden
+                      className="absolute pointer-events-none"
+                      style={{
+                        top: '25%',
+                        left: '70%',
+                        width: '26%',
+                        height: '9%',
+                        transformOrigin: 'left center',
+                        background: SIDE_FLAME_GRADIENT,
+                        filter: 'blur(1.5px)',
+                        animation: `side-thrust-right ${LANDING_CYCLE} ease-in-out infinite`,
+                      }}
+                    />
+                    <div
+                      aria-hidden
+                      className="absolute pointer-events-none"
+                      style={{
+                        top: '25%',
+                        right: '70%',
+                        width: '26%',
+                        height: '9%',
+                        transformOrigin: 'right center',
+                        background: SIDE_FLAME_GRADIENT_REVERSED,
+                        filter: 'blur(1.5px)',
+                        animation: `side-thrust-left ${LANDING_CYCLE} ease-in-out infinite`,
+                      }}
+                    />
+                    <div
+                      aria-hidden
+                      className="absolute pointer-events-none"
+                      style={{
+                        left: '50%',
+                        bottom: '-30%',
+                        width: '58%',
+                        height: '20%',
+                        transform: 'translateX(-50%)',
+                        borderRadius: '999px',
+                        background:
+                          'radial-gradient(ellipse at 50% 50%, rgba(251,146,60,0.3) 0%, rgba(251,146,60,0.16) 38%, transparent 70%)',
+                        filter: 'blur(6px)',
+                        animation: `escape-wake ${LANDING_CYCLE} ease-in-out infinite`,
+                      }}
+                    />
                   </div>
                 </div>
               </div>
