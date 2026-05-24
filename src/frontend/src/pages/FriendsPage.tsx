@@ -157,7 +157,11 @@ export function FriendsPage() {
 
       {tab === 'invitations' && (
         <InvitationsList
-          invitations={invitationsQuery.data ?? []}
+          invitations={
+            invitationsQuery.data?.filter(
+              (inv) => inv.receiver.id === user?.id,
+            ) ?? []
+          }
           onAccept={(id) =>
             gameHub
               .acceptGameInvitation(id)
