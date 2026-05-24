@@ -21,6 +21,7 @@ import { formatClock, useChessClock } from '../shared/lib/useChessClock'
 import { useEquippedSkinsStore } from '../shared/lib/equippedSkins'
 import { FightAnimation, type FightPiece } from '../shared/ui/FightAnimation'
 import { ConfirmModal } from '../shared/ui/ConfirmModal'
+import { playSound } from '../shared/lib/sound'
 
 type Color = 'white' | 'black'
 type Outcome = 'win' | 'loss' | 'draw'
@@ -295,6 +296,14 @@ export function GamePage() {
           })
           setFen(game.fen())
           setGameHasStarted(true)
+          if (applied.flags.includes('k') || applied.flags.includes('q')) {
+            playSound('castle')
+          } else if (applied.captured) {
+            playSound('capture')
+          } else {
+            playSound('move')
+          }
+          if (game.inCheck()) playSound('check')
           if (applied.captured) {
             const attackerColor: Color =
               applied.color === 'w' ? 'white' : 'black'
@@ -326,6 +335,7 @@ export function GamePage() {
                   ? 'win'
                   : 'loss'
             setEnded({ outcome, reason })
+            playSound('gameEnd')
             pause()
             return
           }
@@ -342,17 +352,20 @@ export function GamePage() {
       onPlayerResigned: (_game, userId) => {
         const outcome: Outcome = userId === user?.id ? 'loss' : 'win'
         setEnded({ outcome, reason: GameTerminationReason.Resignation })
+        playSound('gameEnd')
         pause()
       },
       onPlayerLeft: (_game, userId) => {
         if (userId === user?.id) return
         toast.warning(t('pages.game.opponentDisconnected'))
         setEnded({ outcome: 'win', reason: GameTerminationReason.Disconnect })
+        playSound('gameEnd')
         pause()
       },
       onTimeExpired: (_game, userId) => {
         const outcome: Outcome = userId === user?.id ? 'loss' : 'win'
         setEnded({ outcome, reason: GameTerminationReason.Timeout })
+        playSound('gameEnd')
         pause()
       },
     })

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import logo from '../assets/logo.svg'
 import { Dropdown } from '../shared/ui/Dropdown'
 import { LanguageToggle } from '../shared/ui/LanguageToggle'
+import { MuteToggle } from '../shared/ui/MuteToggle'
+import { ActiveGamePill } from '../shared/ui/ActiveGamePill'
 import { PageTransition } from '../shared/ui/PageTransition'
 import { useAuthStore } from '../shared/auth/authStore'
 import { useAuth } from '../shared/auth/useAuth'
@@ -55,6 +57,8 @@ export function RootLayout() {
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <ActiveGamePill />
+            <MuteToggle />
             <LanguageToggle />
             <span className="text-sm tabular-nums font-medium flex items-center gap-1">
               <span
@@ -89,7 +93,6 @@ export function RootLayout() {
               label={user?.login ?? t('nav.profile')}
               align="right"
               items={[
-                { label: t('nav.profileItems.myProfile'), to: '/profile' },
                 { label: t('nav.profileItems.history'), to: '/history' },
                 { label: t('nav.profileItems.friends'), to: '/friends' },
                 {

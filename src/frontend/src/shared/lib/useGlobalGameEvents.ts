@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { gameHub, subscribeGameHub } from '../realtime/gameHub'
 import { useAuth } from '../auth/useAuth'
+import { playSound } from './sound'
 
 export function useGlobalGameEvents() {
   const navigate = useNavigate()
@@ -18,9 +19,11 @@ export function useGlobalGameEvents() {
     return subscribeGameHub({
       onGameStarted: (game) => {
         qc.setQueryData(['game', game.id], game)
+        playSound('gameStart')
         navigate(`/game/${game.id}`)
       },
       onGameInvitationReceived: (invitation) => {
+        playSound('notify')
         const sender = invitation.sender.login
         const tc = invitation.timeControlIsEnabled
           ? `${(invitation.initialTimeSec ?? 0) / 60}+${invitation.incrementPerMoveSec ?? 0}`
