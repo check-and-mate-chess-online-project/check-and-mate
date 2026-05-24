@@ -16,8 +16,8 @@ public static class GameInvitationMapper
         GameInvitationDto invitation = new()
         {
             Id = gameInvitation.Id,
-            Sender = UserPublicMapper.ToDto(receiver),
-            Receiver = UserPublicMapper.ToDto(sender),
+            Sender = UserPublicMapper.ToDto(sender),
+            Receiver = UserPublicMapper.ToDto(receiver),
             TimeControlIsEnabled = gameInvitation.TimeControl.IsEnabled,
             InitialTimeSec = gameInvitation.TimeControl.InitialTimeSec,
             IncrementPerMoveSec = gameInvitation.TimeControl.IncrementPerMoveSec,
