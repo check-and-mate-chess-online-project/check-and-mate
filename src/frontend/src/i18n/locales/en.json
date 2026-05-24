@@ -132,7 +132,8 @@
       "result": {
         "win": "You won",
         "loss": "You lost",
-        "draw": "Draw"
+        "draw": "Draw",
+        "cancelled": "Match cancelled"
       },
       "reason": {
         "checkmate": "by checkmate",
@@ -140,7 +141,8 @@
         "resignation": "by resignation",
         "timeout": "on time",
         "drawAgreement": "by agreement",
-        "disconnect": "opponent disconnected"
+        "disconnect": "opponent disconnected",
+        "cancelled": "opponent left before the first move — no rating change"
       }
     },
     "history": {

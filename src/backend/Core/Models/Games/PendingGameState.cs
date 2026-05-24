@@ -26,8 +26,6 @@ public class PendingGameState : IGameState
     public void HandleDisconnect(Game game, Guid playerId)
     {
         if (playerId != game.WhitePlayerId && playerId != game.BlackPlayerId) throw new CoreLogicException("invalid player");
-        game.SetGameStartTime(DateTime.UtcNow);
-        game.FinishGame(GameTerminationReason.Disconnect, playerId);
         game.SetState(new FinishedGameState());
     }
 }

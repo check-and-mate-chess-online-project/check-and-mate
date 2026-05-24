@@ -24,7 +24,7 @@ import { ConfirmModal } from '../shared/ui/ConfirmModal'
 import { playSound } from '../shared/lib/sound'
 
 type Color = 'white' | 'black'
-type Outcome = 'win' | 'loss' | 'draw'
+type Outcome = 'win' | 'loss' | 'draw' | 'cancelled'
 
 interface ResultState {
   outcome: Outcome
@@ -143,11 +143,15 @@ function ResultModal({ result, onClose }: ResultModalProps) {
       ? 'text-orange-400'
       : result.outcome === 'loss'
         ? 'text-violet-300'
-        : 'text-slate-200'
+        : result.outcome === 'cancelled'
+          ? 'text-slate-300'
+          : 'text-slate-200'
   const reasonText =
-    reason !== null
-      ? t(`pages.game.reason.${REASON_KEY[reason]}`)
-      : t('pages.game.gameEnded')
+    result.outcome === 'cancelled'
+      ? t('pages.game.reason.cancelled')
+      : reason !== null
+        ? t(`pages.game.reason.${REASON_KEY[reason]}`)
+        : t('pages.game.gameEnded')
   return (
     <div className="fixed inset-0 z-40 bg-black/70 flex items-center justify-center">
       <div className="bg-slate-900 border border-violet-900 rounded-lg p-8 text-center max-w-sm">
@@ -418,7 +422,12 @@ export function GamePage() {
         toast.warning(t('pages.game.opponentDisconnected'))
         pause()
         syncClocksFromGame(gameState)
-        setEnded({ outcome: 'win', reason: GameTerminationReason.Disconnect })
+        const isCancelled =
+          gameState.result === null || gameState.result === undefined
+        setEnded({
+          outcome: isCancelled ? 'cancelled' : 'win',
+          reason: isCancelled ? null : GameTerminationReason.Disconnect,
+        })
         playSound('gameEnd')
       },
       onTimeExpired: (gameState, userId) => {
