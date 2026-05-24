@@ -75,13 +75,7 @@ public class GameplayService(
     {
         Game? game = _sessionService.GetByUserId(userId);
         if (game == null) return null;
-        bool wasPending = game.StartTimeUtc == null;
         game.EndByDisconnect(userId);
-        if (wasPending)
-        {
-            _sessionService.Remove(game.Id);
-            return await GameMapper.ToDto(game, _userRepos);
-        }
         await HandleGameCompletion(game, userId, GameTerminationReason.Disconnect);
         await _uow.CommitChangesAsync();
         return await GameMapper.ToDto(game, _userRepos);
