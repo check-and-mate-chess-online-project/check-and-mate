@@ -201,10 +201,8 @@ export function GamePage() {
   const [loadingGame, setLoadingGame] = useState(!cachedGame)
   const initialMs = (activeGame?.initialTimeSec ?? 300) * 1000
   const incMs = (activeGame?.incrementPerMoveSec ?? 0) * 1000
-  const { whiteMs, blackMs, active, switchTo, pause, reset } = useChessClock(
-    initialMs,
-    incMs,
-  )
+  const { whiteMs, blackMs, active, switchTo, pause, reset, setTimes } =
+    useChessClock(initialMs, incMs)
 
   const myColor: Color | null =
     !user || !activeGame
@@ -277,11 +275,41 @@ export function GamePage() {
       }
 
       setEnded(null)
-      if (appliedCount > 0) switchTo(nextTurn)
-      else pause()
+      if (appliedCount > 0) {
+        // эвристика восстановления часов: бэк не отдаёт left-time per side,
+        // делим прошедшее wall-time поровну и накидываем инкременты по числу ходов
+        const startMs = activeGame.startTimeUtc
+          ? Date.parse(activeGame.startTimeUtc)
+          : null
+        if (
+          activeGame.timeControlIsEnabled &&
+          startMs &&
+          !Number.isNaN(startMs)
+        ) {
+          const elapsed = Math.max(0, Date.now() - startMs)
+          let whiteMoves = 0
+          let blackMoves = 0
+          for (const ply of activeGame.moves ?? []) {
+            const color = normalizePlayerColor(ply.color)
+            if (color === 1) whiteMoves += 1
+            else if (color === 2) blackMoves += 1
+          }
+          const half = elapsed / 2
+          const whiteLeft = Math.max(
+            0,
+            initialMs + whiteMoves * incMs - half,
+          )
+          const blackLeft = Math.max(
+            0,
+            initialMs + blackMoves * incMs - half,
+          )
+          setTimes(whiteLeft, blackLeft)
+        }
+        switchTo(nextTurn)
+      } else pause()
     }, 0)
     return () => window.clearTimeout(id)
-  }, [activeGame, myColor, game, reset, switchTo, pause])
+  }, [activeGame, myColor, game, reset, switchTo, pause, setTimes, initialMs, incMs])
 
   useEffect(() => {
     if (!activeGame || !myColor) return

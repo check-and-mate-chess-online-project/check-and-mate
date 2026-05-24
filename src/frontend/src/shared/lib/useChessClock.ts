@@ -9,6 +9,7 @@ export interface ChessClock {
   switchTo: (next: Color) => void
   pause: () => void
   reset: () => void
+  setTimes: (whiteMs: number, blackMs: number) => void
 }
 
 export function useChessClock(
@@ -87,7 +88,17 @@ export function useChessClock(
     setActive(null)
   }, [initialMs])
 
-  return { whiteMs, blackMs, active, switchTo, pause, reset }
+  const setTimes = useCallback((w: number, b: number) => {
+    const wc = Math.max(0, w)
+    const bc = Math.max(0, b)
+    anchorWhiteRef.current = wc
+    anchorBlackRef.current = bc
+    setWhiteMs(wc)
+    setBlackMs(bc)
+    if (activeRef.current !== null) anchorAtRef.current = performance.now()
+  }, [])
+
+  return { whiteMs, blackMs, active, switchTo, pause, reset, setTimes }
 }
 
 export function formatClock(ms: number): string {
