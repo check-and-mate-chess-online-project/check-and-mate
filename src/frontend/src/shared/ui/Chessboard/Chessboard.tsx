@@ -54,5 +54,14 @@ export function Chessboard({ options }: Props) {
     return map
   }, [equipped])
 
-  return <RCBChessboard options={{ ...options, pieces }} />
+  return (
+    <RCBChessboard
+      options={{
+        animationDurationInMs: 0,
+        showAnimations: false,
+        ...options,
+        pieces,
+      }}
+    />
+  )
 }
