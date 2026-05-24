@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useBuyLootbox, useMe } from '../shared/api/hooks'
 import { ApiError } from '../shared/api/http'
@@ -70,11 +72,13 @@ function CornerBracket({
 
 export function ShopPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { data: me } = useMe()
   const buy = useBuyLootbox()
   const stars = useMemo(() => generateTwinkleStars(180), [])
   const [count, setCount] = useState(1)
   const [purchasing, setPurchasing] = useState(false)
+  const [purchasedCount, setPurchasedCount] = useState(0)
 
   useEffect(() => {
     const planet = new Image()
@@ -91,8 +95,10 @@ export function ShopPage() {
   const handleBuy = () => {
     if (disabled) return
     setPurchasing(true)
+    setPurchasedCount(0)
     buy.mutate(count, {
       onSuccess: () => {
+        setPurchasedCount(count)
         toast.success(t('pages.shop.purchased', { count }))
       },
       onError: (e) => {
@@ -109,7 +115,12 @@ export function ShopPage() {
   }
 
   return (
-    <div className="fixed left-0 right-0 top-[81px] bottom-0 z-10 bg-black overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      className="fixed left-0 right-0 top-[81px] bottom-0 z-10 bg-black overflow-hidden"
+    >
       <div className="absolute inset-0 pointer-events-none">
         {stars.map((s, i) => (
           <div
@@ -128,19 +139,27 @@ export function ShopPage() {
         ))}
       </div>
 
-      <div className="absolute top-6 left-6 z-20">
+      <motion.div
+        initial={{ opacity: 0, y: -14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
+        className="absolute top-6 left-6 z-20"
+      >
         <h1 className="text-3xl">{t('pages.shop.title')}</h1>
         <p className="text-xs text-violet-400/70 mt-1 font-mono uppercase tracking-[0.3em]">
           {t('pages.shop.terminalSubtitle')}
         </p>
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
+        initial={{ opacity: 0, x: 60, scale: 0.94 }}
+        animate={{ opacity: 1, x: 0, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 0.84, 0.32, 1] }}
         className="absolute pointer-events-none"
         style={{
           right: '12vw',
           top: '50%',
-          transform: 'translateY(-50%)',
+          translate: '0 -50%',
         }}
       >
         <div
@@ -284,14 +303,17 @@ export function ShopPage() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
+        initial={{ opacity: 0, x: -36, scale: 0.97 }}
+        animate={{ opacity: 1, x: 0, scale: 1 }}
+        transition={{ duration: 0.62, delay: 0.12, ease: [0.16, 0.84, 0.32, 1] }}
         className="absolute z-20 w-[min(92vw,24rem)]"
         style={{
           left: '30%',
           top: '50%',
-          transform: 'translate(-50%, -50%)',
+          translate: '-50% -50%',
         }}
       >
         <div className="relative">
@@ -350,12 +372,16 @@ export function ShopPage() {
                 </span>
                 <span
                   className={`font-display text-3xl tabular-nums leading-none ${
-                    notEnough ? 'text-red-400' : 'text-yellow-300'
+                    notEnough ? 'text-red-400' : ''
                   }`}
                   style={
                     notEnough
                       ? undefined
-                      : { textShadow: '0 0 10px rgba(250,204,21,0.45)' }
+                      : {
+                          color: '#fcd34d',
+                          textShadow:
+                            '0 0 10px rgba(252,211,77,0.5), 0 0 22px rgba(217,119,6,0.22)',
+                        }
                   }
                 >
                   {total} ◈
@@ -369,8 +395,8 @@ export function ShopPage() {
               onClick={handleBuy}
               className={
                 disabled
-                  ? 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                  : 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-400 hover:to-orange-600 text-slate-50 shadow-lg shadow-orange-900/40 transition-colors'
+                  ? 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm bg-slate-800/60 text-slate-500 cursor-not-allowed border border-slate-700/70 backdrop-blur-sm'
+                  : 'w-full px-4 py-3 rounded-md font-display uppercase tracking-[0.25em] text-sm text-violet-50 bg-gradient-to-b from-violet-500 to-violet-800 hover:from-violet-400 hover:to-violet-700 border border-violet-300/40 shadow-[0_4px_22px_rgba(167,139,250,0.42),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_4px_30px_rgba(167,139,250,0.6),inset_0_1px_0_rgba(255,255,255,0.22)] active:translate-y-px transition-all backdrop-blur-sm'
               }
             >
               {notEnough
@@ -379,9 +405,19 @@ export function ShopPage() {
                   ? '…'
                   : t('pages.shop.purchase')}
             </button>
+
+            {purchasedCount > 0 && !purchasing && (
+              <button
+                type="button"
+                onClick={() => navigate('/cases')}
+                className="w-full mt-3 px-4 py-3 rounded-md font-display uppercase tracking-[0.22em] text-xs bg-cyan-500/12 hover:bg-cyan-500/20 text-cyan-200 border border-cyan-400/35 shadow-[0_0_22px_rgba(34,211,238,0.12)] transition-colors"
+              >
+                {t('pages.shop.openCases')}
+              </button>
+            )}
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

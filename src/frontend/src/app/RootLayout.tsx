@@ -59,7 +59,14 @@ export function RootLayout() {
             <span className="text-sky-300 text-sm tabular-nums">
               {user?.rating ?? 0} ★
             </span>
-            <span className="text-yellow-400 text-sm tabular-nums">
+            <span
+              className="text-sm tabular-nums"
+              style={{
+                color: '#fcd34d',
+                textShadow:
+                  '0 0 8px rgba(252,211,77,0.5), 0 0 18px rgba(217,119,6,0.22)',
+              }}
+            >
               {user?.balance ?? 0} ◈
             </span>
             <Dropdown

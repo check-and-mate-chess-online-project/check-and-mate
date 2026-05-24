@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useMe, useOpenLootbox, usePlanets } from '../shared/api/hooks'
 import { FigureType, SkinRarity } from '../shared/api/enums'
@@ -16,7 +16,8 @@ const FAKE_RARITY: Record<string, SkinRarity> = {
 }
 
 const CASE_DESCENT_MS = 7600
-const CASE_WHITE_FLASH_MS = 520
+const CASE_WHITE_FLASH_MS = 860
+const CASE_STARS_FREEZE_MS = Math.round(CASE_DESCENT_MS * 0.42)
 const CASE_LANDING_THRUSTERS = [
   { left: '32%', delay: '0s' },
   { left: '50%', delay: '0.12s' },
@@ -141,6 +142,7 @@ function findLandingPlanet(
 
 export function CasesPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { data: me } = useMe()
   const { data: planets } = usePlanets()
   const open = useOpenLootbox()
@@ -154,6 +156,7 @@ export function CasesPage() {
   const [phase, setPhase] = useState<Phase>('idle')
   const [drop, setDrop] = useState<LootBoxDropResultDto | null>(null)
   const [shipEntered, setShipEntered] = useState(false)
+  const [starsFrozen, setStarsFrozen] = useState(false)
   const timeoutsRef = useRef<number[]>([])
 
   useEffect(() => {
@@ -184,8 +187,10 @@ export function CasesPage() {
   }
 
   const runAnimation = (result: LootBoxDropResultDto) => {
+    setStarsFrozen(false)
     setDrop(result)
     schedule(() => setPhase('descent'), 600)
+    schedule(() => setStarsFrozen(true), 600 + CASE_STARS_FREEZE_MS)
     schedule(() => setPhase('whiteflash'), 600 + CASE_DESCENT_MS)
     schedule(
       () => setPhase('reveal'),
@@ -196,6 +201,7 @@ export function CasesPage() {
   const handleOpen = async () => {
     if (empty || animating) return
     clearScheduled()
+    setStarsFrozen(false)
     setDrop(null)
     setPhase('flash')
 
@@ -214,8 +220,17 @@ export function CasesPage() {
     }
   }
 
+  const handlePrimaryAction = () => {
+    if (empty) {
+      navigate('/shop')
+      return
+    }
+    void handleOpen()
+  }
+
   const handleClose = () => {
     clearScheduled()
+    setStarsFrozen(false)
     setPhase('idle')
     setDrop(null)
   }
@@ -242,6 +257,7 @@ export function CasesPage() {
               height: s.size,
               opacity: s.opacity,
               animation: `drift-left ${s.duration}s linear ${s.delay}s infinite`,
+              animationPlayState: starsFrozen ? 'paused' : 'running',
               boxShadow: `0 0 ${s.size * 2}px rgba(255,255,255,${s.opacity * 0.6})`,
             }}
           />
@@ -251,8 +267,8 @@ export function CasesPage() {
       <div
         className="absolute inset-0 overflow-hidden pointer-events-none"
         style={{
-          opacity: descentVisible ? 1 : 0,
-          transition: 'opacity 0.25s linear',
+          opacity: descentVisible && !starsFrozen ? 1 : 0,
+          transition: 'opacity 0.35s linear',
         }}
       >
         {ascendStars.map((s, i) => (
@@ -266,6 +282,7 @@ export function CasesPage() {
               height: s.size,
               opacity: s.opacity,
               animation: `ascend-star ${s.duration}s linear ${s.delay}s infinite`,
+              animationPlayState: starsFrozen ? 'paused' : 'running',
               boxShadow: `0 0 ${s.size * 3}px rgba(255,255,255,${s.opacity * 0.5})`,
             }}
           />
@@ -374,9 +391,9 @@ export function CasesPage() {
           style={{
             animation:
               phase === 'whiteflash'
-                ? `case-whiteflash-camera ${CASE_WHITE_FLASH_MS}ms ease-in forwards`
+                ? `case-whiteflash-camera ${CASE_WHITE_FLASH_MS}ms cubic-bezier(0.18, 0.72, 0.18, 1) forwards`
                 : descentVisible
-                  ? `case-descent-camera-prep ${CASE_DESCENT_MS}ms ease-in-out forwards`
+                  ? `case-descent-camera-prep ${CASE_DESCENT_MS}ms linear forwards`
                   : undefined,
             transformOrigin: '50% 78%',
           }}
@@ -490,8 +507,10 @@ export function CasesPage() {
                     transformOrigin: 'top',
                     background: CASE_FLAME_GRADIENT,
                     filter: 'blur(2px)',
+                    opacity: 0,
+                    transform: 'translateX(-50%) scaleY(0)',
                     animation: descentVisible
-                      ? `case-landing-burn ${CASE_DESCENT_MS}ms ease-in-out ${thruster.delay} forwards`
+                      ? `case-landing-burn ${CASE_DESCENT_MS}ms ease-in-out ${thruster.delay} both`
                       : undefined,
                   }}
                 />
@@ -574,11 +593,14 @@ export function CasesPage() {
               </div>
               <button
                 type="button"
-                disabled={empty}
-                onClick={handleOpen}
-                className="px-8 py-3 bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-400 hover:to-orange-600 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed rounded-md font-display text-lg uppercase tracking-wider shadow-lg shadow-orange-900/40 transition-colors"
+                onClick={handlePrimaryAction}
+                className={
+                  empty
+                    ? 'px-8 py-3 rounded-md font-display text-lg uppercase tracking-[0.18em] text-cyan-50 bg-gradient-to-b from-cyan-500 to-blue-700 hover:from-cyan-400 hover:to-blue-600 border border-cyan-300/40 shadow-[0_4px_22px_rgba(56,189,248,0.42),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_4px_30px_rgba(56,189,248,0.6),inset_0_1px_0_rgba(255,255,255,0.22)] active:translate-y-px transition-all backdrop-blur-sm'
+                    : 'px-8 py-3 rounded-md font-display text-lg uppercase tracking-[0.18em] text-orange-50 bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-400 hover:to-orange-600 border border-orange-300/40 shadow-[0_4px_22px_rgba(251,146,60,0.45),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_4px_30px_rgba(251,146,60,0.62),inset_0_1px_0_rgba(255,255,255,0.22)] active:translate-y-px transition-all backdrop-blur-sm'
+                }
               >
-                {t('pages.cases.openButton')}
+                {empty ? t('pages.cases.buyCases') : t('pages.cases.openButton')}
               </button>
             </div>
             {empty && (
@@ -696,7 +718,7 @@ export function CasesPage() {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="self-start mt-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 rounded-md font-display uppercase tracking-wider text-sm"
+                  className="self-start mt-2 px-6 py-3 rounded-md font-display uppercase tracking-[0.18em] text-sm text-violet-50 bg-gradient-to-b from-violet-500 to-violet-800 hover:from-violet-400 hover:to-violet-700 border border-violet-300/40 shadow-[0_4px_18px_rgba(167,139,250,0.4),inset_0_1px_0_rgba(255,255,255,0.18)] hover:shadow-[0_4px_26px_rgba(167,139,250,0.55),inset_0_1px_0_rgba(255,255,255,0.22)] active:translate-y-px transition-all backdrop-blur-sm"
                 >
                   {t('pages.cases.continue')}
                 </button>
