@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { UserDto } from '../api'
 import { clearToken, getToken, setToken } from './token'
+import { useEquippedSkinsStore } from '../lib/equippedSkins'
 
 interface AuthState {
   user: UserDto | null
@@ -24,6 +25,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user) => set({ user }),
   clearSession: () => {
     clearToken()
+    useEquippedSkinsStore.getState().clear()
     set({ token: null, user: null, isAuthenticated: false })
   },
 }))
