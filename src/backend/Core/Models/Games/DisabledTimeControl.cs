@@ -8,6 +8,8 @@ public class DisabledTimeControl : ITimeControl
     public bool IsEnabled { get; } = false;
     public int InitialTimeSec { get; } = 0;
     public int IncrementPerMoveSec { get; } = 0;
+    public double WhiteTimeLeftSec { get; } = 0;
+    public double BlackTimeLeftSec { get; } = 0;
 
     public void SetMoveStartTime(PlayerColor color, DateTime currentTime) {}
 

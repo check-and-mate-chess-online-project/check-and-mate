@@ -25,6 +25,8 @@ public static class GameMapper
             TimeControlIsEnabled = game.TimeControl.IsEnabled,
             InitialTimeSec = game.TimeControl.InitialTimeSec,
             IncrementPerMoveSec = game.TimeControl.IncrementPerMoveSec,
+            WhiteTimeLeftSec = game.TimeControl.WhiteTimeLeftSec,
+            BlackTimeLeftSec = game.TimeControl.BlackTimeLeftSec,
             Figures = [.. game.GetFigures().Select(FigureMapper.ToDto)],
             Moves = [.. game.GetMoves().Select(PlyMapper.ToDto)]
         };
