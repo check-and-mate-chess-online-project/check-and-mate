@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
@@ -195,6 +195,7 @@ export function GamePage() {
     onConfirm: () => void
   } | null>(null)
   const equipped = useEquippedSkinsStore((s) => s.equipped)
+  const pendingMoveRef = useRef<{ from: string; to: string } | null>(null)
 
   const cachedGame = qc.getQueryData<GameDto>(['game', gameId])
   const [activeGame, setActiveGame] = useState<GameDto | undefined>(cachedGame)
@@ -316,38 +317,48 @@ export function GamePage() {
     return subscribeGameHub({
       onMoveMade: (move, result) => {
         const { from, to } = apiMoveToSquares(move)
+        const pending = pendingMoveRef.current
+        const isOurOptimistic =
+          pending && pending.from === from && pending.to === to
+        if (isOurOptimistic) {
+          pendingMoveRef.current = null
+        }
         try {
-          const applied = game.move({
-            from,
-            to,
-            promotion: promotionFromMove(move) ?? 'q',
-          })
+          const applied = isOurOptimistic
+            ? null
+            : game.move({
+                from,
+                to,
+                promotion: promotionFromMove(move) ?? 'q',
+              })
           setFen(game.fen())
           setGameHasStarted(true)
-          if (applied.flags.includes('k') || applied.flags.includes('q')) {
-            playSound('castle')
-          } else if (applied.captured) {
-            playSound('capture')
-          } else {
-            playSound('move')
-          }
-          if (game.inCheck()) playSound('check')
-          if (applied.captured) {
-            const attackerColor: Color =
-              applied.color === 'w' ? 'white' : 'black'
-            const victimColor: Color =
-              attackerColor === 'white' ? 'black' : 'white'
-            const attackerFigure = CHESS_TO_FIGURE[applied.piece]
-            const victimFigure = CHESS_TO_FIGURE[applied.captured]
-            if (attackerFigure && victimFigure) {
-              setFightQueue((q) => [
-                ...q,
-                {
-                  attacker: { figure: attackerFigure, color: attackerColor },
-                  victim: { figure: victimFigure, color: victimColor },
-                  key: Date.now() + Math.random(),
-                },
-              ])
+          if (applied) {
+            if (applied.flags.includes('k') || applied.flags.includes('q')) {
+              playSound('castle')
+            } else if (applied.captured) {
+              playSound('capture')
+            } else {
+              playSound('move')
+            }
+            if (game.inCheck()) playSound('check')
+            if (applied.captured) {
+              const attackerColor: Color =
+                applied.color === 'w' ? 'white' : 'black'
+              const victimColor: Color =
+                attackerColor === 'white' ? 'black' : 'white'
+              const attackerFigure = CHESS_TO_FIGURE[applied.piece]
+              const victimFigure = CHESS_TO_FIGURE[applied.captured]
+              if (attackerFigure && victimFigure) {
+                setFightQueue((q) => [
+                  ...q,
+                  {
+                    attacker: { figure: attackerFigure, color: attackerColor },
+                    victim: { figure: victimFigure, color: victimColor },
+                    key: Date.now() + Math.random(),
+                  },
+                ])
+              }
             }
           }
           if (result.isGameOver) {
@@ -376,6 +387,15 @@ export function GamePage() {
       },
       onMoveRejected: () => {
         toast.error('move rejected')
+        if (pendingMoveRef.current) {
+          try {
+            game.undo()
+            setFen(game.fen())
+          } catch {
+            // ignore
+          }
+          pendingMoveRef.current = null
+        }
       },
       onPlayerResigned: (_game, userId) => {
         const outcome: Outcome = userId === user?.id ? 'loss' : 'win'
@@ -467,9 +487,9 @@ export function GamePage() {
     setSelectedSquare(null)
     if (!targetSquare) return false
     if (!isMyTurn) return false
-    const preview = new Chess(game.fen())
+    let applied
     try {
-      preview.move({
+      applied = game.move({
         from: sourceSquare,
         to: targetSquare,
         promotion: 'q',
@@ -477,11 +497,50 @@ export function GamePage() {
     } catch {
       return false
     }
+    if (!applied) return false
+    setFen(game.fen())
+    setGameHasStarted(true)
+    if (applied.flags.includes('k') || applied.flags.includes('q')) {
+      playSound('castle')
+    } else if (applied.captured) {
+      playSound('capture')
+    } else {
+      playSound('move')
+    }
+    if (game.inCheck()) playSound('check')
+    if (applied.captured) {
+      const attackerColor: Color = applied.color === 'w' ? 'white' : 'black'
+      const victimColor: Color =
+        attackerColor === 'white' ? 'black' : 'white'
+      const attackerFigure = CHESS_TO_FIGURE[applied.piece]
+      const victimFigure = CHESS_TO_FIGURE[applied.captured]
+      if (attackerFigure && victimFigure) {
+        setFightQueue((q) => [
+          ...q,
+          {
+            attacker: { figure: attackerFigure, color: attackerColor },
+            victim: { figure: victimFigure, color: victimColor },
+            key: Date.now() + Math.random(),
+          },
+        ])
+      }
+    }
+    const nextTurn = game.turn() === 'w' ? 'white' : 'black'
+    setTurn(nextTurn)
+    pendingMoveRef.current = { from: sourceSquare, to: targetSquare }
     const apiMove = squaresToApiMove(sourceSquare, targetSquare)
     gameHub.makeMove(apiMove).catch(() => {
       toast.error('move failed')
+      try {
+        game.undo()
+        setFen(game.fen())
+        setTurn(game.turn() === 'w' ? 'white' : 'black')
+      } catch {
+        // ignore
+      }
+      pendingMoveRef.current = null
     })
-    return false
+    return true
   }
 
   const handleResign = () => {
