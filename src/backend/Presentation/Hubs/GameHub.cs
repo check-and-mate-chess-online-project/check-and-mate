@@ -35,6 +35,14 @@ public class GameHub(
         return await _invitation.GetPendingGameInvitationsAsync(userId);
     }
 
+    public async Task<GameDto?> GetActiveGameState()
+    {
+        Guid userId = GetUserId();
+        _timer.CancelGracePeriod(userId);
+        GameDto? game = await _gameplay.GetActiveGameByUser(userId);
+        return game;
+    }
+
     public async Task FindGame(SearchOpponentRequest request)
     {
         Guid userId = GetUserId();
