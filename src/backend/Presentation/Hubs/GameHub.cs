@@ -75,15 +75,17 @@ public class GameHub(
 
     public async Task AcceptGameInvitation(Guid invitationId)
     {
+        Guid userId = GetUserId();
         _timer.CancelGracePeriod(GetUserId());
-        GameInvitationDto invitation = await _invitation.AcceptGameInvitationAsync(invitationId);
+        GameInvitationDto invitation = await _invitation.AcceptGameInvitationAsync(userId, invitationId);
         await Clients.Users(invitation.Sender.Id.ToString(), invitation.Receiver.Id.ToString()).SendAsync("gameInvitationAccepted", invitation);
     }
 
     public async Task RejectGameInvitation(Guid invitationId)
     {
+        Guid userId = GetUserId();
         _timer.CancelGracePeriod(GetUserId());
-        GameInvitationDto invitation = await _invitation.RejectGameInvitationAsync(invitationId);
+        GameInvitationDto invitation = await _invitation.RejectGameInvitationAsync(userId, invitationId);
         await Clients.Users(invitation.Sender.Id.ToString(), invitation.Receiver.Id.ToString()).SendAsync("gameInvitationRejected", invitation);
     }
 

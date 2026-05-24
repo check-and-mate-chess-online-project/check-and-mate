@@ -183,6 +183,7 @@ public class Program
                     CoreLogicException => StatusCodes.Status400BadRequest,
                     ArgumentException => StatusCodes.Status400BadRequest,
                     UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+                    ForbiddenException => StatusCodes.Status403Forbidden,
                     NotFoundException => StatusCodes.Status404NotFound,
                     ConflictException => StatusCodes.Status409Conflict,
                     UserDeletedException => StatusCodes.Status410Gone,

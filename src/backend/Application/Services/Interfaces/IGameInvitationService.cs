@@ -11,6 +11,6 @@ public interface IGameInvitationService
         bool timeControlIsEnabled, 
         int initialTimeSec, 
         int incrementPerMoveSec);
-    Task<GameInvitationDto> AcceptGameInvitationAsync(Guid invitationId);
-    Task<GameInvitationDto> RejectGameInvitationAsync(Guid invitationId);
+    Task<GameInvitationDto> AcceptGameInvitationAsync(Guid userId, Guid invitationId);
+    Task<GameInvitationDto> RejectGameInvitationAsync(Guid userId, Guid invitationId);
 }

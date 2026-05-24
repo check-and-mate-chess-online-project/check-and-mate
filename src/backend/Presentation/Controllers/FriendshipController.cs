@@ -51,19 +51,25 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
 
     [HttpPatch("requests/{friendRequestId}/accept")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> AcceptFriendRequest([FromRoute]Guid friendRequestId)
     {
-        await _friendship.AcceptFriendRequestAsync(friendRequestId);
+        Guid userId = GetUserId();
+        await _friendship.AcceptFriendRequestAsync(userId, friendRequestId);
         return NoContent();
     }
 
     [HttpPatch("requests/{friendRequestId}/reject")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> RejectFriendRequest([FromRoute]Guid friendRequestId)
     {
-        await _friendship.RejectFriendRequestAsync(friendRequestId);
+        Guid userId = GetUserId();
+        await _friendship.RejectFriendRequestAsync(userId, friendRequestId);
         return NoContent();
     }
 

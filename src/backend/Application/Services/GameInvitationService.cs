@@ -61,12 +61,13 @@ public class GameInvitationService(
         return await GameInvitationMapper.ToDto(invitation, _userRepos);
     }
 
-    public async Task<GameInvitationDto> AcceptGameInvitationAsync(Guid invitationId)
+    public async Task<GameInvitationDto> AcceptGameInvitationAsync(Guid userId, Guid invitationId)
     {
         GameInvitation invitation = await _invitationRepos.GetAsync(invitationId) 
             ?? throw new NotFoundException($"game invitation {invitationId} not found");
         if (invitation.State != GameInvitationState.Pending) 
             throw new ConflictException($"game invitation {invitationId} already resolved");
+        if (invitation.ReceiverId != userId) throw new ForbiddenException($"user {userId} not receiver");
         invitation.ChangeState(GameInvitationState.Accepted);
         await _invitationRepos.Update(invitation);
         Game game = _sessionService.Create(invitation.SenderId, invitation.ReceiverId, invitation.TimeControl);
@@ -75,12 +76,13 @@ public class GameInvitationService(
         return await GameInvitationMapper.ToDto(invitation, _userRepos);
     }
 
-    public async Task<GameInvitationDto> RejectGameInvitationAsync(Guid invitationId)
+    public async Task<GameInvitationDto> RejectGameInvitationAsync(Guid userId, Guid invitationId)
     {
         GameInvitation invitation = await _invitationRepos.GetAsync(invitationId) 
             ?? throw new NotFoundException($"game invitation {invitationId} not found");
         if (invitation.State != GameInvitationState.Pending) 
             throw new ConflictException($"game invitation {invitationId} already resolved");
+        if (invitation.ReceiverId != userId) throw new ForbiddenException($"user {userId} not receiver");
         invitation.ChangeState(GameInvitationState.Rejected);
         await _invitationRepos.Update(invitation);
         await _uow.CommitChangesAsync();

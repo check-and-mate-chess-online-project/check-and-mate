@@ -54,12 +54,12 @@ public class FriendshipService(
         User receiver = await _userRepos.GetAsync(receiverLogin) ?? throw new NotFoundException($"user {receiverLogin} not found");
         if (receiver.IsDeleted) throw new UserDeletedException($"user {receiverLogin} is deleted");
         if (senderId == receiver.Id) throw new CoreLogicException("users must be different");
-        if (await _requestRepos.GetPendingAsync(senderId, receiver.Id) != null) 
+        if (await _requestRepos.GetPendingAsync(sender.Id, receiver.Id) != null) 
             throw new ConflictException($"friend request from {senderId} to {receiver.Id} already exist");
-        FriendRequest? reverseRequest = await _requestRepos.GetPendingAsync(receiver.Id, senderId);
+        FriendRequest? reverseRequest = await _requestRepos.GetPendingAsync(receiver.Id, sender.Id);
         if (reverseRequest != null) 
         {
-            await AcceptFriendRequestAsync(reverseRequest.Id);
+            await AcceptFriendRequestAsync(sender.Id, reverseRequest.Id);
             return await FriendRequestMapper.ToDto(reverseRequest, _userRepos);
         }
         (Guid senderId, Guid userId) key = FriendshipKey.Normalize(senderId, receiver.Id);
@@ -71,12 +71,13 @@ public class FriendshipService(
         return await FriendRequestMapper.ToDto(request, _userRepos);
     }
 
-    public async Task AcceptFriendRequestAsync(Guid requestId)
+    public async Task AcceptFriendRequestAsync(Guid userId, Guid requestId)
     {
         FriendRequest request = await _requestRepos.GetAsync(requestId) 
             ?? throw new NotFoundException($"friend request {requestId} not found");
         if (request.State != FriendRequestState.Pending) 
             throw new ConflictException($"friend request {requestId} already resolved");
+        if (request.ReceiverId != userId) throw new ForbiddenException($"user {userId} not receiver");
         (Guid senderId, Guid receiverId) = FriendshipKey.Normalize(request.SenderId, request.ReceiverId);
         request.ChangeState(FriendRequestState.Accepted);
         await _requestRepos.Update(request);
@@ -85,12 +86,13 @@ public class FriendshipService(
         await _uow.CommitChangesAsync();
     }
 
-    public async Task RejectFriendRequestAsync(Guid requestId)
+    public async Task RejectFriendRequestAsync(Guid userId, Guid requestId)
     {
         FriendRequest request = await _requestRepos.GetAsync(requestId) 
             ?? throw new NotFoundException($"friend request {requestId} not found");
         if (request.State != FriendRequestState.Pending) 
             throw new ConflictException($"friend request {requestId} already resolved");
+        if (request.ReceiverId != userId) throw new ForbiddenException($"user {userId} not receiver");
         request.ChangeState(FriendRequestState.Rejected);
         await _requestRepos.Update(request);
         await _uow.CommitChangesAsync();
