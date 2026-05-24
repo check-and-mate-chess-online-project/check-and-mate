@@ -9,11 +9,32 @@ import {
   usePlanetSkins,
   usePlanets,
 } from '../shared/api/hooks'
+import { planetById } from '../shared/lib/planets'
 import {
+  FigureType,
   figureTypeI18nKey,
   normalizeFigureType,
   skinRarityI18nKey,
 } from '../shared/api/enums'
+
+function figureKeyName(figure: number): string {
+  switch (figure) {
+    case FigureType.King:
+      return 'king'
+    case FigureType.Queen:
+      return 'queen'
+    case FigureType.Rook:
+      return 'rook'
+    case FigureType.Bishop:
+      return 'bishop'
+    case FigureType.Knight:
+      return 'knight'
+    case FigureType.Pawn:
+      return 'pawn'
+    default:
+      return ''
+  }
+}
 import { skinImageSrc } from '../shared/lib/skinImage'
 import { useEquippedSkinsStore } from '../shared/lib/equippedSkins'
 import { Skeleton } from '../shared/ui/Skeleton'
@@ -22,12 +43,12 @@ interface DisplaySkin extends SkinDto {
   isOwned: boolean
 }
 
-function mergeSkins(
-  planetSkins: SkinDto[],
-  inventory: SkinDto[],
-): DisplaySkin[] {
-  const ownedIds = new Set(inventory.map((s) => s.id))
-  return planetSkins.map((s) => ({ ...s, isOwned: ownedIds.has(s.id) }))
+function isPlaceholderId(id: string): boolean {
+  return id.startsWith('__placeholder__:')
+}
+
+function toDisplaySkins(planetSkins: SkinDto[]): DisplaySkin[] {
+  return planetSkins.map((s) => ({ ...s, isOwned: !isPlaceholderId(s.id) }))
 }
 
 interface PlanetGridProps {
@@ -48,6 +69,8 @@ function PlanetGrid({ planets, onSelect }: PlanetGridProps) {
       <h1 className="text-3xl mb-8">{t('pages.inventory.title')}</h1>
       <div className="grid grid-cols-3 gap-6">
         {planets.map((p) => {
+          const meta = planetById(p.id)
+          const available = meta?.available ?? false
           const name = t(`pages.inventory.planets.${p.id}`, {
             defaultValue: p.name,
           })
@@ -55,20 +78,40 @@ function PlanetGrid({ planets, onSelect }: PlanetGridProps) {
             <motion.button
               key={p.id}
               type="button"
-              onClick={() => onSelect(p.id)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.92 }}
+              onClick={() => available && onSelect(p.id)}
+              disabled={!available}
+              whileHover={available ? { scale: 1.05 } : undefined}
+              whileTap={available ? { scale: 0.92 } : undefined}
               transition={{ duration: 0.18 }}
-              className="flex flex-col items-center group"
+              className={
+                available
+                  ? 'flex flex-col items-center group'
+                  : 'flex flex-col items-center group cursor-not-allowed'
+              }
             >
               <motion.img
                 layoutId={`planet-${p.id}`}
                 src={p.imageUrl}
                 alt={name}
-                className="w-full aspect-square rounded-full"
+                className={
+                  available
+                    ? 'w-full aspect-square rounded-full'
+                    : 'w-full aspect-square rounded-full grayscale opacity-40'
+                }
               />
-              <div className="mt-3 text-slate-300 group-hover:text-slate-100">
+              <div
+                className={
+                  available
+                    ? 'mt-3 text-slate-300 group-hover:text-slate-100'
+                    : 'mt-3 text-slate-500'
+                }
+              >
                 {name}
+                {!available && (
+                  <span className="ml-2 text-xs uppercase tracking-wider text-slate-600">
+                    {t('pages.lobby.mode.soon')}
+                  </span>
+                )}
               </div>
             </motion.button>
           )
@@ -98,12 +141,21 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
   const planetName = t(`pages.inventory.planets.${planet.id}`, {
     defaultValue: planet.name,
   })
-  const skinName = skin
-    ? t(`pages.inventory.skins.${skin.id}.name`, { defaultValue: '' })
-    : ''
-  const skinDescription = skin
-    ? t(`pages.inventory.skins.${skin.id}.description`, { defaultValue: '' })
-    : ''
+  const figureKeyForSkin =
+    skin && skinFigure !== null ? figureKeyName(skinFigure) : null
+  const skinName =
+    skin && figureKeyForSkin
+      ? t(`pages.inventory.skins.${planet.id}.${figureKeyForSkin}.name`, {
+          defaultValue: '',
+        })
+      : ''
+  const skinDescription =
+    skin && figureKeyForSkin
+      ? t(
+          `pages.inventory.skins.${planet.id}.${figureKeyForSkin}.description`,
+          { defaultValue: '' },
+        )
+      : ''
 
   const prev = () =>
     setIdx((i) => (i - 1 + skins.length) % Math.max(1, skins.length))
@@ -277,11 +329,9 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
 
 function PlanetDetailLoader({
   planet,
-  inventory,
   onBack,
 }: {
   planet: PlanetDto
-  inventory: SkinDto[]
   onBack: () => void
 }) {
   const { data: planetSkins, isLoading } = usePlanetSkins(planet.id)
@@ -292,16 +342,16 @@ function PlanetDetailLoader({
       </div>
     )
   }
-  const skins = mergeSkins(planetSkins, inventory)
+  const skins = toDisplaySkins(planetSkins)
   return <PlanetDetail planet={planet} skins={skins} onBack={onBack} />
 }
 
 export function InventoryPage() {
-  const { data: planets, isLoading: loadingPlanets } = usePlanets()
-  const { data: inventory, isLoading: loadingInventory } = useInventory()
+  const { data: planets } = usePlanets()
+  const { isLoading: loadingInventory } = useInventory()
   const [selected, setSelected] = useState<string | null>(null)
 
-  if (loadingPlanets || loadingInventory) {
+  if (loadingInventory) {
     return (
       <div className="grid grid-cols-3 gap-6">
         {Array.from({ length: 3 }).map((_, i) => (
@@ -311,18 +361,19 @@ export function InventoryPage() {
     )
   }
 
-  const planet = planets?.find((p) => p.id === selected)
+  const planet = planets.find((p) => p.id === selected)
+  const planetMeta = selected ? planetById(selected) : null
+  const isAvailable = planetMeta?.available ?? false
 
   return (
     <AnimatePresence mode="wait">
-      {selected && planet ? (
+      {selected && planet && isAvailable ? (
         <PlanetDetailLoader
           planet={planet}
-          inventory={inventory ?? []}
           onBack={() => setSelected(null)}
         />
       ) : (
-        <PlanetGrid planets={planets ?? []} onSelect={setSelected} />
+        <PlanetGrid planets={planets} onSelect={setSelected} />
       )}
     </AnimatePresence>
   )

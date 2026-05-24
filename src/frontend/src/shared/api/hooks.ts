@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './http'
 import { gameHub } from '../realtime/gameHub'
+import { PLANETS, planetById } from '../lib/planets'
 import type {
   FriendRequestDto,
   GameDto,
@@ -12,7 +13,7 @@ import type {
   UserDto,
   UserPublicDto,
 } from '.'
-import type { FigureType } from './enums'
+import { type FigureType, normalizeFigureType } from './enums'
 
 export function useMe() {
   return useQuery({
@@ -69,18 +70,50 @@ export function useSkinConfiguration() {
 }
 
 export function usePlanets() {
-  return useQuery({
-    queryKey: ['planets'],
-    queryFn: () => api.get<PlanetDto[]>('/api/planets'),
-  })
+  const data: PlanetDto[] = PLANETS.map((p) => ({
+    id: p.id,
+    name: p.id,
+    imageUrl: p.imageUrl,
+  }))
+  return { data, isLoading: false } as const
 }
 
 export function usePlanetSkins(planetId: Guid) {
-  return useQuery({
-    queryKey: ['planet-skins', planetId],
-    queryFn: () => api.get<SkinDto[]>(`/api/planets/${planetId}/skins`),
-    enabled: !!planetId,
+  const { data: inventory, isLoading } = useInventory()
+  const planet = planetById(planetId)
+  if (!planet) return { data: [] as SkinDto[], isLoading } as const
+  const byFigure = new Map<number, SkinDto>()
+  for (const s of inventory ?? []) {
+    const f = normalizeFigureType(s.figure)
+    if (f !== null) byFigure.set(f, s)
+  }
+  const data: SkinDto[] = planet.figures.map((figure) => {
+    const owned = byFigure.get(figure as number)
+    if (owned) return owned
+    return placeholderSkin(planet.id, figure)
   })
+  return { data, isLoading } as const
+}
+
+function placeholderSkin(planetId: string, figure: FigureType): SkinDto {
+  return {
+    id: `__placeholder__:${planetId}:${figure}`,
+    setId: planetId,
+    name: '',
+    description: null,
+    figure,
+    rarity: 1,
+    assets: {
+      whiteBoardImage: '',
+      blackBoardImage: '',
+      idleImage: '',
+      startFightWinImage: '',
+      startFightLoseImage: '',
+      endFightWinImage: '',
+      endFightLoseImage: '',
+    },
+    isDefault: false,
+  }
 }
 
 export function useInventory() {

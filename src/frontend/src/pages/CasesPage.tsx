@@ -8,12 +8,34 @@ import {
   FigureType,
   SkinRarity,
   figureTypeI18nKey,
+  normalizeFigureType,
   normalizeSkinRarity,
   skinRarityI18nKey,
 } from '../shared/api/enums'
 import type { LootBoxDropResultDto, PlanetDto } from '../shared/api'
 import { ApiError } from '../shared/api/http'
 import { skinImageSrc } from '../shared/lib/skinImage'
+import { planetForSkin } from '../shared/lib/planets'
+import { playSound } from '../shared/lib/sound'
+
+function figureKeyName(figure: number | null): string {
+  switch (figure) {
+    case FigureType.King:
+      return 'king'
+    case FigureType.Queen:
+      return 'queen'
+    case FigureType.Rook:
+      return 'rook'
+    case FigureType.Bishop:
+      return 'bishop'
+    case FigureType.Knight:
+      return 'knight'
+    case FigureType.Pawn:
+      return 'pawn'
+    default:
+      return ''
+  }
+}
 
 const FAKE_RARITY: Record<string, SkinRarity> = {
   common: SkinRarity.Common,
@@ -142,8 +164,9 @@ function findLandingPlanet(
   planets: PlanetDto[] | undefined,
 ): PlanetDto {
   if (!drop) return FALLBACK_LANDING_PLANET
+  const planetSlug = planetForSkin().id
   return (
-    planets?.find((planet) => planet.id === drop.skin.setId) ??
+    planets?.find((planet) => planet.id === planetSlug) ??
     FALLBACK_LANDING_PLANET
   )
 }
@@ -199,13 +222,16 @@ export function CasesPage() {
   const runAnimation = (result: LootBoxDropResultDto) => {
     setStarsFrozen(false)
     setDrop(result)
-    schedule(() => setPhase('descent'), 600)
+    schedule(() => {
+      setPhase('descent')
+      playSound('lootboxOpen')
+    }, 600)
     schedule(() => setStarsFrozen(true), 600 + CASE_STARS_FREEZE_MS)
     schedule(() => setPhase('whiteflash'), 600 + CASE_DESCENT_MS)
-    schedule(
-      () => setPhase('reveal'),
-      600 + CASE_DESCENT_MS + CASE_WHITE_FLASH_MS,
-    )
+    schedule(() => {
+      setPhase('reveal')
+      playSound('lootboxReveal')
+    }, 600 + CASE_DESCENT_MS + CASE_WHITE_FLASH_MS)
   }
 
   const handleOpen = async () => {
@@ -722,18 +748,25 @@ export function CasesPage() {
                   )}
                 </div>
                 <h2 className="font-display text-5xl md:text-6xl mb-2 leading-tight">
-                  {drop.skin.name}
+                  {t(
+                    `pages.inventory.skins.${planetForSkin().id}.${figureKeyName(normalizeFigureType(drop.skin.figure))}.name`,
+                    { defaultValue: drop.skin.name },
+                  )}
                 </h2>
                 <div className="text-violet-300 text-lg mb-6">
                   {t(
                     `pages.inventory.figures.${figureTypeI18nKey(drop.skin.figure)}`,
                   )}
                 </div>
-                {drop.skin.description && (
-                  <p className="text-slate-400 leading-relaxed mb-6">
-                    {drop.skin.description}
-                  </p>
-                )}
+                {(() => {
+                  const desc = t(
+                    `pages.inventory.skins.${planetForSkin().id}.${figureKeyName(normalizeFigureType(drop.skin.figure))}.description`,
+                    { defaultValue: drop.skin.description ?? '' },
+                  )
+                  return desc ? (
+                    <p className="text-slate-400 leading-relaxed mb-6">{desc}</p>
+                  ) : null
+                })()}
                 {drop.isDuplicate && (
                   <div className="text-sm text-slate-500 mb-4">
                     {t('pages.cases.duplicate')}
