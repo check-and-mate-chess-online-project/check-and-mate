@@ -8,14 +8,14 @@ public class User
     public string Login { get; private set; }
     public string PasswordHash { get; private set; }
     public string Email { get; private set; }
-    public int Rating { get; private set; } = 500;
-    public int Balance { get; private set; } = 0;
-    public int LootBoxCount { get; private set; } = 0;
+    public int Rating { get; private set; }
+    public int Balance { get; private set; }
+    public int LootBoxCount { get; private set; }
     public UserRole Role { get; private set; }
-    public bool IsDeleted { get; private set; } = false;
+    public bool IsDeleted { get; private set; }
 
     public User(string login, string passwordHash, string email, UserRole role) 
-        : this(Guid.NewGuid(), login, passwordHash, email, 500, 0, 0, role) {}
+        : this(Guid.NewGuid(), login, passwordHash, email, 500, 1000, 0, role) {}
 
     private User(Guid id, string login, string passwordHash, string email, int rating, int balance, int lootBoxCount, UserRole role, bool isDeleted = false)
     {

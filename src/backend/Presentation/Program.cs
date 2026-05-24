@@ -54,7 +54,14 @@ public class Program
         builder.Configuration.AddEnvironmentVariables(); 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add
+                (
+                    new System.Text.Json.Serialization.JsonStringEnumConverter()
+                );
+            });
         builder.Services.AddSignalR(hubOptions =>
         {
             hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(10);
@@ -101,13 +108,13 @@ public class Program
 
         builder.Services.AddScoped<IGameRepository, GameRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
-        builder.Services.AddSingleton<ISkinRepository, SkinRepository>();
-        builder.Services.AddSingleton<ISkinSetRepository, SkinSetRepository>();
-        builder.Services.AddSingleton<IUserSkinRepository, UserSkinRepository>();
-        builder.Services.AddSingleton<IGameInvitationRepository, GameInvitationRepository>();
+        builder.Services.AddScoped<ISkinRepository, SkinRepository>();
+        builder.Services.AddScoped<ISkinSetRepository, SkinSetRepository>();
+        builder.Services.AddScoped<IUserSkinRepository, UserSkinRepository>();
+        builder.Services.AddScoped<IGameInvitationRepository, GameInvitationRepository>();
         builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
-        builder.Services.AddSingleton<IFriendshipRepository, FriendshipRepository>();
-        builder.Services.AddSingleton<ISkinConfigurationRepository, SkinConfigurationRepository>();
+        builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        builder.Services.AddScoped<ISkinConfigurationRepository, SkinConfigurationRepository>();
 
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
         builder.Services.AddSingleton<IMatchmakingPool, MatchmakingPool>();

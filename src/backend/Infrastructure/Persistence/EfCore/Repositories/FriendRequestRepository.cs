@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Infrastructure.Persistence.EfCore.Context;
 using Infrastructure.Persistence.EfCore.Entities;
 using Infrastructure.Persistence.EfCore.Mappers;
@@ -43,11 +44,18 @@ public class FriendRequestRepository(AppDbContext context) : IFriendRequestRepos
     public void Add(FriendRequest request) => _context.FriendRequests.Add(FriendRequestMapper.ToDb(request));
 
     public async Task Update(FriendRequest request)
+{
+    FriendRequestEntity entity = FriendRequestMapper.ToDb(request);
+    EntityEntry<FriendRequestEntity>? existingEntry = _context.ChangeTracker.Entries<FriendRequestEntity>()
+        .FirstOrDefault(e => e.Entity.Id == entity.Id);
+    if (existingEntry != null)
     {
-        if (!await _context.FriendRequests.AnyAsync(fr => fr.Id == request.Id))
-            throw new InvalidOperationException($"friend request {request.Id} not exist");
-        FriendRequestEntity requestEntity = FriendRequestMapper.ToDb(request);
-        _context.FriendRequests.Attach(requestEntity);
-        _context.Entry(requestEntity).State = EntityState.Modified;
+        existingEntry.CurrentValues.SetValues(entity);
     }
+    else
+    {
+        _context.FriendRequests.Attach(entity);
+        _context.Entry(entity).State = EntityState.Modified;
+    }
+}
 }

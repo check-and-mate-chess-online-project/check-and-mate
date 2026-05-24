@@ -4,9 +4,9 @@ using Infrastructure.Persistence.EfCore.Entities;
 
 namespace Infrastructure.Persistence.EfCore.Configurations;
 
-public class FriendConfiguration : IEntityTypeConfiguration<FriendEntity>
+public class FriendConfiguration : IEntityTypeConfiguration<FriendshipEntity>
 {
-    public void Configure(EntityTypeBuilder<FriendEntity> builder)
+    public void Configure(EntityTypeBuilder<FriendshipEntity> builder)
     {
         builder.ToTable("friends");
         builder.HasKey(f => new { f.UserId, f.FriendId });

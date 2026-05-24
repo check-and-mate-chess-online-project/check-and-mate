@@ -6,6 +6,7 @@ using Core.Repositories;
 using Core.Models.Skins;
 using Core.Models.Chess;
 using Core.Models.Users;
+using Core.Exceptions;
 
 namespace Application.Orchestration.SkinConfigurations;
 
@@ -31,8 +32,6 @@ public class SkinConfigurationService(
 
     public async Task AddDefaultConfigurationAsync(Guid userId)
     {
-        User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
-        if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
         SkinConfiguration configuration = new(userId, (await _skinRepos.GetDefaultsAsync()).ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Id));
         _configurationRepos.Add(configuration);
         await _uow.CommitChangesAsync();
@@ -43,7 +42,8 @@ public class SkinConfigurationService(
         User user = await _userRepos.GetAsync(userId) ?? throw new NotFoundException($"user {userId} not found");
         if (user.IsDeleted) throw new UserDeletedException($"user {userId} is deleted");
         SkinConfiguration configuration = await _configurationRepos.GetAsync(userId) ?? throw new InvalidOperationException($"configuration not exist");
-        if (await _skinRepos.GetAsync(skinId) == null) throw new InvalidOperationException($"skin {skinId} not exist");
+        Skin skin = await _skinRepos.GetAsync(skinId) ?? throw new InvalidOperationException($"skin {skinId} not exist");
+        if (skin.Figure != figure) throw new CoreLogicException($"incorrect figure {figure} for skin {skinId}");
         configuration.ChangeFigureSkin(figure, skinId);
         await _configurationRepos.Update(configuration);
         await _uow.CommitChangesAsync();

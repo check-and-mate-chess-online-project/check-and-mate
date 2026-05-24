@@ -5,6 +5,9 @@ namespace Infrastructure.Persistence.EfCore.Mappers;
 
 public static class PlyMapper
 {
+    public static Ply ToDomain(PlyEntity plyEntity) 
+        => new(plyEntity.N, (PlayerColor)plyEntity.P, MoveMapper.ToDomain(plyEntity.M));
+
     public static PlyEntity ToDb(Ply ply)
     {
         PlyEntity plyEntity = new()
@@ -15,6 +18,4 @@ public static class PlyMapper
         };
         return plyEntity;
     }
-
-    public static Ply ToDomain(PlyEntity plyEntity) => new(plyEntity.N, (PlayerColor)plyEntity.P, MoveMapper.ToDomain(plyEntity.M));
 }

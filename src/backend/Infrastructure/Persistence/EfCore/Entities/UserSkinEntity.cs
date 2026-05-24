@@ -9,4 +9,7 @@ public class UserSkinEntity
     public SkinEntity Skin { get; private set; } = null!;
 
     private UserSkinEntity() { }
+
+    public static UserSkinEntity Create(Guid userId, Guid skinId)
+        => new() { UserId = userId, SkinId = skinId };
 }

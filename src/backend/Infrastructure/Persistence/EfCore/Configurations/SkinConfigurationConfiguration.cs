@@ -4,11 +4,11 @@ using Infrastructure.Persistence.EfCore.Entities;
 
 namespace Infrastructure.Persistence.EfCore.Configurations;
 
-public class UserFigureSkinConfiguration : IEntityTypeConfiguration<UserFigureSkinEntity>
+public class SkinConfigurationConfiguration : IEntityTypeConfiguration<SkinConfigurationEntity>
 {
-    public void Configure(EntityTypeBuilder<UserFigureSkinEntity> builder)
+    public void Configure(EntityTypeBuilder<SkinConfigurationEntity> builder)
     {
-        builder.ToTable("user_figure_skins");
+        builder.ToTable("skin_configurations");
         builder.HasKey(ufs => new {ufs.UserId, ufs.Figure});
 
         builder.HasOne(ufs => ufs.User)

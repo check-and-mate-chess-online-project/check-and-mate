@@ -21,4 +21,37 @@ public class SkinEntity
     public ICollection<UserSkinEntity> Owners { get; private set; } = [];
 
     private SkinEntity() { }
+
+    public static SkinEntity Create(
+        Guid id,
+        Guid setId,
+        string name,
+        string? description,
+        int figure,
+        int rarity,
+        byte[] wbi,
+        byte[] bbi,
+        byte[] ii,
+        byte[] sfwi,
+        byte[] sfli,
+        byte[] efwi,
+        byte[] efli,
+        bool IsDefault
+    ) => new()
+    {
+        Id = id,
+        SetId = setId,
+        Name = name,
+        Description = description,
+        Figure = figure,
+        Rarity = rarity,
+        WhiteBoardImage = wbi,
+        BlackBoardImage = bbi,
+        IdleImage = ii,
+        StartFightWinImage = sfwi,
+        StartFightLoseImage = sfli,
+        EndFightWinImage = efwi,
+        EndFightLoseImage = efli,
+        IsDefault = IsDefault
+    };
 }

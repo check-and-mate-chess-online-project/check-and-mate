@@ -4,5 +4,5 @@ namespace Application.Dtos;
 
 public class SkinConfigurationDto
 {
-    public Dictionary<FigureType, SkinDto> UserFigureSkins { get; set; } = null!;
+    public Dictionary<FigureType, SkinDto> UserFigureSkins { get; set; } = [];
 }

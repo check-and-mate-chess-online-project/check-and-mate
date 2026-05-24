@@ -21,8 +21,7 @@ public class SkinConfiguration : IEntityTypeConfiguration<SkinEntity>
             .HasMaxLength(25);
         
         builder.Property(s => s.Description)
-            .IsRequired(false)
-            .HasMaxLength(255);
+            .IsRequired(false);
         
         builder.Property(s => s.WhiteBoardImage).IsRequired();
         builder.Property(s => s.BlackBoardImage).IsRequired();

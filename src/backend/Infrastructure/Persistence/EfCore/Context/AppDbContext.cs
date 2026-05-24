@@ -7,13 +7,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<UserEntity> Users => Set<UserEntity>();
     public DbSet<GameEntity> Games => Set<GameEntity>();
-    public DbSet<FriendEntity> Friends => Set<FriendEntity>();
+    public DbSet<FriendshipEntity> Friends => Set<FriendshipEntity>();
     public DbSet<FriendRequestEntity> FriendRequests => Set<FriendRequestEntity>();
     public DbSet<GameInvitationEntity> GameInvitations => Set<GameInvitationEntity>();
     public DbSet<SkinSetEntity> SkinSets => Set<SkinSetEntity>();
     public DbSet<SkinEntity> Skins => Set<SkinEntity>();
     public DbSet<UserSkinEntity> UserSkins => Set<UserSkinEntity>();
-    public DbSet<UserFigureSkinEntity> UserFigureSkins => Set<UserFigureSkinEntity>();
+    public DbSet<SkinConfigurationEntity> SkinConfigurations => Set<SkinConfigurationEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

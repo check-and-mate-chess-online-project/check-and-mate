@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Infrastructure.Persistence.EfCore.Context;
 using Infrastructure.Persistence.EfCore.Entities;
 using Infrastructure.Persistence.EfCore.Mappers;
@@ -33,9 +34,17 @@ public class UserRepository(AppDbContext context) : IUserRepository
     
     public async Task Update(User user)
     {
-        if (!await _context.Users.AnyAsync(u => u.Id == user.Id)) throw new InvalidOperationException($"user {user.Id} not exist");
         UserEntity userEntity = UserMapper.ToDb(user);
-        _context.Users.Attach(userEntity);
-        _context.Entry(userEntity).State = EntityState.Modified;
+        EntityEntry<UserEntity>? existingEntry = _context.ChangeTracker.Entries<UserEntity>()
+            .FirstOrDefault(e => e.Entity.Id == userEntity.Id);
+        if (existingEntry != null)
+        {
+            existingEntry.CurrentValues.SetValues(userEntity);
+        }
+        else
+        {
+            _context.Users.Attach(userEntity);
+            _context.Entry(userEntity).State = EntityState.Modified;
+        }
     }
 }

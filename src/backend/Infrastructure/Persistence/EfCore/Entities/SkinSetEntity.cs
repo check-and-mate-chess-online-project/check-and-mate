@@ -9,4 +9,7 @@ public class SkinSetEntity
     public ICollection<SkinEntity> Skins { get; private set; } = [];
 
     private SkinSetEntity() { }
+
+    public static SkinSetEntity Create(Guid id, string name, string? description)
+        => new() { Id = id, Name = name, Description = description };
 }

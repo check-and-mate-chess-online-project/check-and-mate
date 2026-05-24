@@ -14,14 +14,14 @@ public class UserEntity
 
     public ICollection<GameEntity> WhiteGames { get; private set; } = [];
     public ICollection<GameEntity> BlackGames { get; private set; } = [];
-    public ICollection<FriendEntity> Friends { get; private set; } = [];
-    public ICollection<FriendEntity> FriendOf { get; private set; } = [];
+    public ICollection<FriendshipEntity> Friends { get; private set; } = [];
+    public ICollection<FriendshipEntity> FriendOf { get; private set; } = [];
     public ICollection<FriendRequestEntity> SentFriendRequests { get; private set; } = [];
     public ICollection<FriendRequestEntity> ReceivedFriendRequests { get; private set; } = [];
     public ICollection<GameInvitationEntity> SentGameInvitations { get; private set; } = [];
     public ICollection<GameInvitationEntity> ReceivedGameInvitations { get; private set; } = [];
     public ICollection<UserSkinEntity> OwnedSkins { get; private set; } = [];
-    public ICollection<UserFigureSkinEntity> EquippedSkins { get; private set; } = [];
+    public ICollection<SkinConfigurationEntity> EquippedSkins { get; private set; } = [];
 
     private UserEntity() {}
 

@@ -5,7 +5,6 @@ using Application.Abstractions.Events;
 using Application.Events;
 using Application.Mappers;
 using Core.Repositories;
-using Infrastructure.Persistence.EfCore.Repositories;
 
 namespace Infrastructure.Background;
 

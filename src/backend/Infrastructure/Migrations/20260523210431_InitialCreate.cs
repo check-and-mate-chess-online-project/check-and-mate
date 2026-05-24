@@ -50,7 +50,7 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     SetId = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(25)", maxLength: 25, nullable: false),
-                    Description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
                     Figure = table.Column<int>(type: "integer", nullable: false),
                     Rarity = table.Column<int>(type: "integer", nullable: false),
                     WhiteBoardImage = table.Column<byte[]>(type: "bytea", nullable: false),
@@ -128,8 +128,11 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ReceiverId = table.Column<Guid>(type: "uuid", nullable: false),
                     SenderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReceiverId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InitialTimeSec = table.Column<int>(type: "integer", nullable: true),
+                    IncrementPerMoveSec = table.Column<int>(type: "integer", nullable: true),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     State = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -182,7 +185,7 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "user_figure_skins",
+                name: "skin_configurations",
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -191,15 +194,15 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_user_figure_skins", x => new { x.UserId, x.Figure });
+                    table.PrimaryKey("PK_skin_configurations", x => new { x.UserId, x.Figure });
                     table.ForeignKey(
-                        name: "FK_user_figure_skins_skins_SkinId",
+                        name: "FK_skin_configurations_skins_SkinId",
                         column: x => x.SkinId,
                         principalTable: "skins",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_user_figure_skins_users_UserId",
+                        name: "FK_skin_configurations_users_UserId",
                         column: x => x.UserId,
                         principalTable: "users",
                         principalColumn: "Id",
@@ -266,14 +269,14 @@ namespace Infrastructure.Migrations
                 column: "WhitePlayerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_skin_configurations_SkinId",
+                table: "skin_configurations",
+                column: "SkinId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_skins_SetId",
                 table: "skins",
                 column: "SetId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_user_figure_skins_SkinId",
-                table: "user_figure_skins",
-                column: "SkinId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_user_skins_SkinId",
@@ -309,7 +312,7 @@ namespace Infrastructure.Migrations
                 name: "games");
 
             migrationBuilder.DropTable(
-                name: "user_figure_skins");
+                name: "skin_configurations");
 
             migrationBuilder.DropTable(
                 name: "user_skins");

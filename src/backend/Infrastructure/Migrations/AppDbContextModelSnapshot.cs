@@ -22,21 +22,6 @@ namespace Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.FriendEntity", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("FriendId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("UserId", "FriendId");
-
-                    b.HasIndex("FriendId");
-
-                    b.ToTable("friends", (string)null);
-                });
-
             modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.FriendRequestEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -59,6 +44,21 @@ namespace Infrastructure.Migrations
                     b.HasIndex("SenderId");
 
                     b.ToTable("friend_requests", (string)null);
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.FriendshipEntity", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FriendId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("UserId", "FriendId");
+
+                    b.HasIndex("FriendId");
+
+                    b.ToTable("friends", (string)null);
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.GameEntity", b =>
@@ -109,6 +109,15 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("IncrementPerMoveSec")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("InitialTimeSec")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("ReceiverId")
                         .HasColumnType("uuid");
 
@@ -127,6 +136,24 @@ namespace Infrastructure.Migrations
                     b.ToTable("game_invitations", (string)null);
                 });
 
+            modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.SkinConfigurationEntity", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Figure")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SkinId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("UserId", "Figure");
+
+                    b.HasIndex("SkinId");
+
+                    b.ToTable("skin_configurations", (string)null);
+                });
+
             modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.SkinEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -138,8 +165,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bytea");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<byte[]>("EndFightLoseImage")
                         .IsRequired()
@@ -256,24 +282,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.UserFigureSkinEntity", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Figure")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("SkinId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("UserId", "Figure");
-
-                    b.HasIndex("SkinId");
-
-                    b.ToTable("user_figure_skins", (string)null);
-                });
-
             modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.UserSkinEntity", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -287,25 +295,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("SkinId");
 
                     b.ToTable("user_skins", (string)null);
-                });
-
-            modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.FriendEntity", b =>
-                {
-                    b.HasOne("Infrastructure.Persistence.EfCore.Entities.UserEntity", "Friend")
-                        .WithMany("FriendOf")
-                        .HasForeignKey("FriendId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Infrastructure.Persistence.EfCore.Entities.UserEntity", "User")
-                        .WithMany("Friends")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Friend");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.FriendRequestEntity", b =>
@@ -325,6 +314,25 @@ namespace Infrastructure.Migrations
                     b.Navigation("Receiver");
 
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.FriendshipEntity", b =>
+                {
+                    b.HasOne("Infrastructure.Persistence.EfCore.Entities.UserEntity", "Friend")
+                        .WithMany("FriendOf")
+                        .HasForeignKey("FriendId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Infrastructure.Persistence.EfCore.Entities.UserEntity", "User")
+                        .WithMany("Friends")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Friend");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.GameEntity", b =>
@@ -365,18 +373,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.SkinEntity", b =>
-                {
-                    b.HasOne("Infrastructure.Persistence.EfCore.Entities.SkinSetEntity", "Set")
-                        .WithMany("Skins")
-                        .HasForeignKey("SetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Set");
-                });
-
-            modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.UserFigureSkinEntity", b =>
+            modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.SkinConfigurationEntity", b =>
                 {
                     b.HasOne("Infrastructure.Persistence.EfCore.Entities.SkinEntity", "Skin")
                         .WithMany()
@@ -393,6 +390,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Skin");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.SkinEntity", b =>
+                {
+                    b.HasOne("Infrastructure.Persistence.EfCore.Entities.SkinSetEntity", "Set")
+                        .WithMany("Skins")
+                        .HasForeignKey("SetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Set");
                 });
 
             modelBuilder.Entity("Infrastructure.Persistence.EfCore.Entities.UserSkinEntity", b =>

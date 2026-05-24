@@ -1,6 +1,6 @@
 namespace Infrastructure.Persistence.EfCore.Entities;
 
-public class FriendEntity
+public class FriendshipEntity
 {
     public Guid UserId { get; private set; }
     public Guid FriendId { get; private set; }
@@ -8,5 +8,11 @@ public class FriendEntity
     public UserEntity User { get; private set; } = null!;
     public UserEntity Friend { get; private set; } = null!;
 
-    private FriendEntity() { }
+    private FriendshipEntity() { }
+
+    public static FriendshipEntity Create(Guid userId, Guid friendId) => new()
+    {
+        UserId = userId,
+        FriendId = friendId
+    };
 }
