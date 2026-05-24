@@ -74,44 +74,47 @@ function PlanetGrid({ planets, onSelect }: PlanetGridProps) {
           const name = t(`pages.inventory.planets.${p.id}`, {
             defaultValue: p.name,
           })
+          if (!available) {
+            return (
+              <button
+                key={p.id}
+                type="button"
+                disabled
+                className="flex flex-col items-center cursor-not-allowed"
+              >
+                <img
+                  src={p.imageUrl}
+                  alt={name}
+                  className="w-full aspect-square rounded-full grayscale opacity-40"
+                  draggable={false}
+                />
+                <div className="mt-3 text-slate-500">
+                  {name}
+                  <span className="ml-2 text-xs uppercase tracking-wider text-slate-600">
+                    {t('pages.lobby.mode.soon')}
+                  </span>
+                </div>
+              </button>
+            )
+          }
           return (
             <motion.button
               key={p.id}
               type="button"
-              onClick={() => available && onSelect(p.id)}
-              disabled={!available}
-              whileHover={available ? { scale: 1.05 } : undefined}
-              whileTap={available ? { scale: 0.92 } : undefined}
+              onClick={() => onSelect(p.id)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.92 }}
               transition={{ duration: 0.18 }}
-              className={
-                available
-                  ? 'flex flex-col items-center group'
-                  : 'flex flex-col items-center group cursor-not-allowed'
-              }
+              className="flex flex-col items-center group"
             >
               <motion.img
                 layoutId={`planet-${p.id}`}
                 src={p.imageUrl}
                 alt={name}
-                className={
-                  available
-                    ? 'w-full aspect-square rounded-full'
-                    : 'w-full aspect-square rounded-full grayscale opacity-40'
-                }
+                className="w-full aspect-square rounded-full"
               />
-              <div
-                className={
-                  available
-                    ? 'mt-3 text-slate-300 group-hover:text-slate-100'
-                    : 'mt-3 text-slate-500'
-                }
-              >
+              <div className="mt-3 text-slate-300 group-hover:text-slate-100">
                 {name}
-                {!available && (
-                  <span className="ml-2 text-xs uppercase tracking-wider text-slate-600">
-                    {t('pages.lobby.mode.soon')}
-                  </span>
-                )}
               </div>
             </motion.button>
           )
