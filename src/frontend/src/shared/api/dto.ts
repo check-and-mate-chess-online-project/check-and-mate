@@ -54,6 +54,8 @@ export interface GameDto {
   timeControlIsEnabled: boolean
   initialTimeSec: number | null
   incrementPerMoveSec: number | null
+  whiteTimeLeftSec: number | null
+  blackTimeLeftSec: number | null
   figures: FigureDto[]
   moves: PlyDto[]
 }
