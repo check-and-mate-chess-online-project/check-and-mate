@@ -41,7 +41,7 @@ public class LootBoxService(
             isDuplicate = true;
             user.AddBalance(_settings.DuplicateSkinReward);
         }
-        _userRepos.Update(user);
+        await _userRepos.Update(user);
         await _uow.CommitChangesAsync();
         LootBoxDropResultDto dropResult = new() { Skin = SkinMapper.ToDto(skin), IsDuplicate = isDuplicate };
         return dropResult;
@@ -54,7 +54,7 @@ public class LootBoxService(
         int totalPrice = _settings.LootBoxPrice * count;
         user.SpendBalance(totalPrice);
         user.AddLootBoxes(count);
-        _userRepos.Update(user);
+        await _userRepos.Update(user);
         await _uow.CommitChangesAsync();
     }
 }

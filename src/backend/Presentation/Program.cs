@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Presentation.Hubs;
 using Presentation.Events.Handlers;
@@ -24,6 +25,7 @@ using Application.Orchestration.SkinDrops;
 using Application.Orchestration.GameSessions;
 using Application.Orchestration.RatingCalculation;
 using Application.Orchestration.SkinConfigurations;
+using Application.Orchestration.InputStringValidation;
 using Application.Events;
 using Application.Exceptions;
 using Infrastructure.Settings;
@@ -34,6 +36,9 @@ using Infrastructure.Events;
 using Infrastructure.Connections;
 using Infrastructure.Background;
 using Infrastructure.Assets.Loaders;
+using Infrastructure.Persistence.EfCore.Context;
+using Infrastructure.Persistence.EfCore.Repositories;
+using Infrastructure.Persistence.EfCore.UnitOfWork;
 using Core.Repositories;
 using Core.Exceptions;
 
@@ -47,19 +52,25 @@ public class Program
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
         builder.Configuration.AddEnvironmentVariables(); 
-
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-
-        builder.Services.AddSwaggerGen();
-
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add
+                (
+                    new System.Text.Json.Serialization.JsonStringEnumConverter()
+                );
+            });
         builder.Services.AddSignalR(hubOptions =>
         {
             hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(10);
             hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
             hubOptions.AddFilter<HubExceptionFilter>();
         });
+
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(builder.Configuration["PostgresConfig:ConnectionString"]));
 
         string key = builder.Configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("jwt key not found");
         if (key.Length < 32) throw new InvalidOperationException("jwt key too short");
@@ -95,15 +106,15 @@ public class Program
         builder.Services.Configure<GameSettings>(builder.Configuration.GetSection("GameSettings"));
         builder.Services.AddSingleton<IGameSettingsProvider, GameSettingsProvider>();
 
-        builder.Services.AddSingleton<IGameRepository, GameRepository>();
-        builder.Services.AddSingleton<IUserRepository, UserRepository>();
-        builder.Services.AddSingleton<ISkinRepository, SkinRepository>();
-        builder.Services.AddSingleton<ISkinSetRepository, SkinSetRepository>();
-        builder.Services.AddSingleton<IUserSkinRepository, UserSkinRepository>();
-        builder.Services.AddSingleton<IGameInvitationRepository, GameInvitationRepository>();
-        builder.Services.AddSingleton<IFriendRequestRepository, FriendRequestRepository>();
-        builder.Services.AddSingleton<IFriendshipRepository, FriendshipRepository>();
-        builder.Services.AddSingleton<ISkinConfigurationRepository, SkinConfigurationRepository>();
+        builder.Services.AddScoped<IGameRepository, GameRepository>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<ISkinRepository, SkinRepository>();
+        builder.Services.AddScoped<ISkinSetRepository, SkinSetRepository>();
+        builder.Services.AddScoped<IUserSkinRepository, UserSkinRepository>();
+        builder.Services.AddScoped<IGameInvitationRepository, GameInvitationRepository>();
+        builder.Services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
+        builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        builder.Services.AddScoped<ISkinConfigurationRepository, SkinConfigurationRepository>();
 
         builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
         builder.Services.AddSingleton<IMatchmakingPool, MatchmakingPool>();
@@ -115,7 +126,10 @@ public class Program
         builder.Services.AddSingleton<IRatingCalculator, RatingCalculator>();
         builder.Services.AddSingleton<IGameSessionService, GameSessionService>();
         builder.Services.AddSingleton<IConnectionGracePeriodTimer, ConnectionGracePeriodTimer>();
-        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddSingleton<LoginValidator>();
+        builder.Services.AddSingleton<PasswordValidator>();
+        builder.Services.AddSingleton<EmailValidator>();
+        builder.Services.AddScoped<IUnitOfWork, AppUoW>();
         builder.Services.AddScoped<IUserSkinService, UserSkinService>();
         builder.Services.AddScoped<ISkinDropService, SkinDropService>();
         builder.Services.AddScoped<ISkinConfigurationService, SkinConfigurationService>();
@@ -169,6 +183,7 @@ public class Program
                     CoreLogicException => StatusCodes.Status400BadRequest,
                     ArgumentException => StatusCodes.Status400BadRequest,
                     UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+                    ForbiddenException => StatusCodes.Status403Forbidden,
                     NotFoundException => StatusCodes.Status404NotFound,
                     ConflictException => StatusCodes.Status409Conflict,
                     UserDeletedException => StatusCodes.Status410Gone,

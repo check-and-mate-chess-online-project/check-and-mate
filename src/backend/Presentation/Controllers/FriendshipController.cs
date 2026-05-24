@@ -45,34 +45,31 @@ public class FriendshipController(IFriendshipService friendship) : ControllerBas
     public async Task<ActionResult<FriendRequestDto>> SendFriendRequest([FromBody]FriendRequest request)
     {
         Guid userId = GetUserId();
-        FriendRequestDto friendRequest;
-        if (request.ReceiverId != null)
-        {
-            friendRequest = await _friendship.SendFriendRequestAsync(userId, request.ReceiverId.Value);
-        }
-        else if (request.ReceiverLogin != null)
-        {
-            friendRequest = await _friendship.SendFriendRequestAsync(userId, request.ReceiverLogin);
-        }
-        else throw new ArgumentException("id or login must be specified");
+        FriendRequestDto friendRequest = await _friendship.SendFriendRequestAsync(userId, request.ReceiverLogin);
         return friendRequest;
     }
 
     [HttpPatch("requests/{friendRequestId}/accept")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> AcceptFriendRequest([FromRoute]Guid friendRequestId)
     {
-        await _friendship.AcceptFriendRequestAsync(friendRequestId);
+        Guid userId = GetUserId();
+        await _friendship.AcceptFriendRequestAsync(userId, friendRequestId);
         return NoContent();
     }
 
     [HttpPatch("requests/{friendRequestId}/reject")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> RejectFriendRequest([FromRoute]Guid friendRequestId)
     {
-        await _friendship.RejectFriendRequestAsync(friendRequestId);
+        Guid userId = GetUserId();
+        await _friendship.RejectFriendRequestAsync(userId, friendRequestId);
         return NoContent();
     }
 

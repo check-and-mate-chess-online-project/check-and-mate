@@ -44,7 +44,7 @@ public class ProfileService(IUserRepository userRepos, IPasswordHasher hasher, I
         if (user.PasswordHash != _hasher.GetHash(password)) throw new UnauthorizedAccessException("incorrect password");
         string passworHash = _hasher.GetHash(newPassword);
         user.ChangePasswordHash(passworHash);
-        _userRepos.Update(user);
+        await _userRepos.Update(user);
         await _uow.CommitChangesAsync();
     }
 
@@ -54,7 +54,7 @@ public class ProfileService(IUserRepository userRepos, IPasswordHasher hasher, I
         if (user.IsDeleted) throw new UserDeletedException($"user {userId} already deleted");
         if (user.PasswordHash != _hasher.GetHash(password)) throw new UnauthorizedAccessException("incorrect password");
         user.Delete();
-        _userRepos.Update(user);
+        await _userRepos.Update(user);
         await _uow.CommitChangesAsync();
     }
 
@@ -62,7 +62,7 @@ public class ProfileService(IUserRepository userRepos, IPasswordHasher hasher, I
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(login);
         user.ChangeLogin(login);
-        _userRepos.Update(user);
+        await _userRepos.Update(user);
         await _uow.CommitChangesAsync();
     }
 
@@ -70,7 +70,7 @@ public class ProfileService(IUserRepository userRepos, IPasswordHasher hasher, I
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
         user.ChangeEmail(email);
-        _userRepos.Update(user);
+        await _userRepos.Update(user);
         await _uow.CommitChangesAsync();
     }
 }

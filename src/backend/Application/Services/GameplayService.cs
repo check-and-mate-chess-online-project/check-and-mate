@@ -2,15 +2,15 @@ using Application.Services.Interfaces;
 using Application.Abstractions.UnitOfWork;
 using Application.Abstractions.Settings;
 using Application.Orchestration.GameSessions;
+using Application.Orchestration.RatingCalculation;
 using Application.Dtos;
 using Application.Mappers;
 using Application.Exceptions;
+using Application.Models;
 using Core.Repositories;
 using Core.Models.Chess;
 using Core.Models.Games;
 using Core.Models.Users;
-using Application.Models;
-using Application.Orchestration.RatingCalculation;
 
 namespace Application.Services;
 
@@ -113,7 +113,7 @@ public class GameplayService(
         RatingResult result = _calculator.CalculateRating(whitePlayer.Rating, blackPlayer.Rating, gameResult);
         whitePlayer.ChangeRating(result.WhiteRatingDelta);
         blackPlayer.ChangeRating(result.BlackRatingDelta);
-        _userRepos.Update(whitePlayer);
-        _userRepos.Update(blackPlayer);
+        await _userRepos.Update(whitePlayer);
+        await _userRepos.Update(blackPlayer);
     }
 }

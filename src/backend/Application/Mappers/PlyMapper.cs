@@ -9,6 +9,6 @@ public static class PlyMapper
     {
         MoveNumber = ply.MoveNumber,
         Color = ply.Color,
-        Coordinates = [.. ply.Coordinates.Select(MoveMapper.ToDto)]
+        Move = MoveMapper.ToDto(ply.Move)
     };
 }

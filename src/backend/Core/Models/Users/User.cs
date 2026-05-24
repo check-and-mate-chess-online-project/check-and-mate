@@ -8,22 +8,41 @@ public class User
     public string Login { get; private set; }
     public string PasswordHash { get; private set; }
     public string Email { get; private set; }
-    public int Rating { get; private set; } = 500;
-    public int Balance { get; private set; } = 0;
-    public int LootBoxCount { get; private set; } = 0;
+    public int Rating { get; private set; }
+    public int Balance { get; private set; }
+    public int LootBoxCount { get; private set; }
     public UserRole Role { get; private set; }
-    public bool IsDeleted { get; private set; } = false;
+    public bool IsDeleted { get; private set; }
 
-    public User(string login, string passwordHash, string email, UserRole role)
+    public User(string login, string passwordHash, string email, UserRole role) 
+        : this(Guid.NewGuid(), login, passwordHash, email, 500, 1000, 0, role) {}
+
+    private User(Guid id, string login, string passwordHash, string email, int rating, int balance, int lootBoxCount, UserRole role, bool isDeleted = false)
     {
         if (string.IsNullOrWhiteSpace(login)) throw new ArgumentException("login cannot be empty");
         if (string.IsNullOrWhiteSpace(passwordHash)) throw new ArgumentException("password hash cannot be empty");
-        Id = Guid.NewGuid();
+        Id = id;
         Login = login;
         PasswordHash = passwordHash;
         Email = email;
+        Rating = rating;
+        Balance = balance;
+        LootBoxCount = lootBoxCount;
         Role = role;
+        IsDeleted = isDeleted;
     }
+
+    public static User Restore(
+        Guid id, 
+        string login, 
+        string passwordHash, 
+        string email, 
+        int rating, 
+        int balance, 
+        int lootBoxCount, 
+        UserRole role, 
+        bool isDeleted) 
+        => new(id, login, passwordHash, email, rating, balance, lootBoxCount, role, isDeleted);
 
     public void ChangeRating(int delta) => Rating = Math.Max(0, Rating + delta);
 

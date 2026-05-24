@@ -1,3 +1,3 @@
 namespace Presentation.Requests;
 
-public record FriendRequest(Guid? ReceiverId, string? ReceiverLogin);
+public record FriendRequest(string ReceiverLogin);

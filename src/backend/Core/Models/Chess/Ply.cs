@@ -1,8 +1,8 @@
 namespace Core.Models.Chess;
 
-public class Ply(int moveNumber, PlayerColor color, List<Move> coordinates)
+public class Ply(int moveNumber, PlayerColor color, Move move)
 {
     public int MoveNumber { get; } = moveNumber;
     public PlayerColor Color { get; } = color;
-    public List<Move> Coordinates { get; } = coordinates;
+    public Move Move { get; } = move;
 }

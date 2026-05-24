@@ -35,6 +35,14 @@ public class GameHub(
         return await _invitation.GetPendingGameInvitationsAsync(userId);
     }
 
+    public async Task<GameDto?> GetActiveGameState()
+    {
+        Guid userId = GetUserId();
+        _timer.CancelGracePeriod(userId);
+        GameDto? game = await _gameplay.GetActiveGameByUser(userId);
+        return game;
+    }
+
     public async Task FindGame(SearchOpponentRequest request)
     {
         Guid userId = GetUserId();
@@ -55,41 +63,29 @@ public class GameHub(
     {
         Guid userId = GetUserId();
         _timer.CancelGracePeriod(userId);
-        GameInvitationDto invitation;
-        if (request.ReceiverId != null)
-        {
-            invitation = await _invitation.SendGameInvitationAsync(
-                userId, 
-                request.ReceiverId.Value,
-                request.TimeControlIsEnabled, 
-                request.InitialTimeSec, 
-                request.IncrementPerMoveSec);
-        }
-        else if (request.ReceiverLogin != null)
-        {
-            invitation = await _invitation.SendGameInvitationAsync(
-                userId, 
-                request.ReceiverLogin,
-                request.TimeControlIsEnabled, 
-                request.InitialTimeSec, 
-                request.IncrementPerMoveSec);
-        }
-        else throw new HubException("id or login must be specified");
+        GameInvitationDto invitation = await _invitation.SendGameInvitationAsync(
+            userId, 
+            request.ReceiverLogin,
+            request.TimeControlIsEnabled, 
+            request.InitialTimeSec, 
+            request.IncrementPerMoveSec);
         await Clients.User(invitation.Receiver.Id.ToString()).SendAsync("gameInvitationReceived", invitation);
         await Clients.Caller.SendAsync("gameInvitationSent", invitation);
     }
 
     public async Task AcceptGameInvitation(Guid invitationId)
     {
+        Guid userId = GetUserId();
         _timer.CancelGracePeriod(GetUserId());
-        GameInvitationDto invitation = await _invitation.AcceptGameInvitationAsync(invitationId);
+        GameInvitationDto invitation = await _invitation.AcceptGameInvitationAsync(userId, invitationId);
         await Clients.Users(invitation.Sender.Id.ToString(), invitation.Receiver.Id.ToString()).SendAsync("gameInvitationAccepted", invitation);
     }
 
     public async Task RejectGameInvitation(Guid invitationId)
     {
+        Guid userId = GetUserId();
         _timer.CancelGracePeriod(GetUserId());
-        GameInvitationDto invitation = await _invitation.RejectGameInvitationAsync(invitationId);
+        GameInvitationDto invitation = await _invitation.RejectGameInvitationAsync(userId, invitationId);
         await Clients.Users(invitation.Sender.Id.ToString(), invitation.Receiver.Id.ToString()).SendAsync("gameInvitationRejected", invitation);
     }
 

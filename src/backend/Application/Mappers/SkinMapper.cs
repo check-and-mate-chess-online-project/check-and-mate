@@ -9,15 +9,11 @@ public static class SkinMapper
     {
         Id = skin.Id,
         SetId = skin.SetId,
+        Name = skin.Name,
+        Description = skin.Description,
         Figure = skin.Figure,
         Rarity = skin.Rarity,
-        WhiteBoardImage = skin.WhiteBoardImage,
-        BlackBoardImage = skin.BlackBoardImage,
-        IdleImage = skin.IdleImage,
-        StartFightWinImage = skin.StartFightWinImage,
-        StartFightLoseImage = skin.StartFightLoseImage,
-        EndFightWinImage = skin.EndFightWinImage,
-        EndFightLoseImage = skin.EndFightLoseImage,
+        Assets = skin.Assets,
         IsDefault = skin.IsDefault
     };
 }
