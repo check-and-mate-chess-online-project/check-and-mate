@@ -205,6 +205,28 @@ export function GamePage() {
   const { whiteMs, blackMs, active, switchTo, pause, reset, setTimes } =
     useChessClock(initialMs, incMs)
 
+  const setTimesRef = useRef(setTimes)
+  useEffect(() => {
+    setTimesRef.current = setTimes
+  }, [setTimes])
+  const syncClocksFromGame = useMemo(
+    () => (g: GameDto | null | undefined) => {
+      if (!g || !g.timeControlIsEnabled) return
+      if (
+        g.whiteTimeLeftSec === null ||
+        g.whiteTimeLeftSec === undefined ||
+        g.blackTimeLeftSec === null ||
+        g.blackTimeLeftSec === undefined
+      )
+        return
+      setTimesRef.current(
+        Math.max(0, g.whiteTimeLeftSec * 1000),
+        Math.max(0, g.blackTimeLeftSec * 1000),
+      )
+    },
+    [],
+  )
+
   const myColor: Color | null =
     !user || !activeGame
       ? null
@@ -344,6 +366,7 @@ export function GamePage() {
               }
             }
           }
+          const serverGame = result.game
           if (result.isGameOver) {
             const moverColor: Color = game.turn() === 'w' ? 'black' : 'white'
             const reason = normalizeGameTerminationReason(
@@ -356,13 +379,16 @@ export function GamePage() {
                 : moverColor === myColor
                   ? 'win'
                   : 'loss'
+            pause()
+            syncClocksFromGame(serverGame)
             setEnded({ outcome, reason })
             playSound('gameEnd')
-            pause()
             return
           }
           const nextTurn = game.turn() === 'w' ? 'white' : 'black'
           setTurn(nextTurn)
+          pause()
+          syncClocksFromGame(serverGame)
           switchTo(nextTurn)
         } catch {
           return
@@ -380,27 +406,30 @@ export function GamePage() {
           pendingMoveRef.current = null
         }
       },
-      onPlayerResigned: (_game, userId) => {
+      onPlayerResigned: (gameState, userId) => {
         const outcome: Outcome = userId === user?.id ? 'loss' : 'win'
+        pause()
+        syncClocksFromGame(gameState)
         setEnded({ outcome, reason: GameTerminationReason.Resignation })
         playSound('gameEnd')
-        pause()
       },
-      onPlayerLeft: (_game, userId) => {
+      onPlayerLeft: (gameState, userId) => {
         if (userId === user?.id) return
         toast.warning(t('pages.game.opponentDisconnected'))
+        pause()
+        syncClocksFromGame(gameState)
         setEnded({ outcome: 'win', reason: GameTerminationReason.Disconnect })
         playSound('gameEnd')
-        pause()
       },
-      onTimeExpired: (_game, userId) => {
+      onTimeExpired: (gameState, userId) => {
         const outcome: Outcome = userId === user?.id ? 'loss' : 'win'
+        pause()
+        syncClocksFromGame(gameState)
         setEnded({ outcome, reason: GameTerminationReason.Timeout })
         playSound('gameEnd')
-        pause()
       },
     })
-  }, [activeGame, myColor, user?.id, t, game, switchTo, pause])
+  }, [activeGame, myColor, user?.id, t, game, switchTo, pause, syncClocksFromGame])
 
   if (loadingGame) {
     return (
@@ -510,6 +539,7 @@ export function GamePage() {
     }
     const nextTurn = game.turn() === 'w' ? 'white' : 'black'
     setTurn(nextTurn)
+    switchTo(nextTurn)
     pendingMoveRef.current = { from: sourceSquare, to: targetSquare }
     const apiMove = squaresToApiMove(sourceSquare, targetSquare)
     gameHub.makeMove(apiMove).catch(() => {
