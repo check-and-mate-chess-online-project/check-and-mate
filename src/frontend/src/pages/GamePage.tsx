@@ -120,7 +120,11 @@ function firstPlyMove(ply: PlyDto): MoveDto | undefined {
   return ply.move ?? ply.coordinates?.[0]
 }
 
-function squaresToApiMove(from: string, to: string): MakeMoveRequest {
+function squaresToApiMove(
+  from: string,
+  to: string,
+  selectedFigure: FigureType | null = null,
+): MakeMoveRequest {
   const f = squareToCoord(from)
   const t = squareToCoord(to)
   return {
@@ -128,7 +132,7 @@ function squaresToApiMove(from: string, to: string): MakeMoveRequest {
     b: f.row,
     x: t.col,
     y: t.row,
-    options: { selectedFigure: null },
+    options: { selectedFigure },
   }
 }
 
@@ -622,7 +626,12 @@ export function GamePage() {
     setTurn(nextTurn)
     switchTo(nextTurn)
     pendingMoveRef.current = { from: sourceSquare, to: targetSquare }
-    const apiMove = squaresToApiMove(sourceSquare, targetSquare)
+    const selectedFigure = applied.flags.includes('p') ? FigureType.Queen : null
+    const apiMove = squaresToApiMove(
+      sourceSquare,
+      targetSquare,
+      selectedFigure,
+    )
     gameHub.makeMove(apiMove).catch(() => {
       toast.error('move failed')
       try {
