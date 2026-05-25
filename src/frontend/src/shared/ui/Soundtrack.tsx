@@ -3,6 +3,38 @@ import { useSoundStore } from '../lib/sound'
 
 const SOUNDTRACK_SRC = '/soundtrack.mp3'
 const BASE_VOLUME = 0.18
+const SILENCE_THRESHOLD = 0.002
+
+function findSilenceBounds(buffer: AudioBuffer): {
+  start: number
+  end: number
+} {
+  const channels = buffer.numberOfChannels
+  const sampleRate = buffer.sampleRate
+  const length = buffer.length
+  let firstNonSilent = length
+  let lastNonSilent = 0
+  for (let c = 0; c < channels; c++) {
+    const data = buffer.getChannelData(c)
+    for (let i = 0; i < length; i++) {
+      if (Math.abs(data[i]) > SILENCE_THRESHOLD) {
+        if (i < firstNonSilent) firstNonSilent = i
+        break
+      }
+    }
+    for (let i = length - 1; i >= 0; i--) {
+      if (Math.abs(data[i]) > SILENCE_THRESHOLD) {
+        if (i > lastNonSilent) lastNonSilent = i
+        break
+      }
+    }
+  }
+  if (firstNonSilent >= length) return { start: 0, end: buffer.duration }
+  return {
+    start: firstNonSilent / sampleRate,
+    end: (lastNonSilent + 1) / sampleRate,
+  }
+}
 
 export function Soundtrack() {
   const muted = useSoundStore((s) => s.muted)
@@ -10,6 +42,10 @@ export function Soundtrack() {
 
   const ctxRef = useRef<AudioContext | null>(null)
   const bufferRef = useRef<AudioBuffer | null>(null)
+  const loopBoundsRef = useRef<{ start: number; end: number }>({
+    start: 0,
+    end: 0,
+  })
   const sourceRef = useRef<AudioBufferSourceNode | null>(null)
   const gainRef = useRef<GainNode | null>(null)
   const startedRef = useRef(false)
@@ -47,6 +83,7 @@ export function Soundtrack() {
         const buffer = await ctx.decodeAudioData(arr)
         if (cancelled) return
         bufferRef.current = buffer
+        loopBoundsRef.current = findSilenceBounds(buffer)
         tryStart()
       } catch {
         // fetch / decode failed, soundtrack stays silent
@@ -66,8 +103,13 @@ export function Soundtrack() {
       const source = ctx.createBufferSource()
       source.buffer = buffer
       source.loop = true
+      const { start, end } = loopBoundsRef.current
+      if (end > start) {
+        source.loopStart = start
+        source.loopEnd = end
+      }
       source.connect(gain)
-      source.start(0)
+      source.start(0, start)
       sourceRef.current = source
       startedRef.current = true
     }
@@ -111,8 +153,13 @@ export function Soundtrack() {
       const source = ctx.createBufferSource()
       source.buffer = bufferRef.current
       source.loop = true
+      const { start, end } = loopBoundsRef.current
+      if (end > start) {
+        source.loopStart = start
+        source.loopEnd = end
+      }
       source.connect(gain)
-      source.start(0)
+      source.start(0, start)
       sourceRef.current = source
       startedRef.current = true
     }
