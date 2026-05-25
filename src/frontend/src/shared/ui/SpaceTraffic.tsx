@@ -58,10 +58,9 @@ function generateComets(count: number): Comet[] {
 export function SpaceTraffic() {
   const location = useLocation()
   const isLanding = location.pathname === '/'
-  const shipCount = isLanding ? 2 : 1
   const ships = useMemo(
-    () => generateShips(shipCount, isLanding),
-    [shipCount, isLanding],
+    () => (isLanding ? [] : generateShips(1, false)),
+    [isLanding],
   )
   const comets = useMemo(() => generateComets(COMET_COUNT), [])
 
