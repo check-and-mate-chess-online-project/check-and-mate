@@ -119,7 +119,7 @@ export function ShopPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="fixed left-0 right-0 top-[81px] bottom-0 z-10 bg-black overflow-hidden"
+      className="fixed left-0 right-0 top-[calc(5rem+1px)] bottom-0 z-10 bg-black overflow-hidden"
     >
       <div className="absolute inset-0 pointer-events-none">
         {stars.map((s, i) => (
@@ -309,9 +309,9 @@ export function ShopPage() {
         initial={{ opacity: 0, x: -36, scale: 0.97 }}
         animate={{ opacity: 1, x: 0, scale: 1 }}
         transition={{ duration: 0.62, delay: 0.12, ease: [0.16, 0.84, 0.32, 1] }}
-        className="absolute z-20 w-[min(92vw,24rem)]"
+        className="absolute z-20 w-[min(94vw,28rem)]"
         style={{
-          left: '30%',
+          left: '24%',
           top: '50%',
           translate: '-50% -50%',
         }}
@@ -322,8 +322,8 @@ export function ShopPage() {
           <CornerBracket position="bl" />
           <CornerBracket position="br" />
 
-          <div className="bg-slate-950/85 backdrop-blur border border-violet-800/50 rounded-md px-6 pt-3 pb-6 shadow-[0_0_36px_rgba(34,211,238,0.12)]">
-            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.3em] text-cyan-400/80 border-b border-cyan-500/20 pb-2 mb-5">
+          <div className="bg-slate-950/85 backdrop-blur border border-violet-800/50 rounded-md px-7 pt-4 pb-7 shadow-[0_0_36px_rgba(34,211,238,0.12)]">
+            <div className="flex items-center justify-between text-xs font-mono uppercase tracking-[0.3em] text-cyan-400/80 border-b border-cyan-500/20 pb-2 mb-5">
               <span>{t('pages.shop.deckTitle')}</span>
               <span className="flex items-center gap-1.5">
                 <span
@@ -338,10 +338,10 @@ export function ShopPage() {
             </div>
 
             <div className="mb-2">
-              <div className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
+              <div className="text-xs text-slate-500 uppercase tracking-[0.25em] font-mono">
                 {t('pages.shop.amount')}
               </div>
-              <div className="font-display text-6xl text-violet-100 tabular-nums leading-none mt-1">
+              <div className="font-display text-7xl text-violet-100 tabular-nums leading-none mt-1">
                 ×{count}
               </div>
             </div>
@@ -352,9 +352,9 @@ export function ShopPage() {
               max={MAX_COUNT}
               value={count}
               onChange={(e) => setCount(Number(e.target.value))}
-              className="w-full accent-violet-500 mb-1 cursor-pointer mt-3"
+              className="w-full accent-violet-500 mb-1 cursor-pointer mt-3 h-2"
             />
-            <div className="flex justify-between text-[10px] font-mono text-slate-600 mb-5">
+            <div className="flex justify-between text-xs font-mono text-slate-600 mb-5">
               {Array.from({ length: MAX_COUNT }, (_, i) => i + 1).map((n) => (
                 <span
                   key={n}
@@ -367,11 +367,11 @@ export function ShopPage() {
 
             <div className="border-t border-slate-800 pt-4 mb-5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-500 uppercase tracking-[0.25em] font-mono">
+                <span className="text-xs text-slate-500 uppercase tracking-[0.25em] font-mono">
                   {t('pages.shop.total')}
                 </span>
                 <span
-                  className={`font-display text-3xl tabular-nums leading-none ${
+                  className={`font-display text-4xl tabular-nums leading-none ${
                     notEnough ? 'text-red-400' : ''
                   }`}
                   style={

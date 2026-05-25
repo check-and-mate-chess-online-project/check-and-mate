@@ -277,7 +277,7 @@ export function CasesPage() {
   }
 
   return (
-    <div className="fixed left-0 right-0 top-[81px] bottom-0 z-10 bg-black overflow-hidden">
+    <div className="fixed left-0 right-0 top-[calc(5rem+1px)] bottom-0 z-10 bg-black overflow-hidden">
       <img
         src="/boat.webp"
         alt=""
