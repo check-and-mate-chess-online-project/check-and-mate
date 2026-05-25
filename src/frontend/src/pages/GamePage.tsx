@@ -632,8 +632,9 @@ export function GamePage() {
       targetSquare,
       selectedFigure,
     )
-    gameHub.makeMove(apiMove).catch(() => {
-      toast.error('move failed')
+    gameHub.makeMove(apiMove).catch((err: unknown) => {
+      const msg = err instanceof Error && err.message ? err.message : 'move failed'
+      toast.error(msg)
       try {
         game.undo()
         setFen(game.fen())
