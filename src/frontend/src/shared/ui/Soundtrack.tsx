@@ -48,7 +48,7 @@ export function Soundtrack() {
   })
   const sourceRef = useRef<AudioBufferSourceNode | null>(null)
   const gainRef = useRef<GainNode | null>(null)
-  const startedRef = useRef(false)
+  const playingRef = useRef(false)
   const mutedRef = useRef(muted)
   const volumeRef = useRef(volume)
 
@@ -62,44 +62,29 @@ export function Soundtrack() {
   useEffect(() => {
     let cancelled = false
 
-    const init = async () => {
+    const ensureContext = () => {
+      if (ctxRef.current) return ctxRef.current
       const Ctor =
         window.AudioContext ??
         (window as unknown as { webkitAudioContext?: typeof AudioContext })
           .webkitAudioContext
-      if (!Ctor) return
+      if (!Ctor) return null
       const ctx = new Ctor()
       ctxRef.current = ctx
       const gain = ctx.createGain()
       gain.gain.value = mutedRef.current ? 0 : BASE_VOLUME * volumeRef.current
       gain.connect(ctx.destination)
       gainRef.current = gain
-
-      try {
-        const res = await fetch(SOUNDTRACK_SRC)
-        if (!res.ok) return
-        const arr = await res.arrayBuffer()
-        if (cancelled) return
-        const buffer = await ctx.decodeAudioData(arr)
-        if (cancelled) return
-        bufferRef.current = buffer
-        loopBoundsRef.current = findSilenceBounds(buffer)
-        tryStart()
-      } catch {
-        // fetch / decode failed, soundtrack stays silent
-      }
+      return ctx
     }
 
-    const tryStart = () => {
-      if (startedRef.current) return
-      if (mutedRef.current) return
+    const startPlayback = () => {
       const ctx = ctxRef.current
       const buffer = bufferRef.current
       const gain = gainRef.current
       if (!ctx || !buffer || !gain) return
-      if (ctx.state === 'suspended') {
-        ctx.resume().catch(() => {})
-      }
+      if (playingRef.current) return
+      if (mutedRef.current) return
       const source = ctx.createBufferSource()
       source.buffer = buffer
       source.loop = true
@@ -111,15 +96,46 @@ export function Soundtrack() {
       source.connect(gain)
       source.start(0, start)
       sourceRef.current = source
-      startedRef.current = true
+      playingRef.current = true
+    }
+
+    const tryResumeAndStart = () => {
+      const ctx = ctxRef.current
+      if (!ctx) return
+      const resumePromise =
+        ctx.state === 'suspended' ? ctx.resume() : Promise.resolve()
+      resumePromise
+        .then(() => {
+          if (cancelled) return
+          startPlayback()
+        })
+        .catch(() => {})
     }
 
     const onInteract = () => {
-      const ctx = ctxRef.current
-      if (ctx && ctx.state === 'suspended') {
-        ctx.resume().catch(() => {})
+      if (!ctxRef.current) {
+        ensureContext()
       }
-      tryStart()
+      tryResumeAndStart()
+    }
+
+    const init = async () => {
+      ensureContext()
+      try {
+        const res = await fetch(SOUNDTRACK_SRC)
+        if (!res.ok) return
+        const arr = await res.arrayBuffer()
+        if (cancelled) return
+        const ctx = ctxRef.current
+        if (!ctx) return
+        const buffer = await ctx.decodeAudioData(arr)
+        if (cancelled) return
+        bufferRef.current = buffer
+        loopBoundsRef.current = findSilenceBounds(buffer)
+        tryResumeAndStart()
+      } catch {
+        // fetch / decode failed, soundtrack stays silent
+      }
     }
 
     void init()
@@ -138,7 +154,7 @@ export function Soundtrack() {
       gainRef.current = null
       sourceRef.current = null
       bufferRef.current = null
-      startedRef.current = false
+      playingRef.current = false
     }
   }, [])
 
@@ -149,19 +165,38 @@ export function Soundtrack() {
     const target = muted ? 0 : BASE_VOLUME * volume
     gain.gain.setTargetAtTime(target, ctx.currentTime, 0.05)
 
-    if (!muted && !startedRef.current && bufferRef.current) {
-      const source = ctx.createBufferSource()
-      source.buffer = bufferRef.current
-      source.loop = true
-      const { start, end } = loopBoundsRef.current
-      if (end > start) {
-        source.loopStart = start
-        source.loopEnd = end
+    if (!muted && !playingRef.current && bufferRef.current) {
+      if (ctx.state === 'suspended') {
+        ctx.resume()
+          .then(() => {
+            const source = ctx.createBufferSource()
+            source.buffer = bufferRef.current!
+            source.loop = true
+            const { start, end } = loopBoundsRef.current
+            if (end > start) {
+              source.loopStart = start
+              source.loopEnd = end
+            }
+            source.connect(gain)
+            source.start(0, start)
+            sourceRef.current = source
+            playingRef.current = true
+          })
+          .catch(() => {})
+      } else {
+        const source = ctx.createBufferSource()
+        source.buffer = bufferRef.current
+        source.loop = true
+        const { start, end } = loopBoundsRef.current
+        if (end > start) {
+          source.loopStart = start
+          source.loopEnd = end
+        }
+        source.connect(gain)
+        source.start(0, loopBoundsRef.current.start)
+        sourceRef.current = source
+        playingRef.current = true
       }
-      source.connect(gain)
-      source.start(0, start)
-      sourceRef.current = source
-      startedRef.current = true
     }
   }, [muted, volume])
 
