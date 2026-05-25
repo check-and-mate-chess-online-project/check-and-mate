@@ -70,7 +70,7 @@ export function LandingPage() {
             <img
               src={logo}
               alt="Check & Mate"
-              className="w-full max-w-md mb-6"
+              className="w-full max-w-2xl mb-8"
               draggable={false}
             />
             <motion.p
@@ -172,44 +172,47 @@ export function LandingPage() {
       <SectionDivider />
 
       <section className="relative px-6 pt-24 pb-0 overflow-hidden">
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-          className="relative z-10 max-w-2xl mx-auto text-center"
-        >
-          <h2 className="font-display text-4xl md:text-5xl mb-4 text-slate-100">
-            {t('landing.cta.title')}
-          </h2>
-          <p className="text-slate-400 mb-9 text-lg leading-relaxed">
-            {t('landing.cta.body')}
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              to="/register"
-              className="px-8 py-3.5 rounded-md font-display uppercase tracking-[0.18em] text-base text-orange-50 bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-400 hover:to-orange-600 border border-orange-300/40 active:translate-y-px transition-colors"
-            >
-              {t('landing.cta.primary')}
-            </Link>
-            <Link
-              to="/login"
-              className="px-8 py-3.5 rounded-md font-display uppercase tracking-[0.18em] text-base text-violet-200 hover:text-violet-100 underline-offset-4 hover:underline transition-colors"
-            >
-              {t('landing.cta.secondary')}
-            </Link>
-          </div>
-        </motion.div>
+        <div className="relative max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-end">
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            className="pb-24"
+          >
+            <h2 className="font-display text-4xl md:text-5xl mb-4 text-slate-100">
+              {t('landing.cta.title')}
+            </h2>
+            <p className="text-slate-400 mb-9 text-lg leading-relaxed">
+              {t('landing.cta.body')}
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                to="/register"
+                className="px-8 py-3.5 rounded-md font-display uppercase tracking-[0.18em] text-base text-orange-50 bg-gradient-to-b from-orange-500 to-orange-700 hover:from-orange-400 hover:to-orange-600 border border-orange-300/40 active:translate-y-px transition-colors"
+              >
+                {t('landing.cta.primary')}
+              </Link>
+              <Link
+                to="/login"
+                className="px-8 py-3.5 rounded-md font-display uppercase tracking-[0.18em] text-base text-violet-200 hover:text-violet-100 underline-offset-4 hover:underline transition-colors"
+              >
+                {t('landing.cta.secondary')}
+              </Link>
+            </div>
+          </motion.div>
 
-        <img
-          src="/durov-bottom.webp"
-          alt=""
-          aria-hidden
-          draggable={false}
-          className="absolute right-0 bottom-0 w-[min(48vw,720px)] h-auto pointer-events-none select-none"
-          style={{ imageRendering: 'auto' }}
-        />
+          <div className="flex items-end justify-end">
+            <img
+              src="/durov-bottom.webp"
+              alt=""
+              aria-hidden
+              draggable={false}
+              className="w-full h-auto max-w-full pointer-events-none select-none"
+            />
+          </div>
+        </div>
       </section>
     </div>
   )
