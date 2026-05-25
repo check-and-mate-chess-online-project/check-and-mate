@@ -633,8 +633,16 @@ export function GamePage() {
       selectedFigure,
     )
     gameHub.makeMove(apiMove).catch((err: unknown) => {
-      const msg = err instanceof Error && err.message ? err.message : 'move failed'
-      toast.error(msg)
+      console.error('[makeMove] backend error:', err, 'apiMove:', apiMove)
+      const raw =
+        err instanceof Error
+          ? err.message
+          : typeof err === 'string'
+            ? err
+            : err && typeof err === 'object'
+              ? JSON.stringify(err)
+              : ''
+      toast.error(raw || 'move failed')
       try {
         game.undo()
         setFen(game.fen())
