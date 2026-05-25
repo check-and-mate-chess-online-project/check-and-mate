@@ -129,6 +129,8 @@
       "opponentTurn": "Opponent's turn",
       "you": "You",
       "opponent": "Opponent",
+      "reviewing": "Reviewing",
+      "backToLive": "Back to live",
       "result": {
         "win": "You won",
         "loss": "You lost",

@@ -129,6 +129,8 @@
       "opponentTurn": "Ход оппонента",
       "you": "Вы",
       "opponent": "Оппонент",
+      "reviewing": "Просмотр",
+      "backToLive": "К текущей позиции",
       "result": {
         "win": "Победа",
         "loss": "Поражение",

@@ -1,21 +1,23 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Chess } from 'chess.js'
-import type { MoveDto, PlyDto } from '../shared/api'
 import {
-  FigureType,
   GameResult,
   GameTerminationReason,
-  PlayerColor,
-  normalizeFigureType,
   normalizeGameResult,
   normalizeGameTerminationReason,
-  normalizePlayerColor,
 } from '../shared/api/enums'
 import { useAuth } from '../shared/auth/useAuth'
 import { useGameHistory } from '../shared/api/hooks'
 import { Chessboard } from '../shared/ui/Chessboard/Chessboard'
+import { MoveHistoryList } from '../shared/ui/MoveHistoryList'
+import { CapturedPieces } from '../shared/ui/CapturedPieces'
+import {
+  INITIAL_FEN,
+  applyPlies,
+  pairRounds,
+  sortPlies,
+} from '../shared/lib/chessReplay'
 
 const REASON_KEY: Record<number, string> = {
   [GameTerminationReason.CheckMate]: 'checkmate',
@@ -24,10 +26,6 @@ const REASON_KEY: Record<number, string> = {
   [GameTerminationReason.Timeout]: 'timeout',
   [GameTerminationReason.DrawAgreement]: 'drawAgreement',
   [GameTerminationReason.Disconnect]: 'disconnect',
-}
-
-function coordToSquare(col: number, row: number): string {
-  return String.fromCharCode(97 + col) + (row + 1)
 }
 
 function sideColor(result: GameResult | null, side: 'white' | 'black'): string {
@@ -40,60 +38,6 @@ function sideColor(result: GameResult | null, side: 'white' | 'black'): string {
   return won ? 'text-orange-400' : 'text-violet-300'
 }
 
-const PROMOTION_CHAR: Record<number, 'q' | 'r' | 'b' | 'n'> = {
-  [FigureType.Queen]: 'q',
-  [FigureType.Rook]: 'r',
-  [FigureType.Bishop]: 'b',
-  [FigureType.Knight]: 'n',
-}
-
-function plyToChessMove(ply: PlyDto): {
-  from: string
-  to: string
-  promotion?: 'q' | 'r' | 'b' | 'n'
-} | null {
-  const coord: MoveDto | undefined = ply.move ?? ply.coordinates?.[0]
-  if (!coord) return null
-  return {
-    from: coordToSquare(coord.a, coord.b),
-    to: coordToSquare(coord.x, coord.y),
-    promotion: coord.options?.selectedFigure
-      ? PROMOTION_CHAR[normalizeFigureType(coord.options.selectedFigure) ?? 0]
-      : undefined,
-  }
-}
-
-interface AppliedPly {
-  san: string
-  fen: string
-  moveNumber: number
-  color: number
-}
-
-function applyPlies(plies: PlyDto[]): AppliedPly[] {
-  const chess = new Chess()
-  const out: AppliedPly[] = []
-  for (const ply of plies) {
-    const move = plyToChessMove(ply)
-    const color = normalizePlayerColor(ply.color)
-    if (!move || color === null) continue
-    try {
-      const applied = chess.move(move)
-      out.push({
-        san: applied.san,
-        fen: chess.fen(),
-        moveNumber: ply.moveNumber,
-        color,
-      })
-    } catch {
-      break
-    }
-  }
-  return out
-}
-
-const INITIAL_FEN = new Chess().fen()
-
 export function ReplayPage() {
   const { gameId } = useParams<{ gameId: string }>()
   const { t } = useTranslation()
@@ -101,15 +45,13 @@ export function ReplayPage() {
   const { data: games, isLoading } = useGameHistory()
   const game = games?.find((g) => g.id === gameId)
 
-  const sortedPlies = useMemo<PlyDto[]>(() => {
-    if (!game?.moves) return []
-    return [...game.moves].sort((a, b) => {
-      if (a.moveNumber !== b.moveNumber) return a.moveNumber - b.moveNumber
-      return normalizePlayerColor(a.color) === PlayerColor.White ? -1 : 1
-    })
-  }, [game])
+  const sortedPlies = useMemo(
+    () => (game?.moves ? sortPlies(game.moves) : []),
+    [game],
+  )
 
   const applied = useMemo(() => applyPlies(sortedPlies), [sortedPlies])
+  const rounds = useMemo(() => pairRounds(applied), [applied])
   const [cursor, setCursor] = useState(0)
 
   const totalPlies = applied.length
@@ -154,22 +96,6 @@ export function ReplayPage() {
   const reasonText =
     reason !== null ? t(`pages.game.reason.${REASON_KEY[reason]}`) : ''
 
-  // Pair plies into rounds: [{whitePly, blackPly?}]
-  const rounds: Array<{
-    moveNumber: number
-    white?: AppliedPly
-    black?: AppliedPly
-  }> = []
-  for (const a of applied) {
-    let round = rounds.find((r) => r.moveNumber === a.moveNumber)
-    if (!round) {
-      round = { moveNumber: a.moveNumber }
-      rounds.push(round)
-    }
-    if (a.color === PlayerColor.White) round.white = a
-    else round.black = a
-  }
-
   return (
     <div className="w-full max-w-[84rem] mx-auto px-4">
       <Link
@@ -199,7 +125,7 @@ export function ReplayPage() {
       </div>
 
       <div className="grid grid-cols-1 items-start justify-center gap-4 xl:grid-cols-[16rem_minmax(0,36rem)_16rem] xl:gap-6 2xl:grid-cols-[18rem_minmax(0,36rem)_18rem]">
-        <div className="hidden xl:block" aria-hidden />
+        <CapturedPieces applied={applied} upTo={safeCursor} myColor={myColor} />
         <div className="w-full max-w-xl justify-self-center">
           <Chessboard
             options={{
@@ -251,68 +177,18 @@ export function ReplayPage() {
           </div>
         </div>
 
-        <aside className="w-full max-w-2xl justify-self-center max-h-[80vh] overflow-y-auto bg-slate-900/40 border border-slate-800 rounded-md p-3 xl:max-w-none xl:justify-self-stretch">
-          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-xs uppercase tracking-wider text-slate-500">
-            <span />
-            <span>{t('pages.replay.white')}</span>
-            <span>{t('pages.replay.black')}</span>
-          </div>
-          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 text-sm mt-1">
-            <span />
-            <span className={sideColor(game.result, 'white')}>
-              {game.whitePlayer.login}
-            </span>
-            <span className={sideColor(game.result, 'black')}>
-              {game.blackPlayer.login}
-            </span>
-          </div>
-          <div className="my-3 border-t border-slate-800" />
-          <div className="grid grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-1 text-sm font-mono">
-            {rounds.map((round) => {
-              const whiteIdx =
-                applied.findIndex(
-                  (p) =>
-                    p.moveNumber === round.moveNumber &&
-                    p.color === PlayerColor.White,
-                ) + 1
-              const blackIdx =
-                applied.findIndex(
-                  (p) =>
-                    p.moveNumber === round.moveNumber &&
-                    p.color === PlayerColor.Black,
-                ) + 1
-              return (
-                <div key={round.moveNumber} className="contents">
-                  <span className="text-slate-500">{round.moveNumber}.</span>
-                  <button
-                    type="button"
-                    onClick={() => round.white && setCursor(whiteIdx)}
-                    disabled={!round.white}
-                    className={`text-left px-2 rounded ${
-                      round.white && safeCursor === whiteIdx
-                        ? 'bg-violet-600/30 text-violet-100'
-                        : 'text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    {round.white?.san ?? '—'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => round.black && setCursor(blackIdx)}
-                    disabled={!round.black}
-                    className={`text-left px-2 rounded ${
-                      round.black && safeCursor === blackIdx
-                        ? 'bg-violet-600/30 text-violet-100'
-                        : 'text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    {round.black?.san ?? ''}
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        </aside>
+        <MoveHistoryList
+          applied={applied}
+          rounds={rounds}
+          cursor={safeCursor}
+          totalPlies={totalPlies}
+          onCursor={setCursor}
+          whiteLogin={game.whitePlayer.login}
+          blackLogin={game.blackPlayer.login}
+          whiteClass={sideColor(game.result, 'white')}
+          blackClass={sideColor(game.result, 'black')}
+          className="w-full max-w-2xl justify-self-center max-h-[80vh] overflow-y-auto xl:max-w-none xl:justify-self-stretch"
+        />
       </div>
     </div>
   )

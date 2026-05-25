@@ -13,7 +13,6 @@ import {
   normalizeFigureType,
   normalizeGameResult,
   normalizeGameTerminationReason,
-  normalizePlayerColor,
 } from '../shared/api/enums'
 import { useAuth } from '../shared/auth/useAuth'
 import { gameHub, subscribeGameHub } from '../shared/realtime/gameHub'
@@ -21,7 +20,15 @@ import { formatClock, useChessClock } from '../shared/lib/useChessClock'
 import { useEquippedSkinsStore } from '../shared/lib/equippedSkins'
 import { FightAnimation, type FightPiece } from '../shared/ui/FightAnimation'
 import { ConfirmModal } from '../shared/ui/ConfirmModal'
+import { MoveHistoryList } from '../shared/ui/MoveHistoryList'
+import { CapturedPieces } from '../shared/ui/CapturedPieces'
 import { playSound } from '../shared/lib/sound'
+import {
+  INITIAL_FEN,
+  applyPlies,
+  pairRounds,
+  sortPlies as sortPliesShared,
+} from '../shared/lib/chessReplay'
 
 type Color = 'white' | 'black'
 type Outcome = 'win' | 'loss' | 'draw'
@@ -107,12 +114,7 @@ function promotionFromMove(
   return figure === null ? undefined : PROMOTION_CHAR[figure]
 }
 
-function sortPlies(plies: PlyDto[]): PlyDto[] {
-  return [...plies].sort((a, b) => {
-    if (a.moveNumber !== b.moveNumber) return a.moveNumber - b.moveNumber
-    return normalizePlayerColor(a.color) === 1 ? -1 : 1
-  })
-}
+const sortPlies = sortPliesShared
 
 function firstPlyMove(ply: PlyDto): MoveDto | undefined {
   return ply.move ?? ply.coordinates?.[0]
@@ -179,6 +181,11 @@ export function GamePage() {
   const [turn, setTurn] = useState<Color>('white')
   const [ended, setEnded] = useState<ResultState | null>(null)
   const [gameHasStarted, setGameHasStarted] = useState(false)
+  const [appliedPlies, setAppliedPlies] = useState<
+    ReturnType<typeof applyPlies>
+  >([])
+  const [cursor, setCursor] = useState(0)
+  const [reviewing, setReviewing] = useState(false)
   const [fightQueue, setFightQueue] = useState<
     Array<{
       attacker: FightPiece
@@ -196,6 +203,8 @@ export function GamePage() {
   } | null>(null)
   const equipped = useEquippedSkinsStore((s) => s.equipped)
   const pendingMoveRef = useRef<{ from: string; to: string } | null>(null)
+  const appliedPliesRef = useRef<ReturnType<typeof applyPlies>>([])
+  const cursorRef = useRef(0)
 
   const cachedGame = qc.getQueryData<GameDto>(['game', gameId])
   const [activeGame, setActiveGame] = useState<GameDto | undefined>(cachedGame)
@@ -209,6 +218,39 @@ export function GamePage() {
   useEffect(() => {
     setTimesRef.current = setTimes
   }, [setTimes])
+  useEffect(() => {
+    appliedPliesRef.current = appliedPlies
+  }, [appliedPlies])
+  useEffect(() => {
+    cursorRef.current = cursor
+  }, [cursor])
+
+  const pushAppliedPly = useMemo(
+    () => (ply: ReturnType<typeof applyPlies>[number]) => {
+      const wasAtEnd = cursorRef.current === appliedPliesRef.current.length
+      const next = [...appliedPliesRef.current, ply]
+      appliedPliesRef.current = next
+      setAppliedPlies(next)
+      if (wasAtEnd) {
+        cursorRef.current = next.length
+        setCursor(next.length)
+      }
+    },
+    [],
+  )
+
+  const popAppliedPly = useMemo(
+    () => () => {
+      const next = appliedPliesRef.current.slice(0, -1)
+      appliedPliesRef.current = next
+      setAppliedPlies(next)
+      if (cursorRef.current > next.length) {
+        cursorRef.current = next.length
+        setCursor(next.length)
+      }
+    },
+    [],
+  )
   const syncClocksFromGame = useMemo(
     () => (g: GameDto | null | undefined) => {
       if (!g || !g.timeControlIsEnabled) return
@@ -260,8 +302,10 @@ export function GamePage() {
     const id = window.setTimeout(() => {
       game.reset()
       reset()
-      let appliedCount = 0
-      for (const ply of sortPlies(activeGame.moves ?? [])) {
+      const sortedInitial = sortPlies(activeGame.moves ?? [])
+      const initialApplied = applyPlies(sortedInitial)
+      const appliedCount = initialApplied.length
+      for (const ply of sortedInitial) {
         const move = firstPlyMove(ply)
         if (!move) continue
         const { from, to } = apiMoveToSquares(move)
@@ -271,11 +315,13 @@ export function GamePage() {
             to,
             promotion: promotionFromMove(move) ?? 'q',
           })
-          appliedCount += 1
         } catch {
           break
         }
       }
+      setAppliedPlies(initialApplied)
+      setCursor(appliedCount)
+      setReviewing(false)
       setFen(game.fen())
       const nextTurn = game.turn() === 'w' ? 'white' : 'black'
       setTurn(nextTurn)
@@ -365,6 +411,14 @@ export function GamePage() {
                 ])
               }
             }
+            pushAppliedPly({
+              san: applied.san,
+              fen: game.fen(),
+              moveNumber: Math.ceil(game.history().length / 2),
+              color: applied.color === 'w' ? 1 : 2,
+              captured: applied.captured,
+              mover: applied.color,
+            })
           }
           const serverGame = result.game
           if (result.isGameOver) {
@@ -400,6 +454,7 @@ export function GamePage() {
           try {
             game.undo()
             setFen(game.fen())
+            popAppliedPly()
           } catch {
             // ignore
           }
@@ -429,7 +484,7 @@ export function GamePage() {
         playSound('gameEnd')
       },
     })
-  }, [activeGame, myColor, user?.id, t, game, switchTo, pause, syncClocksFromGame])
+  }, [activeGame, myColor, user?.id, t, game, switchTo, pause, syncClocksFromGame, pushAppliedPly, popAppliedPly])
 
   if (loadingGame) {
     return (
@@ -461,6 +516,24 @@ export function GamePage() {
     myColor === 'white'
       ? activeGame.blackPlayer.login
       : activeGame.whitePlayer.login
+
+  const totalPlies = appliedPlies.length
+  const safeCursor = Math.min(cursor, totalPlies)
+  const atLive = safeCursor === totalPlies
+  const displayFen = atLive
+    ? fen
+    : safeCursor === 0
+      ? INITIAL_FEN
+      : appliedPlies[safeCursor - 1].fen
+  const rounds = pairRounds(appliedPlies)
+  const onCursor = (n: number) => {
+    setCursor(n)
+    setReviewing(n < totalPlies)
+  }
+  const goLive = () => {
+    setCursor(totalPlies)
+    setReviewing(false)
+  }
 
   const squareStyles: Record<string, React.CSSProperties> = (() => {
     if (!selectedSquare) return {}
@@ -537,6 +610,14 @@ export function GamePage() {
         ])
       }
     }
+    pushAppliedPly({
+      san: applied.san,
+      fen: game.fen(),
+      moveNumber: Math.ceil(game.history().length / 2),
+      color: applied.color === 'w' ? 1 : 2,
+      captured: applied.captured,
+      mover: applied.color,
+    })
     const nextTurn = game.turn() === 'w' ? 'white' : 'black'
     setTurn(nextTurn)
     switchTo(nextTurn)
@@ -548,6 +629,7 @@ export function GamePage() {
         game.undo()
         setFen(game.fen())
         setTurn(game.turn() === 'w' ? 'white' : 'black')
+        popAppliedPly()
       } catch {
         // ignore
       }
@@ -640,33 +722,68 @@ export function GamePage() {
         </button>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-xl flex flex-col gap-3">
-          <Clock
-            ms={opponentColor === 'white' ? whiteMs : blackMs}
-            active={active === opponentColor}
-            login={opponentLogin}
-          />
-          <Chessboard
-            options={{
-              position: fen,
-              onPieceDrop,
-              onPieceDrag,
-              boardOrientation: myColor,
-              squareStyles,
-              boardStyle: {
-                borderRadius: '12px',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-              },
-              darkSquareStyle: { backgroundColor: '#4c1d95' },
-              lightSquareStyle: { backgroundColor: '#e5e7eb' },
-            }}
-          />
-          <Clock
-            ms={myColor === 'white' ? whiteMs : blackMs}
-            active={active === myColor}
-            login={user?.login ?? ''}
-          />
+      <main className="flex-1 flex justify-center p-4">
+        <div className="w-full max-w-[80rem] grid grid-cols-1 items-start gap-4 xl:grid-cols-[15rem_minmax(0,36rem)_15rem]">
+          <aside className="flex flex-col gap-3 order-2 xl:order-1">
+            <CapturedPieces
+              applied={appliedPlies}
+              upTo={safeCursor}
+              myColor={myColor}
+            />
+            <MoveHistoryList
+              applied={appliedPlies}
+              rounds={rounds}
+              cursor={safeCursor}
+              totalPlies={totalPlies}
+              onCursor={onCursor}
+              className="max-h-[60vh] overflow-y-auto"
+            />
+            {reviewing && (
+              <button
+                type="button"
+                onClick={goLive}
+                className="px-3 py-2 rounded-md border border-orange-500/60 bg-orange-500/15 hover:bg-orange-500/25 text-orange-200 text-sm"
+              >
+                {t('pages.game.backToLive')} ▶
+              </button>
+            )}
+          </aside>
+          <div className="w-full max-w-xl justify-self-center flex flex-col gap-3 order-1 xl:order-2">
+            <Clock
+              ms={opponentColor === 'white' ? whiteMs : blackMs}
+              active={active === opponentColor}
+              login={opponentLogin}
+            />
+            <div className="relative">
+              <Chessboard
+                options={{
+                  position: displayFen,
+                  onPieceDrop: reviewing ? undefined : onPieceDrop,
+                  onPieceDrag: reviewing ? undefined : onPieceDrag,
+                  allowDragging: !reviewing,
+                  boardOrientation: myColor,
+                  squareStyles: reviewing ? {} : squareStyles,
+                  boardStyle: {
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                  },
+                  darkSquareStyle: { backgroundColor: '#4c1d95' },
+                  lightSquareStyle: { backgroundColor: '#e5e7eb' },
+                }}
+              />
+              {reviewing && (
+                <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-slate-900/80 border border-slate-700 text-xs text-slate-300 tracking-wider uppercase pointer-events-none">
+                  {t('pages.game.reviewing')} {safeCursor}/{totalPlies}
+                </div>
+              )}
+            </div>
+            <Clock
+              ms={myColor === 'white' ? whiteMs : blackMs}
+              active={active === myColor}
+              login={user?.login ?? ''}
+            />
+          </div>
+          <div className="hidden xl:block order-3" aria-hidden />
         </div>
       </main>
 
