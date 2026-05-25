@@ -12,8 +12,6 @@ public class GameInvitation
     public DateTime ExpiresAt { get; }
     public GameInvitationState State { get; private set; }
 
-    public void ChangeState(GameInvitationState state) => State = state;
-
     public GameInvitation(Guid senderId, Guid receiverId, ITimeControl timeControl, GameInvitationState state)
         : this(Guid.NewGuid(), senderId, receiverId, timeControl, DateTime.UtcNow.AddSeconds(60), state) {}
 
@@ -37,4 +35,6 @@ public class GameInvitation
         (
             id, senderId, receiverId, timeControl, expiresAt, state
         );
+    
+    public void ChangeState(GameInvitationState state) => State = state;
 }
