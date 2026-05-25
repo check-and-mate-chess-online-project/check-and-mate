@@ -11,7 +11,12 @@ export function DebugBoardPage() {
     <div className="min-h-screen text-slate-100 p-6">
       <h1 className="text-2xl mb-2">Debug board</h1>
       <p className="text-slate-400 mb-4 text-sm">
-        equipped: {JSON.stringify(equipped)}
+        equipped:{' '}
+        {JSON.stringify(
+          Object.fromEntries(
+            Object.entries(equipped).map(([k, v]) => [k, v?.id ?? null]),
+          ),
+        )}
       </p>
       <div className="max-w-xl">
         <Chessboard

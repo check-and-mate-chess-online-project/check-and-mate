@@ -823,8 +823,18 @@ export function GamePage() {
           key={fightQueue[0].key}
           attacker={fightQueue[0].attacker}
           victim={fightQueue[0].victim}
-          attackerSkinId={equipped[fightQueue[0].attacker.figure]}
-          victimSkinId={equipped[fightQueue[0].victim.figure]}
+          attackerStartImage={
+            equipped[fightQueue[0].attacker.figure]?.assets.startFightWinImage
+          }
+          victimStartImage={
+            equipped[fightQueue[0].victim.figure]?.assets.startFightLoseImage
+          }
+          attackerEndImage={
+            equipped[fightQueue[0].attacker.figure]?.assets.endFightWinImage
+          }
+          victimEndImage={
+            equipped[fightQueue[0].victim.figure]?.assets.endFightLoseImage
+          }
           onComplete={() => setFightQueue((q) => q.slice(1))}
         />
       )}

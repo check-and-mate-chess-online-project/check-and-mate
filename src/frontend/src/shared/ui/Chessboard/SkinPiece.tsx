@@ -1,73 +1,20 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
+import { skinImageSrc } from '../../lib/skinImage'
 
 type Color = 'white' | 'black'
 
 interface Props {
-  skinId: string
+  boardImage: string
   color: Color
   fallback: () => React.JSX.Element
   svgStyle?: CSSProperties
 }
 
-const cache = new Map<string, string | null>()
+export function SkinPiece({ boardImage, color, fallback, svgStyle }: Props) {
+  const [errored, setErrored] = useState(false)
+  const src = skinImageSrc(boardImage)
 
-function fitSvgToParent(svg: string): string | null {
-  const doc = new DOMParser().parseFromString(svg, 'image/svg+xml')
-  if (doc.querySelector('parsererror')) return null
-
-  const svgElement = doc.documentElement
-  if (svgElement.localName.toLowerCase() !== 'svg') return null
-
-  svgElement.removeAttribute('width')
-  svgElement.removeAttribute('height')
-  svgElement.setAttribute('width', '100%')
-  svgElement.setAttribute('height', '100%')
-  svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
-
-  return new XMLSerializer().serializeToString(svgElement)
-}
-
-async function loadSvg(url: string): Promise<string | null> {
-  if (cache.has(url)) return cache.get(url) ?? null
-  try {
-    const res = await fetch(url)
-    if (!res.ok) {
-      cache.set(url, null)
-      return null
-    }
-    const text = await res.text()
-    const fitted = fitSvgToParent(text)
-    if (!fitted) {
-      cache.set(url, null)
-      return null
-    }
-    cache.set(url, fitted)
-    return fitted
-  } catch {
-    cache.set(url, null)
-    return null
-  }
-}
-
-export function SkinPiece({ skinId, color, fallback, svgStyle }: Props) {
-  const url = `/skins/${skinId}/board-${color}.svg`
-  const [svg, setSvg] = useState<string | null | undefined>(
-    cache.has(url) ? cache.get(url) : undefined,
-  )
-
-  useEffect(() => {
-    if (svg !== undefined) return
-    let cancelled = false
-    loadSvg(url).then((result) => {
-      if (!cancelled) setSvg(result)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [url, svg])
-
-  if (svg === null) return fallback()
-  if (svg === undefined) return null
+  if (!src || errored) return fallback()
 
   return (
     <div
@@ -81,7 +28,18 @@ export function SkinPiece({ skinId, color, fallback, svgStyle }: Props) {
         pointerEvents: 'none',
         ...svgStyle,
       }}
-      dangerouslySetInnerHTML={{ __html: svg }}
-    />
+    >
+      <img
+        src={src}
+        alt=""
+        draggable={false}
+        onError={() => setErrored(true)}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+        }}
+      />
+    </div>
   )
 }

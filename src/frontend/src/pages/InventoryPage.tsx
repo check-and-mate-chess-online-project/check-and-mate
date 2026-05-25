@@ -139,7 +139,7 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
   const skin = skins[idx]
   const skinFigure = skin ? normalizeFigureType(skin.figure) : null
   const isActive =
-    !!skin && skinFigure !== null && equippedMap[skinFigure] === skin.id
+    !!skin && skinFigure !== null && equippedMap[skinFigure]?.id === skin.id
 
   const planetName = t(`pages.inventory.planets.${planet.id}`, {
     defaultValue: planet.name,
@@ -281,7 +281,7 @@ function PlanetDetail({ planet, skins, onBack }: PlanetDetailProps) {
                     { figure: skinFigure ?? skin.figure, skinId: skin.id },
                     {
                       onSuccess: () =>
-                        setEquipped(skinFigure ?? skin.figure, skin.id),
+                        setEquipped(skinFigure ?? skin.figure, skin),
                     },
                   )
                 }

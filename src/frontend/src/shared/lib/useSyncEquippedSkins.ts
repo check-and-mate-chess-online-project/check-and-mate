@@ -16,7 +16,7 @@ export function useSyncEquippedSkins() {
       ) as FigureType
       const figure = normalizeFigureType(candidate)
       if (figure === null || !skin?.id) continue
-      setEquipped(figure, skin.id)
+      setEquipped(figure, skin)
     }
   }, [data, setEquipped])
 }

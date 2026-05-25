@@ -39,12 +39,14 @@ export function Chessboard({ options }: Props) {
   const pieces = useMemo(() => {
     const map: typeof defaultPieces = { ...defaultPieces }
     for (const [key, { figure, color }] of Object.entries(PIECE_KEY_TO_FIGURE)) {
-      const skinId = equipped[figure]
-      if (!skinId) continue
+      const skin = equipped[figure]
+      const boardImage =
+        color === 'white' ? skin?.assets.whiteBoardImage : skin?.assets.blackBoardImage
+      if (!boardImage) continue
       const Default = defaultPieces[key]
       map[key] = (props) => (
         <SkinPiece
-          skinId={skinId}
+          boardImage={boardImage}
           color={color}
           fallback={() => Default(props)}
           svgStyle={props?.svgStyle}

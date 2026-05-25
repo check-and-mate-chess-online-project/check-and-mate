@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import type { Guid } from '../api'
 import { FigureType } from '../api/enums'
+import { skinImageSrc } from '../lib/skinImage'
 
 export type Side = 'white' | 'black'
 
@@ -13,8 +13,10 @@ export interface FightPiece {
 interface Props {
   attacker: FightPiece
   victim: FightPiece
-  attackerSkinId?: Guid
-  victimSkinId?: Guid
+  attackerStartImage?: string
+  victimStartImage?: string
+  attackerEndImage?: string
+  victimEndImage?: string
   onComplete: () => void
 }
 
@@ -37,11 +39,6 @@ const FIGHT_FRAMES = [
 const FIGHT_TEXT_URL = '/fight-text.webp'
 const FIGHT_FRAME_MS = 70
 
-function poseUrl(skinId: Guid | undefined, pose: string): string | undefined {
-  if (!skinId) return undefined
-  return `/skins/${skinId}/${pose}.webp`
-}
-
 interface PoseImgProps {
   src: string | undefined
   className?: string
@@ -49,13 +46,13 @@ interface PoseImgProps {
 }
 
 function PoseImg({ src, className, style }: PoseImgProps) {
-  const [errored, setErrored] = useState(false)
-  if (!src || errored) return null
+  const [erroredSrc, setErroredSrc] = useState<string | undefined>(undefined)
+  if (!src || erroredSrc === src) return null
   return (
     <img
       src={src}
       alt=""
-      onError={() => setErrored(true)}
+      onError={() => setErroredSrc(src)}
       draggable={false}
       className={className}
       style={style}
@@ -64,8 +61,10 @@ function PoseImg({ src, className, style }: PoseImgProps) {
 }
 
 export function FightAnimation({
-  attackerSkinId,
-  victimSkinId,
+  attackerStartImage,
+  victimStartImage,
+  attackerEndImage,
+  victimEndImage,
   onComplete,
 }: Props) {
   const [phase, setPhase] = useState<Phase>('start')
@@ -104,10 +103,10 @@ export function FightAnimation({
     return () => clearInterval(id)
   }, [phase])
 
-  const startWin = poseUrl(attackerSkinId, 'start-fight-win')
-  const startLose = poseUrl(victimSkinId, 'start-fight-lose')
-  const endWin = poseUrl(attackerSkinId, 'end-fight-win')
-  const endLose = poseUrl(victimSkinId, 'end-fight-lose')
+  const startWin = skinImageSrc(attackerStartImage) || undefined
+  const startLose = skinImageSrc(victimStartImage) || undefined
+  const endWin = skinImageSrc(attackerEndImage) || undefined
+  const endLose = skinImageSrc(victimEndImage) || undefined
 
   return (
     <div className="fixed right-4 top-0 bottom-0 z-30 flex items-center pointer-events-none">
