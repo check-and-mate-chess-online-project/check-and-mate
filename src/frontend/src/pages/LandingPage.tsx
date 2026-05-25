@@ -59,6 +59,8 @@ interface PlanetWithCharacterProps {
   characterHeight: string
   characterAccent: string
   characterScale?: number
+  characterOffsetX?: string
+  characterOffsetY?: string
 }
 
 function PlanetWithCharacter({
@@ -71,6 +73,8 @@ function PlanetWithCharacter({
   characterHeight,
   characterAccent,
   characterScale = 1,
+  characterOffsetX = '0px',
+  characterOffsetY = '0px',
 }: PlanetWithCharacterProps) {
   return (
     <div
@@ -99,7 +103,9 @@ function PlanetWithCharacter({
       />
       <div
         className="relative z-10"
-        style={{ transform: `scale(${characterScale})` }}
+        style={{
+          transform: `translate(${characterOffsetX}, ${characterOffsetY}) scale(${characterScale})`,
+        }}
       >
         <div
           aria-hidden
@@ -113,17 +119,9 @@ function PlanetWithCharacter({
           src={characterSrc}
           alt=""
           draggable={false}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: [20, 0, -10, 0] }}
-          transition={{
-            opacity: { duration: 0.9, delay: 0.4, ease: 'easeOut' },
-            y: {
-              duration: 5,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: 0.4,
-            },
-          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.9, delay: 0.4, ease: 'easeOut' }}
           className="relative w-auto object-contain z-10"
           style={{
             height: characterHeight,
@@ -225,6 +223,8 @@ export function LandingPage() {
               rotateDuration="240s"
               characterHeight="420px"
               characterAccent="rgba(56,189,248,1)"
+              characterOffsetX="40px"
+              characterOffsetY="-20px"
             />
           </div>
         </div>
@@ -294,6 +294,8 @@ export function LandingPage() {
               reverse
               characterHeight="440px"
               characterAccent="rgba(251,146,60,1)"
+              characterOffsetX="-30px"
+              characterOffsetY="-20px"
             />
           </div>
           <motion.div
