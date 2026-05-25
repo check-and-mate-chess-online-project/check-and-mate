@@ -27,12 +27,12 @@ const TIMINGS = {
 }
 
 const FIGHT_FRAMES = [
-  '/skins/fight-1.png',
-  '/skins/fight-2.png',
-  '/skins/fight-3.png',
-  '/skins/fight-4.png',
-  '/skins/fight-5.png',
-  '/skins/fight-6.png',
+  '/fight/fight-1.png',
+  '/fight/fight-2.png',
+  '/fight/fight-3.png',
+  '/fight/fight-4.png',
+  '/fight/fight-5.png',
+  '/fight/fight-6.png',
 ]
 const FIGHT_TEXT_URL = '/fight-text.webp'
 const FIGHT_FRAME_MS = 70
