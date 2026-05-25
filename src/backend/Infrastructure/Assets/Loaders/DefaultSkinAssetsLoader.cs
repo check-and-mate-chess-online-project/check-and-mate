@@ -8,13 +8,23 @@ public class DefaultSkinAssetsLoader : IDefaultSkinAssetsLoader
 {
     private readonly Assembly _assembly = typeof(DefaultSkinAssetsLoader).Assembly;
     private readonly string _basePath = "Infrastructure.Assets.DefaultSkins";
-    private readonly string _format = "png";
+    private readonly string[] SupportedFormats = ["webp", "svg"];
 
     public byte[] Load(FigureType figure, SkinImageType image)
     {
-        string resourceName = $"{_basePath}.{figure}.{image}.{_format}";
-        using Stream stream = _assembly.GetManifestResourceStream(resourceName)
-            ?? throw new InvalidOperationException($"embedded resource '{resourceName}' not found.");
+        foreach (var format in SupportedFormats)
+        {
+            byte[]? data = TryLoadResource(figure, image, format);
+            if (data != null) return data;
+        }
+        throw new InvalidOperationException("unsupported format");
+    }
+
+    private byte[]? TryLoadResource(FigureType figure, SkinImageType image, string format)
+    {
+        string resourceName = $"{_basePath}.{figure}.{image}.{format}";
+        using Stream? stream = _assembly.GetManifestResourceStream(resourceName);
+        if (stream == null) return null;
         using MemoryStream ms = new();
         stream.CopyTo(ms);
         return ms.ToArray();
