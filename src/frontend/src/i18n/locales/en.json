@@ -325,6 +325,34 @@
       "title": "404",
       "subtitle": "Page not found",
       "goHome": "Go home"
+    },
+    "onboarding": {
+      "stepLabel": "{{current}} / {{total}}",
+      "prev": "Back",
+      "next": "Next",
+      "finish": "To lobby",
+      "skip": "Skip",
+      "close": "Close",
+      "intro": {
+        "title": "In a galaxy far, far away",
+        "body": "In a galaxy far away the races no longer fight the old way. Now they settle disputes and stage spectacular duels by the rules of a chess match.\n\nYou are one of the players in this arena. Pick a side, lead your pieces into battle, and prove your strategy is stronger."
+      },
+      "modes": {
+        "title": "Game modes",
+        "body": "Play against a random opponent or invite a friend directly. Every match has a time control: the first number is minutes per game, the second is seconds added each move.\n\n• Bullet 2+1 — fastest mode, decisions made almost instantly.\n• Blitz 3+2 — dynamic format with constant clock pressure.\n• Rapid 15+10 — calmer pace, time to think.\n\nIf your clock runs out, you lose on time."
+      },
+      "matchmaking": {
+        "title": "Matchmaking and rating",
+        "body": "In a random game the system looks for an opponent with the same settings and a similar rating — the max rating gap is 200 points.\n\nA new player starts at 500. After every match the rating is recomputed with the Elo principle: beating a stronger opponent gives more points, losing to a stronger one costs less. The opposite holds for weaker opponents."
+      },
+      "cases": {
+        "title": "Coins, lootboxes and skins",
+        "body": "You earn coins from matches: 20 for a win, 5 for a loss. A lootbox costs 100 coins.\n\nDrops come at different rarities:\n• Common — 50%\n• Rare — 30%\n• Legendary — 20%\n\nA duplicate turns into 50 coins. Collect planets and customize how your pieces look on the board."
+      },
+      "extras": {
+        "title": "Friends and history",
+        "body": "Add players as friends, accept requests, and invite people to a match directly.\n\nGame history and replays let you review moves and revisit key moments."
+      }
     }
   }
 }

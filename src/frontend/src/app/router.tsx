@@ -17,6 +17,7 @@ import { CasesPage } from '../pages/CasesPage'
 import { ShopPage } from '../pages/ShopPage'
 import { FriendsPage } from '../pages/FriendsPage'
 import { DebugBoardPage } from '../pages/DebugBoardPage'
+import { OnboardingPage } from '../pages/OnboardingPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 
 export const router = createBrowserRouter([
@@ -55,6 +56,7 @@ export const router = createBrowserRouter([
         ],
       },
       { path: '/game/:gameId', element: <GamePage /> },
+      { path: '/onboarding', element: <OnboardingPage /> },
     ],
   },
   // 404 — без обёрток

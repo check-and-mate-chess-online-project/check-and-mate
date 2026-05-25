@@ -49,7 +49,7 @@ export function RegisterPage() {
         { login, email, password },
       )
       useAuthStore.getState().setSession(token, user)
-      navigate('/lobby')
+      navigate('/onboarding')
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setError('root', { message: t('forms.register.loginTaken') })
