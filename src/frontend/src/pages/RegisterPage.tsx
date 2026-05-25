@@ -48,7 +48,7 @@ export function RegisterPage() {
         '/api/auth/register',
         { login, email, password },
       )
-      useAuthStore.getState().setSession(token, user)
+      useAuthStore.getState().setSession(token, user, true)
       navigate('/onboarding')
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {

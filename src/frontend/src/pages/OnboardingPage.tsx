@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useAuthStore } from '../shared/auth/authStore'
 
 interface Slide {
   id: string
@@ -48,7 +49,10 @@ export function OnboardingPage() {
   const slide = SLIDES[index]
   const isLast = index === total - 1
 
-  const finish = () => navigate('/lobby')
+  const finish = () => {
+    useAuthStore.getState().setPendingOnboarding(false)
+    navigate('/lobby')
+  }
   const prev = () => setIndex((i) => Math.max(0, i - 1))
   const next = () => {
     if (isLast) finish()
