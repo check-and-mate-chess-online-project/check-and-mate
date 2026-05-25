@@ -48,10 +48,21 @@ export function Dropdown({ label, items, align = 'left' }: DropdownProps) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="text-violet-400 hover:text-violet-300 flex items-center gap-1"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-colors ${
+          open
+            ? 'text-violet-100 bg-violet-500/15 border-violet-400/40'
+            : 'text-violet-300 hover:text-violet-100 border-violet-500/25 hover:border-violet-400/50 hover:bg-violet-500/10'
+        }`}
       >
         {label}
-        <span className="text-xs">▾</span>
+        <span
+          className="text-[10px] leading-none transition-transform"
+          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0)' }}
+        >
+          ▾
+        </span>
       </button>
       {open && (
         <div
