@@ -9,7 +9,7 @@ export function GuestLayout() {
       <div className="flex justify-end p-4">
         <LanguageToggle />
       </div>
-      <div className="flex-1 flex items-center justify-center p-6">
+      <div className="flex-1 flex flex-col">
         <PageTransition />
       </div>
     </div>

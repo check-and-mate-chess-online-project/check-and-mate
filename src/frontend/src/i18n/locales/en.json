@@ -70,8 +70,36 @@
   },
   "landing": {
     "tagline": "Chess with skins from cases",
+    "subtitle": "Step onto the cosmic board. Match opponents across the galaxy, open lootboxes and collect themed sets of legendary figures.",
     "signIn": "Sign in",
-    "signUp": "Sign up"
+    "signUp": "Sign up",
+    "startPlaying": "Start playing",
+    "features": {
+      "title": "What's inside",
+      "play": {
+        "title": "Real-time matches",
+        "body": "Find an opponent in seconds. Bullet, blitz or rapid — your rating is on the line."
+      },
+      "cases": {
+        "title": "Lootboxes",
+        "body": "Open cases dropped from orbit. Genshin-style capsule descent, no wheel spins."
+      },
+      "planets": {
+        "title": "Planet collections",
+        "body": "Skins are grouped into themed planet sets — Earth, Mars and more coming."
+      }
+    },
+    "showcase": {
+      "tagline": "Earth · King",
+      "name": "Gagarin",
+      "lore": "First man in space. Leads earthlings to the stars."
+    },
+    "cta": {
+      "title": "Ready to play?",
+      "body": "Create an account, claim your starter set and step on the board.",
+      "primary": "Create account",
+      "secondary": "I already have one"
+    }
   },
   "pages": {
     "lobby": {

@@ -60,6 +60,7 @@ export function RegisterPage() {
   }
 
   return (
+    <div className="flex-1 flex items-center justify-center p-6">
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="w-full max-w-sm flex flex-col gap-2"
@@ -132,5 +133,6 @@ export function RegisterPage() {
         </Link>
       </p>
     </form>
+    </div>
   )
 }

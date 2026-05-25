@@ -2,4 +2,8 @@
 **/obj/
 .vscode/
 .DS_Store
-src/frontend/public/skins/
+src/frontend/public/skins/*
+!src/frontend/public/skins/gagarin-king-idle.webp
+!src/frontend/public/skins/magnus-pawn
+src/frontend/public/skins/magnus-pawn/*
+!src/frontend/public/skins/magnus-pawn/idle.webp
