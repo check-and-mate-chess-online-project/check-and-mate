@@ -348,10 +348,6 @@
       "cases": {
         "title": "Coins, lootboxes and skins",
         "body": "You earn coins from matches: 20 for a win, 5 for a loss. A lootbox costs 100 coins.\n\nDrops come at different rarities:\n• Common — 50%\n• Rare — 30%\n• Legendary — 20%\n\nA duplicate turns into 50 coins. Collect planets and customize how your pieces look on the board."
-      },
-      "extras": {
-        "title": "Friends and history",
-        "body": "Add players as friends, accept requests, and invite people to a match directly.\n\nGame history and replays let you review moves and revisit key moments."
       }
     }
   }
