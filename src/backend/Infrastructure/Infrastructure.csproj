@@ -23,7 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Assets\DefaultSkins\**\*.png" />
+    <EmbeddedResource Include="Assets\DefaultSkins\**\*.webp" />
+    <EmbeddedResource Include="Assets\DefaultSkins\**\*.svg" />
   </ItemGroup>
 
   <PropertyGroup>
