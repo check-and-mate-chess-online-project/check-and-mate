@@ -89,7 +89,7 @@ public class GameplayService(
 
     private async Task HandleGameCompletion(Game game, Guid userId, GameTerminationReason terminationReason)
     {
-        await UpdatePlayerStats(game, userId, GameTerminationReason.Resignation);
+        await UpdatePlayerStats(game, userId, terminationReason);
         _sessionService.Remove(game.Id);
         _gameRepos.Add(game);
     }
