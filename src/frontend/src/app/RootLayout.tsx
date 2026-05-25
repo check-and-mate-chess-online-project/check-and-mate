@@ -12,7 +12,6 @@ import { useAuthStore } from '../shared/auth/authStore'
 import { useAuth } from '../shared/auth/useAuth'
 import { useMe } from '../shared/api/hooks'
 import { useGlobalGameEvents } from '../shared/lib/useGlobalGameEvents'
-import { useSyncEquippedSkins } from '../shared/lib/useSyncEquippedSkins'
 import { stopGameHub } from '../shared/realtime/gameHub'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -25,7 +24,6 @@ export function RootLayout() {
   const { data: meData } = useMe()
   const setUser = useAuthStore((s) => s.setUser)
   useGlobalGameEvents()
-  useSyncEquippedSkins()
 
   useEffect(() => {
     if (meData) setUser(meData)
