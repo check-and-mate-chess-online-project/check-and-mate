@@ -5,14 +5,29 @@
   --font-display: 'Russo One', sans-serif;
 }
 
+html {
+  font-size: 17.5px;
+}
+
 body {
   font-family: var(--font-sans);
+  line-height: 1.55;
+  letter-spacing: 0.005em;
 }
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
   font-family: var(--font-display);
+  line-height: 1.25;
+}
+
+button,
+input,
+textarea,
+select {
+  font-size: inherit;
 }
 
 @keyframes twinkle {
