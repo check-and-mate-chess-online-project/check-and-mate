@@ -160,12 +160,17 @@ export function FightAnimation({
           </>
         )}
 
-        {phase === 'fight' && (
-          <PoseImg
-            src={FIGHT_FRAMES[frameIdx]}
-            className="absolute inset-0 w-full h-full object-contain"
-          />
-        )}
+        {phase === 'fight' &&
+          FIGHT_FRAMES.map((src, i) => (
+            <img
+              key={src}
+              src={src}
+              alt=""
+              draggable={false}
+              className="absolute inset-0 w-full h-full object-contain"
+              style={{ visibility: i === frameIdx ? 'visible' : 'hidden' }}
+            />
+          ))}
 
         {phase === 'end' && (
           <motion.div
