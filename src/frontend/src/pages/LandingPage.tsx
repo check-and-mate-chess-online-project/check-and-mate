@@ -49,43 +49,125 @@ function FeatureCard({ icon, title, body, delay, accent }: FeatureCardProps) {
   )
 }
 
+interface PlanetWithCharacterProps {
+  planetSrc: string
+  characterSrc: string
+  planetOffsetX: string
+  planetSize: string
+  rotateDuration: string
+  reverse?: boolean
+  characterHeight: string
+  characterAccent: string
+  characterScale?: number
+}
+
+function PlanetWithCharacter({
+  planetSrc,
+  characterSrc,
+  planetOffsetX,
+  planetSize,
+  rotateDuration,
+  reverse,
+  characterHeight,
+  characterAccent,
+  characterScale = 1,
+}: PlanetWithCharacterProps) {
+  return (
+    <div
+      className="relative w-full h-full flex items-center justify-center"
+      aria-hidden
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.85 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.4, ease: 'easeOut' }}
+        className="absolute"
+        style={{
+          [reverse ? 'left' : 'right']: planetOffsetX,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          width: planetSize,
+          aspectRatio: '1',
+          backgroundImage: `url(${planetSrc})`,
+          backgroundSize: 'contain',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          filter: `drop-shadow(0 0 60px ${characterAccent}40)`,
+          animation: `planet-rotate ${rotateDuration} linear infinite ${reverse ? 'reverse' : ''}`,
+          opacity: 0.9,
+        }}
+      />
+      <div
+        className="relative z-10"
+        style={{ transform: `scale(${characterScale})` }}
+      >
+        <div
+          aria-hidden
+          className="absolute -inset-10 rounded-full pointer-events-none"
+          style={{
+            background: `radial-gradient(circle, ${characterAccent}55 0%, transparent 65%)`,
+            filter: 'blur(28px)',
+          }}
+        />
+        <motion.img
+          src={characterSrc}
+          alt=""
+          draggable={false}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: [20, 0, -10, 0] }}
+          transition={{
+            opacity: { duration: 0.9, delay: 0.4, ease: 'easeOut' },
+            y: {
+              duration: 5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: 0.4,
+            },
+          }}
+          className="relative w-auto object-contain z-10"
+          style={{
+            height: characterHeight,
+            filter: `drop-shadow(0 0 25px ${characterAccent}88) drop-shadow(0 20px 40px rgba(0,0,0,0.6))`,
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+function SectionDivider() {
+  return (
+    <div className="relative max-w-3xl mx-auto px-6">
+      <div className="h-px bg-gradient-to-r from-transparent via-violet-600/60 to-transparent" />
+      <div
+        aria-hidden
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-violet-400"
+        style={{ boxShadow: '0 0 12px rgba(167,139,250,0.9)' }}
+      />
+    </div>
+  )
+}
+
 export function LandingPage() {
   const { t } = useTranslation()
 
   return (
     <div className="w-full">
       <section className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center px-6 pt-8 pb-16 overflow-hidden">
-        <motion.div
-          aria-hidden
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.4, ease: 'easeOut' }}
-          className="absolute pointer-events-none"
-          style={{
-            right: '-12vw',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: 'min(70vw, 55rem)',
-            aspectRatio: '1',
-            backgroundImage: 'url(/planets/earth_big.webp)',
-            backgroundSize: 'contain',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            filter: 'drop-shadow(0 0 60px rgba(56,189,248,0.25))',
-            animation: 'planet-rotate 240s linear infinite',
-            opacity: 0.85,
-          }}
-        />
         <div
           aria-hidden
-          className="absolute inset-0 pointer-events-none"
+          className="absolute pointer-events-none"
           style={{
+            top: '-5rem',
+            right: 0,
+            bottom: 0,
+            left: 0,
             background:
-              'radial-gradient(ellipse at 70% 50%, rgba(56,189,248,0.18) 0%, transparent 55%), radial-gradient(ellipse at 10% 30%, rgba(167,139,250,0.22) 0%, transparent 60%)',
+              'radial-gradient(ellipse at 70% 45%, rgba(56,189,248,0.22) 0%, transparent 55%), radial-gradient(ellipse at 10% 25%, rgba(167,139,250,0.28) 0%, transparent 60%), radial-gradient(ellipse at 50% 0%, rgba(167,139,250,0.18) 0%, transparent 50%)',
           }}
         />
 
-        <div className="relative z-10 w-full max-w-5xl grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 items-center">
+        <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 items-center">
           <motion.div
             initial="hidden"
             animate="visible"
@@ -134,34 +216,17 @@ export function LandingPage() {
             </motion.div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.9, delay: 0.4, ease: 'easeOut' }}
-            className="hidden lg:flex relative items-end justify-center"
-          >
-            <div
-              aria-hidden
-              className="absolute -inset-4 rounded-full pointer-events-none"
-              style={{
-                background:
-                  'radial-gradient(circle, rgba(167,139,250,0.32) 0%, transparent 65%)',
-                filter: 'blur(30px)',
-              }}
+          <div className="hidden lg:block relative h-[500px]">
+            <PlanetWithCharacter
+              planetSrc="/planets/earth_big.webp"
+              characterSrc="/skins/magnus-pawn/idle.webp"
+              planetOffsetX="-30%"
+              planetSize="min(45rem, 60vw)"
+              rotateDuration="240s"
+              characterHeight="420px"
+              characterAccent="rgba(56,189,248,1)"
             />
-            <motion.img
-              src="/skins/gagarin-king-idle.webp"
-              alt=""
-              draggable={false}
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-              className="relative h-[440px] w-auto object-contain z-10"
-              style={{
-                filter:
-                  'drop-shadow(0 0 25px rgba(167,139,250,0.55)) drop-shadow(0 20px 40px rgba(0,0,0,0.6))',
-              }}
-            />
-          </motion.div>
+          </div>
         </div>
 
         <motion.div
@@ -174,6 +239,8 @@ export function LandingPage() {
           ↓
         </motion.div>
       </section>
+
+      <SectionDivider />
 
       <section className="px-6 py-24">
         <div className="max-w-6xl mx-auto">
@@ -213,62 +280,29 @@ export function LandingPage() {
         </div>
       </section>
 
+      <SectionDivider />
+
       <section className="px-6 py-24 relative overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute pointer-events-none"
-          style={{
-            left: '-15vw',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: 'min(60vw, 40rem)',
-            aspectRatio: '1',
-            backgroundImage: 'url(/planets/mars_big.webp)',
-            backgroundSize: 'contain',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            filter: 'drop-shadow(0 0 50px rgba(251,146,60,0.2))',
-            opacity: 0.5,
-            animation: 'planet-rotate 320s linear infinite reverse',
-          }}
-        />
-        <div className="relative max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.7, ease: 'easeOut' }}
-            className="relative flex items-end justify-center"
-          >
-            <div
-              aria-hidden
-              className="absolute -inset-8 rounded-full"
-              style={{
-                background:
-                  'radial-gradient(circle, rgba(251,146,60,0.28) 0%, transparent 65%)',
-                filter: 'blur(28px)',
-              }}
+        <div className="relative max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="relative h-[500px] order-2 md:order-1">
+            <PlanetWithCharacter
+              planetSrc="/planets/mars_big.webp"
+              characterSrc="/skins/gagarin-king-idle.webp"
+              planetOffsetX="-25%"
+              planetSize="min(38rem, 55vw)"
+              rotateDuration="320s"
+              reverse
+              characterHeight="440px"
+              characterAccent="rgba(251,146,60,1)"
             />
-            <motion.img
-              src="/skins/magnus-pawn/idle.webp"
-              alt=""
-              draggable={false}
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-              className="relative h-[420px] w-auto object-contain z-10"
-              style={{
-                filter:
-                  'drop-shadow(0 0 25px rgba(251,146,60,0.45)) drop-shadow(0 20px 40px rgba(0,0,0,0.6))',
-              }}
-            />
-          </motion.div>
+          </div>
           <motion.div
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.7, delay: 0.15, ease: 'easeOut' }}
+            className="order-1 md:order-2"
           >
             <div className="text-xs uppercase tracking-[0.4em] text-violet-400 mb-3">
               {t('landing.showcase.tagline')}
@@ -282,6 +316,8 @@ export function LandingPage() {
           </motion.div>
         </div>
       </section>
+
+      <SectionDivider />
 
       <section className="px-6 py-24 relative">
         <div
