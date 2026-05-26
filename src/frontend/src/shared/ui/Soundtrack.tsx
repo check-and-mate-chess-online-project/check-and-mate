@@ -3,7 +3,8 @@ import { useSoundStore } from '../lib/sound'
 
 const SOUNDTRACK_SRC = '/soundtrack.mp3'
 const BASE_VOLUME = 0.18
-const SILENCE_THRESHOLD = 0.002
+const RMS_THRESHOLD = 0.01
+const WINDOW_SECONDS = 0.01
 
 function findSilenceBounds(buffer: AudioBuffer): {
   start: number
@@ -12,27 +13,42 @@ function findSilenceBounds(buffer: AudioBuffer): {
   const channels = buffer.numberOfChannels
   const sampleRate = buffer.sampleRate
   const length = buffer.length
-  let firstNonSilent = length
-  let lastNonSilent = 0
-  for (let c = 0; c < channels; c++) {
-    const data = buffer.getChannelData(c)
-    for (let i = 0; i < length; i++) {
-      if (Math.abs(data[i]) > SILENCE_THRESHOLD) {
-        if (i < firstNonSilent) firstNonSilent = i
-        break
+  const windowSize = Math.max(1, Math.floor(sampleRate * WINDOW_SECONDS))
+  const data: Float32Array[] = []
+  for (let c = 0; c < channels; c++) data.push(buffer.getChannelData(c))
+
+  const windowRms = (from: number): number => {
+    const to = Math.min(from + windowSize, length)
+    let sum = 0
+    let count = 0
+    for (let c = 0; c < channels; c++) {
+      const ch = data[c]
+      for (let i = from; i < to; i++) {
+        sum += ch[i] * ch[i]
+        count++
       }
     }
-    for (let i = length - 1; i >= 0; i--) {
-      if (Math.abs(data[i]) > SILENCE_THRESHOLD) {
-        if (i > lastNonSilent) lastNonSilent = i
-        break
-      }
+    return count === 0 ? 0 : Math.sqrt(sum / count)
+  }
+
+  let startSample = 0
+  for (let i = 0; i + windowSize <= length; i += windowSize) {
+    if (windowRms(i) > RMS_THRESHOLD) {
+      startSample = i
+      break
     }
   }
-  if (firstNonSilent >= length) return { start: 0, end: buffer.duration }
+  let endSample = length
+  for (let i = length - windowSize; i >= 0; i -= windowSize) {
+    if (windowRms(i) > RMS_THRESHOLD) {
+      endSample = Math.min(length, i + windowSize)
+      break
+    }
+  }
+  if (endSample <= startSample) return { start: 0, end: buffer.duration }
   return {
-    start: firstNonSilent / sampleRate,
-    end: (lastNonSilent + 1) / sampleRate,
+    start: startSample / sampleRate,
+    end: endSample / sampleRate,
   }
 }
 
